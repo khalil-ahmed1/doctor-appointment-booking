@@ -114,6 +114,8 @@ const appointmentSchema = new mongoose.Schema(
       dateStr: String,
       startTime: String,
     },
+    
+    idempotencyKey: { type: String }, // For preventing double submission
   },
   { timestamps: true },
 );
@@ -125,6 +127,7 @@ appointmentSchema.index(
   { unique: true, partialFilterExpression: { slotLock: { $type: 'string' } } },
 );
 
+appointmentSchema.index({ idempotencyKey: 1 });
 appointmentSchema.index({ doctor: 1, dateStr: 1, status: 1 });
 appointmentSchema.index({ doctor: 1, type: 1, status: 1, tokenSeq: 1 });
 appointmentSchema.index({ patient: 1, createdAt: -1 });
