@@ -103,4 +103,41 @@ describe('Doctor Profile APIs', () => {
     expect(res.body.data.name).toBe('Heart Clinic');
     expect(res.body.data.location.coordinates[0]).toBe(72.8258);
   });
+
+  it('PATCH /api/v1/doctor/types - fails if fee is not set for enabled type', async () => {
+    const res = await request(app)
+      .patch('/api/v1/doctor/types')
+      .set('Authorization', `Bearer ${doctorToken}`)
+      .send({
+        normal: { enabled: true }
+      });
+      
+    expect(res.status).toBe(400);
+    expect(res.body.message).toMatch(/fee must be set/i);
+  });
+
+  it('PATCH /api/v1/doctor/fees and types - successfully updates', async () => {
+    const feeRes = await request(app)
+      .patch('/api/v1/doctor/fees')
+      .set('Authorization', `Bearer ${doctorToken}`)
+      .send({
+        normal: 50000,
+        premium: 100000
+      });
+      
+    expect(feeRes.status).toBe(200);
+    expect(feeRes.body.data.normal).toBe(50000);
+
+    const typeRes = await request(app)
+      .patch('/api/v1/doctor/types')
+      .set('Authorization', `Bearer ${doctorToken}`)
+      .send({
+        normal: { enabled: true, dailyTokenLimit: 20 },
+        premium: { enabled: true }
+      });
+
+    expect(typeRes.status).toBe(200);
+    expect(typeRes.body.data.normal.enabled).toBe(true);
+    expect(typeRes.body.data.normal.dailyTokenLimit).toBe(20);
+  });
 });

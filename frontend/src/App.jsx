@@ -18,6 +18,7 @@ import { ResetPasswordPage } from './features/auth/pages/ResetPasswordPage';
 import DoctorsListPage from './features/admin/pages/DoctorsListPage';
 import DoctorCreatePage from './features/admin/pages/DoctorCreatePage';
 import DoctorProfilePage from './features/doctor/pages/DoctorProfilePage';
+import DoctorFeesPage from './features/doctor/pages/DoctorFeesPage';
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ function App() {
                 
                 {/* Doctor Features */}
                 <Route path="/doctor/profile" element={<DoctorProfilePage />} />
+                <Route path="/doctor/fees" element={<DoctorFeesPage />} />
                 
                 {/* Admin Features */}
                 <Route path="/admin/doctors" element={<DoctorsListPage />} />

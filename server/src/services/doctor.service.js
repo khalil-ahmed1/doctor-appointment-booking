@@ -152,17 +152,33 @@ const updateTypes = async (userId, typesData) => {
   const profile = await getDoctorProfileByUser(userId);
 
   if (typesData.normal) {
-    if (typesData.normal.enabled !== undefined) profile.types.normal.enabled = typesData.normal.enabled;
+    if (typesData.normal.enabled !== undefined) {
+      if (typesData.normal.enabled && (profile.fees.normal || 0) <= 0) {
+        throw new ApiError(400, 'FEE_NOT_SET', 'Normal fee must be set before enabling');
+      }
+      profile.types.normal.enabled = typesData.normal.enabled;
+    }
     if (typesData.normal.dailyTokenLimit !== undefined) profile.types.normal.dailyTokenLimit = typesData.normal.dailyTokenLimit;
     if (typesData.normal.walkInHoursText !== undefined) profile.types.normal.walkInHoursText = typesData.normal.walkInHoursText;
   }
 
   if (typesData.premium) {
-    if (typesData.premium.enabled !== undefined) profile.types.premium.enabled = typesData.premium.enabled;
+    if (typesData.premium.enabled !== undefined) {
+      if (typesData.premium.enabled && (profile.fees.premium || 0) <= 0) {
+        throw new ApiError(400, 'FEE_NOT_SET', 'Premium fee must be set before enabling');
+      }
+      // Note: checking working days/windows will be done in F-14 / F-15
+      profile.types.premium.enabled = typesData.premium.enabled;
+    }
   }
 
   if (typesData.homeVisit) {
-    if (typesData.homeVisit.enabled !== undefined) profile.types.homeVisit.enabled = typesData.homeVisit.enabled;
+    if (typesData.homeVisit.enabled !== undefined) {
+      if (typesData.homeVisit.enabled && (profile.fees.homeVisit || 0) <= 0) {
+        throw new ApiError(400, 'FEE_NOT_SET', 'Home Visit fee must be set before enabling');
+      }
+      profile.types.homeVisit.enabled = typesData.homeVisit.enabled;
+    }
     if (typesData.homeVisit.serviceArea) {
       if (typesData.homeVisit.serviceArea.mode !== undefined) profile.types.homeVisit.serviceArea.mode = typesData.homeVisit.serviceArea.mode;
       if (typesData.homeVisit.serviceArea.radiusKm !== undefined) profile.types.homeVisit.serviceArea.radiusKm = typesData.homeVisit.serviceArea.radiusKm;
