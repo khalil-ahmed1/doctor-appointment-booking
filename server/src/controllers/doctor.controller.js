@@ -1,0 +1,88 @@
+const asyncHandler = require('../utils/asyncHandler');
+const doctorService = require('../services/doctor.service');
+const ApiError = require('../utils/ApiError');
+
+const getProfile = asyncHandler(async (req, res) => {
+  const profile = await doctorService.getDoctorProfileByUser(req.user._id);
+  res.status(200).json({ success: true, data: profile });
+});
+
+const updateProfile = asyncHandler(async (req, res) => {
+  const profile = await doctorService.updateProfile(req.user._id, req.body);
+  res.status(200).json({ success: true, data: profile });
+});
+
+const updateProfilePicture = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, 'NO_FILE', 'Please upload a file');
+  }
+
+  const imageUrl = await doctorService.updateProfilePicture(
+    req.user._id,
+    req.file.buffer,
+    req.file.originalname
+  );
+  res.status(200).json({ success: true, data: { avatarUrl: imageUrl } });
+});
+
+const deleteProfilePicture = asyncHandler(async (req, res) => {
+  await doctorService.deleteProfilePicture(req.user._id);
+  res.status(200).json({ success: true, data: {} });
+});
+
+const addGalleryImage = asyncHandler(async (req, res) => {
+  if (!req.file) {
+    throw new ApiError(400, 'NO_FILE', 'Please upload a file');
+  }
+
+  const { caption, order } = req.body;
+  const gallery = await doctorService.addGalleryImage(
+    req.user._id,
+    req.file.buffer,
+    req.file.originalname,
+    caption,
+    order ? parseInt(order, 10) : undefined
+  );
+  res.status(200).json({ success: true, data: gallery });
+});
+
+const updateGalleryImage = asyncHandler(async (req, res) => {
+  const { imageId } = req.params;
+  const { caption, order } = req.body;
+  const gallery = await doctorService.updateGalleryImage(req.user._id, imageId, caption, order);
+  res.status(200).json({ success: true, data: gallery });
+});
+
+const deleteGalleryImage = asyncHandler(async (req, res) => {
+  const { imageId } = req.params;
+  const gallery = await doctorService.deleteGalleryImage(req.user._id, imageId);
+  res.status(200).json({ success: true, data: gallery });
+});
+
+const updateClinic = asyncHandler(async (req, res) => {
+  const clinic = await doctorService.updateClinic(req.user._id, req.body);
+  res.status(200).json({ success: true, data: clinic });
+});
+
+const updateFees = asyncHandler(async (req, res) => {
+  const fees = await doctorService.updateFees(req.user._id, req.body);
+  res.status(200).json({ success: true, data: fees });
+});
+
+const updateTypes = asyncHandler(async (req, res) => {
+  const types = await doctorService.updateTypes(req.user._id, req.body);
+  res.status(200).json({ success: true, data: types });
+});
+
+module.exports = {
+  getProfile,
+  updateProfile,
+  updateProfilePicture,
+  deleteProfilePicture,
+  addGalleryImage,
+  updateGalleryImage,
+  deleteGalleryImage,
+  updateClinic,
+  updateFees,
+  updateTypes,
+};

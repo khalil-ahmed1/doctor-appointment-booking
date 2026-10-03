@@ -17,6 +17,8 @@ import { VerifyEmailPage } from './features/auth/pages/VerifyEmailPage';
 import { ResetPasswordPage } from './features/auth/pages/ResetPasswordPage';
 import DoctorsListPage from './features/admin/pages/DoctorsListPage';
 import DoctorCreatePage from './features/admin/pages/DoctorCreatePage';
+import DoctorProfilePage from './features/doctor/pages/DoctorProfilePage';
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -47,6 +49,9 @@ function App() {
                 <Route path="/patient/dashboard" element={<div>Patient Dashboard Placeholder</div>} />
                 <Route path="/doctor/dashboard" element={<div>Doctor Dashboard Placeholder</div>} />
                 <Route path="/admin/dashboard" element={<div>Admin Dashboard Placeholder</div>} />
+                
+                {/* Doctor Features */}
+                <Route path="/doctor/profile" element={<DoctorProfilePage />} />
                 
                 {/* Admin Features */}
                 <Route path="/admin/doctors" element={<DoctorsListPage />} />

@@ -1,13 +1,78 @@
-import { Outlet, Navigate, Link } from 'react-router-dom';
+import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+import { 
+  LayoutDashboard, 
+  CalendarCheck, 
+  ListOrdered, 
+  CalendarDays, 
+  UserCircle, 
+  Stethoscope, 
+  Wallet, 
+  CreditCard, 
+  Bell, 
+  Settings 
+} from 'lucide-react';
+
+const doctorLinks = [
+  { name: 'Overview', to: '/doctor/dashboard', icon: LayoutDashboard },
+  { name: 'Appointments', to: '/doctor/appointments', icon: CalendarCheck },
+  { name: 'Normal Queue', to: '/doctor/queue', icon: ListOrdered },
+  { name: 'Schedule', to: '/doctor/schedule', icon: CalendarDays },
+  { name: 'Profile & Gallery', to: '/doctor/profile', icon: UserCircle },
+  { name: 'Fees & Services', to: '/doctor/fees', icon: Stethoscope },
+  { name: 'Earnings & Payouts', to: '/doctor/earnings', icon: Wallet },
+  { name: 'Subscription', to: '/doctor/subscription', icon: CreditCard },
+  { name: 'Notifications', to: '/doctor/notifications', icon: Bell },
+  { name: 'Account', to: '/doctor/account', icon: Settings },
+];
 
 export const DashboardLayout = () => {
   const { user, logout } = useAuth();
+  const location = useLocation();
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
+
+  const renderNavLinks = () => {
+    if (user.role === 'DOCTOR') {
+      return doctorLinks.map((link) => {
+        const isActive = location.pathname.startsWith(link.to);
+        const Icon = link.icon;
+        return (
+          <Link
+            key={link.to}
+            to={link.to}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors",
+              isActive 
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {link.name}
+          </Link>
+        );
+      });
+    }
+
+    if (user.role === 'ADMIN') {
+      return (
+        <Link to="/admin/dashboard" className="block px-3 py-2 rounded-md bg-primary/10 text-primary font-medium">
+          Overview
+        </Link>
+      );
+    }
+
+    return (
+      <Link to="/dashboard" className="block px-3 py-2 rounded-md bg-primary/10 text-primary font-medium">
+        Overview
+      </Link>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-muted/20 flex flex-col">
@@ -23,19 +88,16 @@ export const DashboardLayout = () => {
         </div>
       </header>
       <div className="container flex-1 flex py-6 px-4">
-        {/* Sidebar placeholder */}
         <aside className="w-64 border-r pr-6 hidden md:block">
-          <nav className="space-y-2">
-            <Link to={`/${user.role.toLowerCase()}/dashboard`} className="block px-3 py-2 rounded-md bg-primary/10 text-primary font-medium">
-              Overview
-            </Link>
-            {/* Additional nav links based on role */}
+          <nav className="space-y-1">
+            {renderNavLinks()}
           </nav>
         </aside>
-        <main className="flex-1 md:pl-6">
+        <main className="flex-1 md:pl-6 max-w-full overflow-hidden">
           <Outlet />
         </main>
       </div>
     </div>
   );
 };
+

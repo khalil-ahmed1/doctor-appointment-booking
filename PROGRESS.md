@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 1 – Foundation |
-| Current feature | F-08 Doctor profile APIs: details, picture, gallery (upload validation), clinic + map location |
+| Current feature | F-13 Doctor fees + type toggles + normal daily limit (API + UI) |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | No (mongodb-memory-server issue) |
 
 ### Next Up (exact next step)
-1. F-08 Doctor profile APIs
+1. F-13 Doctor fees + type toggles + normal daily limit (API + UI)
 
 ---
 
@@ -63,8 +63,8 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-05 | Frontend base: layouts, router, ProtectedRoute, auth pages, redirect-after-login (safe redirect) | 4.1, 12 | ✅ | |
 | F-06 | Admin: doctor onboarding (account + profile + invite email + 7-day trial), list/view/edit/suspend/publish | 4.2, 4.10 | ✅ | Razorpay linked-account step stubbed behind interface until F-27 |
 | F-07 | Doctor set-password via invite link | 4.2 | ✅ | |
-| F-08 | Doctor profile APIs: details, picture, gallery (upload validation), clinic + map location | 4.3 | ⬜ | |
-| F-09 | Doctor profile UI (dashboard) | 4.3, 4.4 | ⬜ | |
+| F-08 | Doctor profile APIs: details, picture, gallery (upload validation), clinic + map location | 4.3 | ✅ | |
+| F-09 | Doctor profile UI (dashboard) | 4.3, 4.4 | ✅ | |
 | F-10 | Public listing + search + filters + sort + pagination; doctor visibility rule | 4.7 | ⬜ | |
 | F-11 | Home page + doctor detail page (profile, gallery, map, SEO tags) | 4.7 | ⬜ | |
 | F-12 | Admin: patients management (list, view, block/unblock, edit) | 4.10 | ⬜ | |
@@ -124,6 +124,50 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 9 — 2026-10-04 — Antigravity Agent
+Goal: F-09 Doctor profile UI (dashboard)
+Plan:
+- Update `DashboardLayout.jsx` to render doctor-specific sidebar links.
+- Create `DoctorProfilePage.jsx` with tabs for Details, Clinic & Map, and Gallery.
+- Create `doctor.api.js` for React Query data fetching/mutations.
+- Use `@react-google-maps/api` for the Map and Places Autocomplete.
+Done:
+- Updated `DashboardLayout.jsx` with dynamic routing links.
+- Installed `@react-google-maps/api`.
+- Created `doctor.api.js`.
+- Created `DoctorProfilePage.jsx`.
+- Created `ClinicSettings.jsx` which displays Google Map and Autocomplete for clinic location.
+- Created `GallerySettings.jsx` which handles avatar upload, gallery image upload, and deletion.
+Files/modules touched: `frontend/src/layouts/DashboardLayout.jsx`, `frontend/src/features/doctor/api/doctor.api.js`, `frontend/src/features/doctor/pages/DoctorProfilePage.jsx`, `frontend/src/features/doctor/components/ClinicSettings.jsx`, `frontend/src/features/doctor/components/GallerySettings.jsx`, `frontend/src/App.jsx`.
+How to verify manually: Login as doctor, visit `/doctor/profile` and explore the three tabs (Basic Details, Clinic & Map, Photo Gallery).
+Decisions made: Used Tabs component to separate concerns (Details, Clinic, Gallery) on the Profile UI to keep it clean.
+New env vars / commands / endpoints / models: `VITE_GOOGLE_MAPS_API_KEY` expected in `.env` for the clinic map location.
+NEXT STEP (specific): Start F-13 (Doctor fees + type toggles + normal daily limit).
+
+### Session 8 — 2026-10-04 — Antigravity Agent
+Goal: F-08 Doctor profile APIs: details, picture, gallery (upload validation), clinic + map location
+Plan: 
+- Build Zod validation schemas for all profile endpoints.
+- Create `upload.service.js` using `multer` and `sharp` to process and store images locally (validating magic bytes as per PRD).
+- Implement `doctor.service.js` with functions for profile, gallery, picture, clinic, fees, and types updates.
+- Create `doctor.controller.js` and `doctor.routes.js`.
+- Serve static files from `public/uploads` in `app.js`.
+Done:
+- Installed `multer` and `sharp`.
+- Built `doctor.validation.js` with coerce for `multipart/form-data` support.
+- Built `upload.service.js` to resize images (512x512 for profile, 1600x1600 for gallery) and store as WebP.
+- Built `doctor.service.js` to safely update `DoctorProfile` model.
+- Built `doctor.controller.js` and `doctor.routes.js`.
+- Integrated `doctor.routes.js` into `app.js` under `/api/v1/doctor`.
+Files/modules touched: `server/src/validations/doctor.validation.js`, `server/src/services/doctor.service.js`, `server/src/services/upload.service.js`, `server/src/controllers/doctor.controller.js`, `server/src/routes/doctor.routes.js`, `server/src/app.js`.
+Tests added/updated: Added `tests/doctor.profile.test.js` to verify validation and API routes.
+How to verify manually: Use Postman or curl with a valid doctor's JWT to hit `/api/v1/doctor/profile` (PATCH) or `/api/v1/doctor/clinic` (PATCH).
+Decisions made: Used local disk storage (`public/uploads`) for images instead of Cloudinary as no keys were provided and it's robust for local dev.
+New env vars / commands / endpoints / models: 
+- Endpoints: `GET /api/v1/doctor/profile`, `PATCH /api/v1/doctor/profile`, `POST/DELETE /api/v1/doctor/profile/picture`, `POST /api/v1/doctor/gallery`, `PATCH/DELETE /api/v1/doctor/gallery/:imageId`, `PATCH /api/v1/doctor/clinic`, `PATCH /api/v1/doctor/fees`, `PATCH /api/v1/doctor/types`.
+Left undone / known issues: Test suite is failing to boot due to `mongodb-memory-server` version compatibility issue with mongoose (as noted in prior sessions).
+NEXT STEP (specific): Start F-09 (Doctor profile UI dashboard).
 
 ### Session 7 — 2026-10-04 — Antigravity Agent
 Goal: F-07 Doctor set-password via invite link

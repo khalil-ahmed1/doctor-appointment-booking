@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
@@ -12,7 +13,9 @@ const logger = require('./utils/logger');
 const app = express();
 
 // Security HTTP headers
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // CORS
 app.use(
@@ -56,10 +59,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Static files
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
 // Routes
 const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const publicRoutes = require('./routes/public.routes');
+const doctorRoutes = require('./routes/doctor.routes');
 
 // Health route
 app.get('/api/v1/healthz', (req, res) => {
@@ -68,6 +75,7 @@ app.get('/api/v1/healthz', (req, res) => {
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/doctor', doctorRoutes);
 app.use('/api/v1', publicRoutes);
 
 // Global Error Handler
