@@ -1,0 +1,60 @@
+const express = require('express');
+const helmet = require('helmet');
+const cors = require('cors');
+const rateLimit = require('express-rate-limit');
+const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
+const cookieParser = require('cookie-parser');
+const env = require('./config/env');
+const errorHandler = require('./middlewares/error');
+const logger = require('./utils/logger');
+
+const app = express();
+
+// Security HTTP headers
+app.use(helmet());
+
+// CORS
+app.use(
+  cors({
+    origin: env.CLIENT_URL,
+    credentials: true,
+  })
+);
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 1000,
+  message: 'Too many requests from this IP, please try again later',
+});
+app.use('/api', limiter);
+
+// Body parser
+app.use(express.json({ limit: '10kb' }));
+app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(cookieParser());
+
+// Data sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Prevent parameter pollution
+app.use(hpp());
+
+// Logging middleware
+app.use((req, res, next) => {
+  if (req.originalUrl !== '/api/v1/healthz') {
+    logger.info(`${req.method} ${req.url}`);
+  }
+  next();
+});
+
+// Health route
+app.get('/api/v1/healthz', (req, res) => {
+  res.status(200).json({ success: true, data: { status: 'ok', timestamp: new Date() } });
+});
+
+// Global Error Handler
+app.use(errorHandler);
+
+module.exports = app;
