@@ -13,9 +13,11 @@ const logger = require('./utils/logger');
 const app = express();
 
 // Security HTTP headers
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
-}));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+);
 
 // CORS
 app.use(

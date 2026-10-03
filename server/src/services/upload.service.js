@@ -41,7 +41,11 @@ const uploadImage = async (buffer, originalName, type = 'gallery') => {
   // Validate magic bytes
   const imageType = validateImageSignature(buffer);
   if (!imageType) {
-    throw new ApiError(422, 'INVALID_FILE_TYPE', 'Only valid JPEG, PNG, and WebP images are allowed.');
+    throw new ApiError(
+      422,
+      'INVALID_FILE_TYPE',
+      'Only valid JPEG, PNG, and WebP images are allowed.',
+    );
   }
 
   // Create unique filename

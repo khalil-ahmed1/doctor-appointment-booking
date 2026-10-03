@@ -17,7 +17,7 @@ const subscriptionSchema = new mongoose.Schema(
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     reason: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 subscriptionSchema.index({ doctor: 1, endsAt: -1 });

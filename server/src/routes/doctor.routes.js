@@ -35,7 +35,7 @@ router
   .post(
     upload.single('image'),
     validate(doctorValidation.addGalleryItemSchema),
-    doctorController.addGalleryImage
+    doctorController.addGalleryImage,
   );
 
 router
@@ -44,12 +44,38 @@ router
   .delete(validate(doctorValidation.deleteGalleryItemSchema), doctorController.deleteGalleryImage);
 
 // Clinic
-router.patch('/clinic', validate(doctorValidation.updateClinicSchema), doctorController.updateClinic);
+router.patch(
+  '/clinic',
+  validate(doctorValidation.updateClinicSchema),
+  doctorController.updateClinic,
+);
 
 // Fees
 router.patch('/fees', validate(doctorValidation.updateFeesSchema), doctorController.updateFees);
 
 // Types
 router.patch('/types', validate(doctorValidation.updateTypesSchema), doctorController.updateTypes);
+
+const scheduleValidation = require('../validations/schedule.validation');
+const scheduleController = require('../controllers/schedule.controller');
+
+// Schedules
+router
+  .route('/schedules/:type')
+  .get(
+    validate(scheduleValidation.updateScheduleSchema.pick({ params: true })),
+    scheduleController.getSchedule,
+  )
+  .put(validate(scheduleValidation.updateScheduleSchema), scheduleController.updateSchedule);
+
+// Exceptions
+router
+  .route('/exceptions')
+  .get(scheduleController.getExceptions)
+  .post(validate(scheduleValidation.addExceptionSchema), scheduleController.addException);
+
+router
+  .route('/exceptions/:id')
+  .delete(validate(scheduleValidation.deleteExceptionSchema), scheduleController.deleteException);
 
 module.exports = router;

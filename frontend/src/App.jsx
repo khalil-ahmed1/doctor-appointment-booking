@@ -19,6 +19,7 @@ import DoctorsListPage from './features/admin/pages/DoctorsListPage';
 import DoctorCreatePage from './features/admin/pages/DoctorCreatePage';
 import DoctorProfilePage from './features/doctor/pages/DoctorProfilePage';
 import DoctorFeesPage from './features/doctor/pages/DoctorFeesPage';
+import DoctorSchedulePage from './features/doctor/pages/DoctorSchedulePage';
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ function App() {
                 {/* Doctor Features */}
                 <Route path="/doctor/profile" element={<DoctorProfilePage />} />
                 <Route path="/doctor/fees" element={<DoctorFeesPage />} />
+                <Route path="/doctor/schedule" element={<DoctorSchedulePage />} />
                 
                 {/* Admin Features */}
                 <Route path="/admin/doctors" element={<DoctorsListPage />} />

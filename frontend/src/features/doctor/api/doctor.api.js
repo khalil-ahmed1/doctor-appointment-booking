@@ -65,4 +65,29 @@ export const doctorApi = {
     const response = await api.patch('/doctor/types', data);
     return response.data.data;
   },
+
+  getSchedule: async (type) => {
+    const response = await api.get(`/doctor/schedules/${type}`);
+    return response.data.data;
+  },
+
+  updateSchedule: async (type, data) => {
+    const response = await api.put(`/doctor/schedules/${type}`, data);
+    return response.data.data;
+  },
+
+  getExceptions: async () => {
+    const response = await api.get('/doctor/exceptions');
+    return response.data.data;
+  },
+
+  addException: async (data) => {
+    const response = await api.post('/doctor/exceptions', data);
+    return response.data.data;
+  },
+
+  deleteException: async (id) => {
+    const response = await api.delete(`/doctor/exceptions/${id}`);
+    return response.data.data;
+  },
 };

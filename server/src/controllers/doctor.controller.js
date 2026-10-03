@@ -20,7 +20,7 @@ const updateProfilePicture = asyncHandler(async (req, res) => {
   const imageUrl = await doctorService.updateProfilePicture(
     req.user._id,
     req.file.buffer,
-    req.file.originalname
+    req.file.originalname,
   );
   res.status(200).json({ success: true, data: { avatarUrl: imageUrl } });
 });
@@ -41,7 +41,7 @@ const addGalleryImage = asyncHandler(async (req, res) => {
     req.file.buffer,
     req.file.originalname,
     caption,
-    order ? parseInt(order, 10) : undefined
+    order ? parseInt(order, 10) : undefined,
   );
   res.status(200).json({ success: true, data: gallery });
 });

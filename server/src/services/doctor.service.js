@@ -39,7 +39,7 @@ const updateProfilePicture = async (userId, imageBuffer, originalName) => {
 
   // We are overriding the avatarUrl on the User model as well if needed, but the PRD says
   // profile picture is under `avatarUrl` in User, wait, the DoctorProfile schema does not have `avatarUrl` or `profilePicture`.
-  // Let me check PRD / models. 
+  // Let me check PRD / models.
   // Wait, let's look at `User` model for `avatarUrl`.
   const User = require('../models/User');
   const user = await User.findById(userId);
@@ -77,7 +77,7 @@ const addGalleryImage = async (userId, imageBuffer, originalName, caption, order
 
   const imageUrl = await uploadImage(imageBuffer, originalName, 'gallery');
 
-  const nextOrder = order !== undefined ? order : (profile.gallery.length + 1);
+  const nextOrder = order !== undefined ? order : profile.gallery.length + 1;
 
   profile.gallery.push({
     url: imageUrl,
@@ -158,8 +158,10 @@ const updateTypes = async (userId, typesData) => {
       }
       profile.types.normal.enabled = typesData.normal.enabled;
     }
-    if (typesData.normal.dailyTokenLimit !== undefined) profile.types.normal.dailyTokenLimit = typesData.normal.dailyTokenLimit;
-    if (typesData.normal.walkInHoursText !== undefined) profile.types.normal.walkInHoursText = typesData.normal.walkInHoursText;
+    if (typesData.normal.dailyTokenLimit !== undefined)
+      profile.types.normal.dailyTokenLimit = typesData.normal.dailyTokenLimit;
+    if (typesData.normal.walkInHoursText !== undefined)
+      profile.types.normal.walkInHoursText = typesData.normal.walkInHoursText;
   }
 
   if (typesData.premium) {
@@ -180,9 +182,12 @@ const updateTypes = async (userId, typesData) => {
       profile.types.homeVisit.enabled = typesData.homeVisit.enabled;
     }
     if (typesData.homeVisit.serviceArea) {
-      if (typesData.homeVisit.serviceArea.mode !== undefined) profile.types.homeVisit.serviceArea.mode = typesData.homeVisit.serviceArea.mode;
-      if (typesData.homeVisit.serviceArea.radiusKm !== undefined) profile.types.homeVisit.serviceArea.radiusKm = typesData.homeVisit.serviceArea.radiusKm;
-      if (typesData.homeVisit.serviceArea.pincodes !== undefined) profile.types.homeVisit.serviceArea.pincodes = typesData.homeVisit.serviceArea.pincodes;
+      if (typesData.homeVisit.serviceArea.mode !== undefined)
+        profile.types.homeVisit.serviceArea.mode = typesData.homeVisit.serviceArea.mode;
+      if (typesData.homeVisit.serviceArea.radiusKm !== undefined)
+        profile.types.homeVisit.serviceArea.radiusKm = typesData.homeVisit.serviceArea.radiusKm;
+      if (typesData.homeVisit.serviceArea.pincodes !== undefined)
+        profile.types.homeVisit.serviceArea.pincodes = typesData.homeVisit.serviceArea.pincodes;
     }
   }
 

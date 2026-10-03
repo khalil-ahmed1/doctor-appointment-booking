@@ -25,9 +25,22 @@ const onboardDoctor = async (doctorData, adminId) => {
   session.startTransaction();
   try {
     const {
-      fullName, email, phone, password, sendInvite,
-      specializations, qualifications, experienceYears, registration,
-      languages, gender, bio, clinic, fees, types, payout
+      fullName,
+      email,
+      phone,
+      password,
+      sendInvite,
+      specializations,
+      qualifications,
+      experienceYears,
+      registration,
+      languages,
+      gender,
+      bio,
+      clinic,
+      fees,
+      types,
+      payout,
     } = doctorData;
 
     // 1. Check existing user
@@ -71,8 +84,13 @@ const onboardDoctor = async (doctorData, adminId) => {
 
     // 4. Create DoctorProfile
     const slug = await generateUniqueSlug(fullName);
-    
-    if (clinic && clinic.location && typeof clinic.location.lng !== 'undefined' && typeof clinic.location.lat !== 'undefined') {
+
+    if (
+      clinic &&
+      clinic.location &&
+      typeof clinic.location.lng !== 'undefined' &&
+      typeof clinic.location.lat !== 'undefined'
+    ) {
       clinic.location = {
         type: 'Point',
         coordinates: [clinic.location.lng, clinic.location.lat],
@@ -111,7 +129,7 @@ const onboardDoctor = async (doctorData, adminId) => {
       trialUsed: true,
     };
     await doctorProfile.save({ session });
-    
+
     user.doctorProfile = doctorProfile._id;
     await user.save({ session });
 
@@ -132,12 +150,13 @@ const onboardDoctor = async (doctorData, adminId) => {
 
     // 7. Send Invite Email (non-blocking)
     if (sendInvite && resetToken) {
-      emailService.sendEmail(
-        email,
-        'Welcome to the Platform - Set Your Password',
-        'doctorInvite',
-        { name: fullName, token: resetToken, trialEndDate: endsAt.toISOString() }
-      ).catch(console.error); // Catch to prevent failure after tx commit
+      emailService
+        .sendEmail(email, 'Welcome to the Platform - Set Your Password', 'doctorInvite', {
+          name: fullName,
+          token: resetToken,
+          trialEndDate: endsAt.toISOString(),
+        })
+        .catch(console.error); // Catch to prevent failure after tx commit
     }
 
     return doctorProfile;
@@ -150,11 +169,11 @@ const onboardDoctor = async (doctorData, adminId) => {
 
 const getDoctors = async (query = {}) => {
   const { page = 1, limit = 12, status, isPublished, search } = query;
-  
+
   const filter = {};
   if (status) filter.status = status;
   if (isPublished !== undefined) filter.isPublished = isPublished === 'true';
-  
+
   if (search) {
     filter.$text = { $search: search };
   }
@@ -167,7 +186,7 @@ const getDoctors = async (query = {}) => {
     .skip(skip)
     .limit(parseInt(limit, 10))
     .sort({ createdAt: -1 });
-    
+
   const total = await DoctorProfile.countDocuments(filter);
 
   return {
@@ -176,7 +195,7 @@ const getDoctors = async (query = {}) => {
       page: parseInt(page, 10),
       limit: parseInt(limit, 10),
       total,
-    }
+    },
   };
 };
 
@@ -185,7 +204,7 @@ const getDoctorById = async (id) => {
     .populate('user', 'email phone status')
     .populate('specializations')
     .populate('onboardedBy', 'name');
-    
+
   if (!doctor) {
     throw new ApiError(404, 'NOT_FOUND', 'Doctor not found');
   }
@@ -200,8 +219,13 @@ const updateDoctor = async (id, updateData) => {
 
   // Nested object updates require careful merging to avoid overwriting unprovided fields
   // Using lodash merge could be good, but we can also use Mongoose set
-  
-  if (updateData.clinic && updateData.clinic.location && typeof updateData.clinic.location.lng !== 'undefined' && typeof updateData.clinic.location.lat !== 'undefined') {
+
+  if (
+    updateData.clinic &&
+    updateData.clinic.location &&
+    typeof updateData.clinic.location.lng !== 'undefined' &&
+    typeof updateData.clinic.location.lat !== 'undefined'
+  ) {
     updateData.clinic.location = {
       type: 'Point',
       coordinates: [updateData.clinic.location.lng, updateData.clinic.location.lat],
@@ -220,17 +244,17 @@ const updateDoctorStatus = async (id, status) => {
   }
 
   const user = await User.findById(doctor.user);
-  
+
   doctor.status = status;
   if (user) {
-    // Sync User status if it's ACTIVE, but do not sync SUSPENDED since User enum doesn't support it 
+    // Sync User status if it's ACTIVE, but do not sync SUSPENDED since User enum doesn't support it
     // and suspended doctors can still log in.
     if (status === 'ACTIVE') {
       user.status = 'ACTIVE';
     }
     await user.save();
   }
-  
+
   await doctor.save();
   return doctor;
 };

@@ -25,7 +25,7 @@ const updateProfileSchema = z.object({
           degree: z.string().min(1),
           institute: z.string().min(1),
           year: z.number().int().min(1900).max(new Date().getFullYear()),
-        })
+        }),
       )
       .optional(),
   }),
@@ -68,7 +68,10 @@ const updateClinicSchema = z.object({
     lat: z.number().min(-90).max(90),
     lng: z.number().min(-180).max(180),
     mapsUrl: z.string().url().or(z.literal('')).optional(),
-    phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid 10-digit phone').optional(),
+    phone: z
+      .string()
+      .regex(/^[6-9]\d{9}$/, 'Invalid 10-digit phone')
+      .optional(),
     email: z.string().email().or(z.literal('')).optional(),
     timingsText: z.string().max(150).optional(),
   }),

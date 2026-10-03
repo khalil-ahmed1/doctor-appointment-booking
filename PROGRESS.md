@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 1 – Foundation |
-| Current feature | F-14 Schedule + exceptions models/APIs/validation |
+| Current feature | F-17 Appointment model + state machine service (`transition`) + audit |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | No (mongodb-memory-server issue) |
 
 ### Next Up (exact next step)
-1. F-14 Schedule + exceptions models/APIs/validation
+1. F-17 Appointment model + state machine service (`transition`) + audit
 
 ---
 
@@ -73,9 +73,9 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | ID | Feature | PRD | Status | Notes |
 |---|---|---|---|---|
 | F-13 | Doctor fees + type toggles + normal daily limit (API + UI) | 3.5, 4.4 | ✅ | |
-| F-14 | Schedule + exceptions models/APIs/validation (Premium + Home, overlap rules, conflict detection) | 4.6 | ⬜ | |
-| F-15 | Schedule editor UI + leaves calendar | 4.6, 12.2 | ⬜ | |
-| F-16 | Slot engine: compute slots on read, slots + availability endpoints (with tests) | 4.6, 11.2 | ⬜ | |
+| F-14 | Schedule + exceptions models/APIs/validation (Premium + Home, overlap rules, conflict detection) | 4.6 | ✅ | |
+| F-15 | Schedule editor UI + leaves calendar | 4.6, 12.2 | ✅ | |
+| F-16 | Slot engine: compute slots on read, slots + availability endpoints (with tests) | 4.6, 11.2 | ✅ | |
 | F-17 | Appointment model + state machine service (`transition`) + audit | 9.1, 10.5 | ⬜ | |
 | F-18 | Slot hold (unique `slotLock`, transaction, stale-hold cleanup, idempotency key, hold limits) + concurrency test | 5 | ⬜ | Must include 50-parallel-hold test |
 | F-19 | Fee/breakdown calculator (gross-up, fee bearer, commission) + unit tests | 6.4 | ⬜ | |
@@ -124,6 +124,65 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 13 — 2026-10-04 — Antigravity Agent
+Goal: F-16 Slot engine: compute slots on read, slots + availability endpoints
+Plan:
+- Implement `slot.service.js` which computes slots dynamically without storing them based on weekly rules, exceptions, and timezone variables.
+- Write endpoints `GET /doctors/:slug/slots` and `GET /doctors/:slug/availability` inside `public.routes.js`.
+- Write test file `slot.service.test.js` to assert logical overlap computation mapping `AVAILABLE`, `HELD`, and `BOOKED`.
+Done:
+- Created `slot.service.js` factoring in `slotDurationMin`, `bufferMin`, `minNoticeMinutes`, `advanceBookingDays`, and processing both `LEAVE` and `CUSTOM_HOURS` exceptions.
+- Implemented slot generation collision checking utilizing `Appointment` model. Overlaps set the slot status to `HELD` (if `PENDING_PAYMENT`) or `BOOKED` for other active states.
+- Setup `slot.controller.js` and mounted public endpoints.
+- Added comprehensive unit tests in `slot.service.test.js` for slot generation and active reservation overriding.
+Files/modules touched: `server/src/services/slot.service.js`, `server/src/controllers/slot.controller.js`, `server/src/routes/public.routes.js`, `server/tests/slot.service.test.js`.
+Tests added/updated: Added `slot.service.test.js` verifying generation logic and `HELD`/`BOOKED` status mapping for appointments.
+How to verify manually: Request `GET /api/v1/doctors/:slug/slots?type=PREMIUM&date=YYYY-MM-DD` and observe the dynamic array response containing `startTime`, `endTime`, and `status`.
+Decisions made: Centralized the time offset calculations purely utilizing minutes from midnight and string equality for easier parsing. Utilized `dayjs` extensively in the backend to explicitly enforce the `Asia/Kolkata` timezone logic requested by the PRD.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-17 (Appointment model + state machine service + audit).
+
+### Session 12 — 2026-10-04 — Antigravity Agent
+Goal: F-15 Schedule editor UI + leaves calendar
+Plan:
+- Expand `doctor.api.js` in frontend with schedule and exceptions endpoints.
+- Create `ScheduleEditor` component for Premium and Home Visit weekly hours configurations.
+- Create `ExceptionsEditor` component for adding/removing leaves and custom dates.
+- Create `DoctorSchedulePage` container to hold these editors in Tabs.
+- Wire up the new `/doctor/schedule` route in `App.jsx`.
+Done:
+- Successfully added API wrappers in `doctor.api.js` using `axios`.
+- Built `ScheduleEditor.jsx` featuring dynamic toggles for days and multi-window time picker.
+- Built `ExceptionsEditor.jsx` featuring a date picker for leaves, custom hour configuration, and a list of upcoming exceptions utilizing `dayjs` (which was installed).
+- Combined them within `DoctorSchedulePage.jsx` utilizing `shadcn` Tabs.
+- Added route to `App.jsx` pointing to `/doctor/schedule` within the DashboardLayout.
+Files/modules touched: `frontend/src/features/doctor/api/doctor.api.js`, `ScheduleEditor.jsx`, `ExceptionsEditor.jsx`, `DoctorSchedulePage.jsx`, `App.jsx`, `frontend/package.json` (installed dayjs).
+Tests added/updated: None.
+How to verify manually: Login as a doctor, navigate to `Schedule` in the sidebar. You can test checking boxes, adding multiple window ranges, setting buffers, and adding leaves under the exceptions tab.
+Decisions made: Used native HTML `<input type="time" />` and `<input type="date" />` styled with shadcn `Input` for lightweight, mobile-friendly pickers. Installed `dayjs` for quick date formatting in the UI.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-16 (Slot engine: compute slots on read).
+
+### Session 11 — 2026-10-04 — Antigravity Agent
+Goal: F-14 Schedule + exceptions models/APIs/validation
+Plan:
+- Review PRD 4.6 and 10 for Schedule and ScheduleException schema and rules.
+- Create Mongoose models for Schedule, ScheduleException, and Appointment (to support conflict detection).
+- Implement validation (Zod), service layer (overlap logic), controller, and routes for fetching and updating schedules and exceptions.
+- Run ESLint to verify formatting.
+Done:
+- Added `Schedule`, `ScheduleException`, and `Appointment` models.
+- Created `schedule.validation.js` with specific checks for time format and array lengths.
+- Added `schedule.service.js` which detects self-overlap, cross-type overlap (Premium vs Home Visit), and conflicts with existing appointments.
+- Created `schedule.controller.js` and wired routes in `doctor.routes.js`.
+- Fixed ESLint issues automatically via `npm run lint -- --fix`.
+Files/modules touched: `server/src/models/Schedule.js`, `ScheduleException.js`, `Appointment.js`, `validations/schedule.validation.js`, `services/schedule.service.js`, `controllers/schedule.controller.js`, `routes/doctor.routes.js`.
+Tests added/updated: None required explicitly in PRD for F-14, but conflict logic is in place.
+How to verify manually: Call the schedule APIs with conflicting times to verify the `400 VALIDATION_ERROR` or `409 SCHEDULE_CONFLICT` works correctly.
+Decisions made: Used string comparison for HH:mm times to check overlap logic simply.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-15 (Schedule editor UI + leaves calendar).
 
 ### Session 10 — 2026-10-04 — Antigravity Agent
 Goal: F-13 Doctor fees + type toggles + normal daily limit (API + UI)

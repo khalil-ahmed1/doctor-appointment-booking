@@ -25,13 +25,13 @@ router
 router.patch(
   '/doctors/:id/status',
   validate(adminValidation.updateDoctorStatusSchema),
-  adminController.updateDoctorStatus
+  adminController.updateDoctorStatus,
 );
 
 router.patch(
   '/doctors/:id/publish',
   validate(adminValidation.updateDoctorPublishSchema),
-  adminController.updateDoctorPublish
+  adminController.updateDoctorPublish,
 );
 
 module.exports = router;

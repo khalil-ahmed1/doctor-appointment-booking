@@ -12,16 +12,18 @@ const onboardDoctorSchema = z.object({
     phone: z.string().regex(/^\d{10}$/, 'Phone number must be exactly 10 digits'),
     password: z.string().min(8, 'Password must be at least 8 characters').optional(),
     sendInvite: z.boolean().default(true),
-    
+
     // Professional
     specializations: z.array(objectIdSchema).min(1, 'At least one specialization is required'),
-    qualifications: z.array(
-      z.object({
-        degree: z.string().min(1, 'Degree is required'),
-        institute: z.string().min(1, 'Institute is required'),
-        year: z.number().int().min(1900).max(new Date().getFullYear()),
-      })
-    ).min(1, 'At least one qualification is required'),
+    qualifications: z
+      .array(
+        z.object({
+          degree: z.string().min(1, 'Degree is required'),
+          institute: z.string().min(1, 'Institute is required'),
+          year: z.number().int().min(1900).max(new Date().getFullYear()),
+        }),
+      )
+      .min(1, 'At least one qualification is required'),
     experienceYears: z.number().int().min(0).default(0),
     registration: z.object({
       number: z.string().min(1, 'Registration number is required'),
@@ -48,37 +50,51 @@ const onboardDoctorSchema = z.object({
     }),
 
     // Fees & Types
-    fees: z.object({
-      normal: z.number().int().min(0).default(0),
-      premium: z.number().int().min(0).default(0),
-      homeVisit: z.number().int().min(0).default(0),
-    }).optional(),
-    types: z.object({
-      normal: z.object({
-        enabled: z.boolean().default(false),
-        dailyTokenLimit: z.number().int().min(0).default(0),
-      }).optional(),
-      premium: z.object({
-        enabled: z.boolean().default(false),
-      }).optional(),
-      homeVisit: z.object({
-        enabled: z.boolean().default(false),
-        serviceArea: z.object({
-          mode: z.enum(['RADIUS', 'PINCODES']).default('RADIUS'),
-          radiusKm: z.number().int().min(1).optional(),
-          pincodes: z.array(z.string()).optional(),
-        }).optional(),
-      }).optional(),
-    }).optional(),
+    fees: z
+      .object({
+        normal: z.number().int().min(0).default(0),
+        premium: z.number().int().min(0).default(0),
+        homeVisit: z.number().int().min(0).default(0),
+      })
+      .optional(),
+    types: z
+      .object({
+        normal: z
+          .object({
+            enabled: z.boolean().default(false),
+            dailyTokenLimit: z.number().int().min(0).default(0),
+          })
+          .optional(),
+        premium: z
+          .object({
+            enabled: z.boolean().default(false),
+          })
+          .optional(),
+        homeVisit: z
+          .object({
+            enabled: z.boolean().default(false),
+            serviceArea: z
+              .object({
+                mode: z.enum(['RADIUS', 'PINCODES']).default('RADIUS'),
+                radiusKm: z.number().int().min(1).optional(),
+                pincodes: z.array(z.string()).optional(),
+              })
+              .optional(),
+          })
+          .optional(),
+      })
+      .optional(),
 
     // Payout (Stubbed)
-    payout: z.object({
-      legalName: z.string().optional(),
-      businessType: z.string().optional(),
-      panLast4: z.string().optional(),
-      bankLast4: z.string().optional(),
-      ifsc: z.string().optional(),
-    }).optional(),
+    payout: z
+      .object({
+        legalName: z.string().optional(),
+        businessType: z.string().optional(),
+        panLast4: z.string().optional(),
+        bankLast4: z.string().optional(),
+        ifsc: z.string().optional(),
+      })
+      .optional(),
   }),
 });
 
