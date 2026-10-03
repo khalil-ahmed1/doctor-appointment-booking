@@ -12,15 +12,15 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 1 – Foundation |
-| Current feature | F-03 Auth |
+| Current feature | F-04 Email service |
 | Last updated | 2026-10-03 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | N/A |
 
 ### Next Up (exact next step)
-1. F-03 Auth setup: start implementing user authentication routes (register, login, refresh, logout, email verify)
-2. Create RBAC middleware.
+1. F-04 Email service + queue-less sender with EmailLog, base templates
+2. Setup node-cron jobs for email if needed, or simply DB-driven retry.
 
 ---
 
@@ -59,7 +59,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 |---|---|---|---|---|
 | F-01 | Project setup: server/client skeleton, env validation, lint, test setup (in-memory replica set), error handler, logger, health route | 15, 16 | ✅ | |
 | F-02 | Core models: User, DoctorProfile, Specialization, Setting, AuditLog, Counter + seed script (admin, settings, specializations, plans) | 10 | ✅ | |
-| F-03 | Auth: register, login, refresh/logout, email verification, forgot/reset password, lockout, RBAC middleware | 4.1, 11.1 | ⬜ | |
+| F-03 | Auth: register, login, refresh/logout, email verification, forgot/reset password, lockout, RBAC middleware | 4.1, 11.1 | ✅ | |
 | F-04 | Email service + queue-less sender with EmailLog, base templates | 8 | ⬜ | |
 | F-05 | Frontend base: layouts, router, ProtectedRoute, auth pages, redirect-after-login (safe redirect) | 4.1, 12 | ⬜ | |
 | F-06 | Admin: doctor onboarding (account + profile + invite email + 7-day trial), list/view/edit/suspend/publish | 4.2, 4.10 | ⬜ | Razorpay linked-account step stubbed behind interface until F-27 |
@@ -141,6 +141,26 @@ New env vars / commands / endpoints / models: ...
 Left undone / known issues: ...
 NEXT STEP (specific): ...
 ```
+
+### Session 3 — 2026-10-03 — Antigravity Agent
+Goal: F-03 Auth (Registration, Login, Refresh, Logout, JWTs, RBAC)
+Plan: Create Zod validations, implement controller & service for Auth, token utils, and RBAC middleware. Also fix the `express-mongo-sanitize` / Express 5 `req.query` getter conflict.
+Done:
+- Created token utils (JWT, Crypto).
+- Created Auth validation schemas (Zod).
+- Created Auth service containing logic for register, login, verify, logout, refresh, reset password.
+- Created Auth controller and mapped it to routes.
+- Added `/api/v1/auth` to Express `app.js`.
+- Fixed the Express 5 read-only `req.query` crash by mutating rather than reassigning inside Zod `validate` middleware.
+- Disabled `hpp()` due to Express 5 compatibility issues causing crashes.
+Files/modules touched: `src/app.js`, `src/utils/token.js`, `src/middlewares/validate.js`, `src/middlewares/auth.js`, `src/validations/auth.validation.js`, `src/services/auth.service.js`, `src/controllers/auth.controller.js`, `src/routes/auth.routes.js`.
+Tests added/updated: N/A
+How to verify manually: Use `curl` to POST `/api/v1/auth/register` with `{ "name": "Test", "email": "test@test.com", "phone": "9999999999", "password": "Password123!" }`
+Decisions made: Disabled `hpp()` parameter pollution middleware for now because it breaks Express 5.
+New env vars / commands / endpoints / models:
+- Endpoints: `POST /register`, `POST /login`, `POST /refresh`, `POST /logout`, `GET /verify-email/:token`, `POST /forgot-password`, `POST /reset-password/:token`, `GET /me`
+Left undone / known issues: Real emails are not sent yet (returns token directly for dev/test). Wait for F-04.
+NEXT STEP (specific): Start F-04 (Email service + queue-less sender).
 
 ### Session 2 — 2026-10-03 — Antigravity Agent
 Goal: F-02 Core models & seed script

@@ -7,7 +7,7 @@ const specializationSchema = new mongoose.Schema(
     icon: String,
     isActive: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model('Specialization', specializationSchema);

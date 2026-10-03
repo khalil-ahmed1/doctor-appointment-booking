@@ -58,7 +58,7 @@ const userSchema = new mongoose.Schema(
     doctorProfile: { type: mongoose.Schema.Types.ObjectId, ref: 'DoctorProfile' },
     isDeleted: { type: Boolean, default: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 userSchema.index({ phone: 1 });

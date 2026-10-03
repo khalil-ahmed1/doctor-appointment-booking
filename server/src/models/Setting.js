@@ -6,7 +6,7 @@ const settingSchema = new mongoose.Schema(
     value: { type: mongoose.Schema.Types.Mixed, required: true },
     description: String,
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model('Setting', settingSchema);

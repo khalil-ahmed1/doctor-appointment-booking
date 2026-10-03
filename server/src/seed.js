@@ -14,7 +14,9 @@ const seed = async () => {
 
     // 1. Seed Super Admin
     if (!env.ADMIN_EMAIL || !env.ADMIN_PASSWORD) {
-      logger.warn('ADMIN_EMAIL and ADMIN_PASSWORD not defined in env. Skipping Super Admin creation.');
+      logger.warn(
+        'ADMIN_EMAIL and ADMIN_PASSWORD not defined in env. Skipping Super Admin creation.',
+      );
     } else {
       const adminExists = await User.findOne({ email: env.ADMIN_EMAIL.toLowerCase() });
       if (!adminExists) {
@@ -92,13 +94,25 @@ const seed = async () => {
       { key: 'holdMinutes', value: 10, description: 'Time a slot is held during payment' },
       { key: 'normalValidityDays', value: 2, description: 'Days a normal token is valid for' },
       { key: 'graceDays', value: 2, description: 'Grace period after subscription expires' },
-      { key: 'advanceBookingDaysMax', value: 30, description: 'Max days in advance a slot can be booked' },
+      {
+        key: 'advanceBookingDaysMax',
+        value: 30,
+        description: 'Max days in advance a slot can be booked',
+      },
       { key: 'maxActiveHoldsPerUser', value: 2, description: 'Max pending payment holds per user' },
-      { key: 'feeBearer', value: 'PATIENT', description: 'Who pays the gateway fee (PATIENT or DOCTOR)' },
+      {
+        key: 'feeBearer',
+        value: 'PATIENT',
+        description: 'Who pays the gateway fee (PATIENT or DOCTOR)',
+      },
       { key: 'gatewayFeePercent', value: 2, description: 'Razorpay fee percentage' },
       { key: 'gstOnFeePercent', value: 18, description: 'GST on gateway fee' },
       { key: 'platformCommissionPercent', value: 0, description: 'Platform commission' },
-      { key: 'refundFeeBearer', value: 'PLATFORM', description: 'Who bears the gateway fee on refund' },
+      {
+        key: 'refundFeeBearer',
+        value: 'PLATFORM',
+        description: 'Who bears the gateway fee on refund',
+      },
     ];
     for (const setting of settings) {
       await Setting.updateOne({ key: setting.key }, { $set: setting }, { upsert: true });

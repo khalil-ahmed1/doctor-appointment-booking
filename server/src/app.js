@@ -19,7 +19,7 @@ app.use(
   cors({
     origin: env.CLIENT_URL,
     credentials: true,
-  })
+  }),
 );
 
 // Rate limiting
@@ -46,7 +46,7 @@ app.use((req, res, next) => {
 });
 
 // Prevent parameter pollution
-app.use(hpp());
+// app.use(hpp()); // Disabled due to Express 5 compatibility issues with req.query
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -56,10 +56,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Routes
+const authRoutes = require('./routes/auth.routes');
+
 // Health route
 app.get('/api/v1/healthz', (req, res) => {
   res.status(200).json({ success: true, data: { status: 'ok', timestamp: new Date() } });
 });
+
+app.use('/api/v1/auth', authRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

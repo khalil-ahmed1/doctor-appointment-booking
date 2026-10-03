@@ -11,7 +11,7 @@ const planSchema = new mongoose.Schema(
     displayOrder: { type: Number, default: 0 },
     features: [String],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 module.exports = mongoose.model('Plan', planSchema);
