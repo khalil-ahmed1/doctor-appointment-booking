@@ -1,8 +1,14 @@
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
-const crypto = require('crypto');
-const { generateAccessToken, generateRefreshToken, hashToken, generateRandomToken } = require('../utils/token');
+const {
+  generateAccessToken,
+  generateRefreshToken,
+  hashToken,
+  generateRandomToken,
+} = require('../utils/token');
 const ApiError = require('../utils/ApiError');
+const emailService = require('./email.service');
+const logger = require('../utils/logger');
 
 const registerUser = async (userData) => {
   const { name, email, phone, password, dob, gender } = userData;
@@ -18,7 +24,7 @@ const registerUser = async (userData) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
-  
+
   const emailVerifyToken = generateRandomToken();
   const hashedEmailToken = hashToken(emailVerifyToken);
   const emailVerifyExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
@@ -35,14 +41,17 @@ const registerUser = async (userData) => {
     emailVerifyExpires,
   });
 
-  // TODO: Send verification email here (F-04)
-  // For now, we just return the unhashed token in dev/test, though in real life we send it via email
+  await emailService.sendEmail(user.email, 'Verify your email address', 'verifyEmail', {
+    name: user.name,
+    token: emailVerifyToken,
+  });
+
   return { user, emailVerifyToken };
 };
 
 const loginUser = async (email, password, reqInfo) => {
   const user = await User.findOne({ email }).select('+passwordHash');
-  
+
   if (!user) {
     throw new ApiError(401, 'UNAUTHORIZED', 'Invalid email or password');
   }
@@ -53,7 +62,11 @@ const loginUser = async (email, password, reqInfo) => {
 
   // Check lockout
   if (user.lockUntil && user.lockUntil > Date.now()) {
-    throw new ApiError(401, 'LOCKED_OUT', 'Account temporarily locked out. Please try again later.');
+    throw new ApiError(
+      401,
+      'LOCKED_OUT',
+      'Account temporarily locked out. Please try again later.',
+    );
   }
 
   const isPasswordMatch = await bcrypt.compare(password, user.passwordHash);
@@ -105,7 +118,7 @@ const refreshAuthToken = async (refreshToken, reqInfo) => {
   if (!user) {
     throw new ApiError(401, 'UNAUTHORIZED', 'Invalid or expired refresh token');
   }
-  
+
   if (user.status === 'BLOCKED' || user.isDeleted) {
     throw new ApiError(401, 'BLOCKED', 'User is blocked or deleted');
   }
@@ -131,18 +144,18 @@ const refreshAuthToken = async (refreshToken, reqInfo) => {
 
 const logoutUser = async (userId, refreshToken) => {
   const hashedToken = hashToken(refreshToken);
-  
+
   await User.findByIdAndUpdate(userId, {
-    $pull: { refreshTokens: { tokenHash: hashedToken } }
+    $pull: { refreshTokens: { tokenHash: hashedToken } },
   });
 };
 
 const verifyEmail = async (token) => {
   const hashedToken = hashToken(token);
-  
+
   const user = await User.findOne({
     emailVerifyToken: hashedToken,
-    emailVerifyExpires: { $gt: Date.now() }
+    emailVerifyExpires: { $gt: Date.now() },
   });
 
   if (!user) {
@@ -153,7 +166,7 @@ const verifyEmail = async (token) => {
   user.emailVerifyToken = undefined;
   user.emailVerifyExpires = undefined;
   await user.save();
-  
+
   return user;
 };
 
@@ -166,12 +179,15 @@ const forgotPassword = async (email) => {
 
   const resetToken = generateRandomToken();
   const hashedResetToken = hashToken(resetToken);
-  
+
   user.resetTokenHash = hashedResetToken;
   user.resetTokenExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
   await user.save();
 
-  // TODO: Send email with resetToken (F-04)
+  await emailService.sendEmail(user.email, 'Reset your password', 'resetPassword', {
+    token: resetToken,
+  });
+
   // Returning it for dev/test
   return { resetToken };
 };
@@ -181,7 +197,7 @@ const resetPassword = async (token, newPassword) => {
 
   const user = await User.findOne({
     resetTokenHash: hashedToken,
-    resetTokenExpires: { $gt: Date.now() }
+    resetTokenExpires: { $gt: Date.now() },
   });
 
   if (!user) {
@@ -189,14 +205,14 @@ const resetPassword = async (token, newPassword) => {
   }
 
   const passwordHash = await bcrypt.hash(newPassword, 12);
-  
+
   user.passwordHash = passwordHash;
   user.resetTokenHash = undefined;
   user.resetTokenExpires = undefined;
-  
+
   // Also log out from all sessions (optional but good practice)
   user.refreshTokens = [];
-  
+
   await user.save();
 };
 
@@ -207,5 +223,5 @@ module.exports = {
   logoutUser,
   verifyEmail,
   forgotPassword,
-  resetPassword
+  resetPassword,
 };

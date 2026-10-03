@@ -12,15 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 1 – Foundation |
-| Current feature | F-04 Email service |
+| Current feature | F-05 Frontend base |
 | Last updated | 2026-10-03 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | N/A |
 
 ### Next Up (exact next step)
-1. F-04 Email service + queue-less sender with EmailLog, base templates
-2. Setup node-cron jobs for email if needed, or simply DB-driven retry.
+1. F-05 Frontend base: layouts, router, ProtectedRoute, auth pages, redirect-after-login (safe redirect)
 
 ---
 
@@ -60,7 +59,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-01 | Project setup: server/client skeleton, env validation, lint, test setup (in-memory replica set), error handler, logger, health route | 15, 16 | ✅ | |
 | F-02 | Core models: User, DoctorProfile, Specialization, Setting, AuditLog, Counter + seed script (admin, settings, specializations, plans) | 10 | ✅ | |
 | F-03 | Auth: register, login, refresh/logout, email verification, forgot/reset password, lockout, RBAC middleware | 4.1, 11.1 | ✅ | |
-| F-04 | Email service + queue-less sender with EmailLog, base templates | 8 | ⬜ | |
+| F-04 | Email service + queue-less sender with EmailLog, base templates | 8 | ✅ | |
 | F-05 | Frontend base: layouts, router, ProtectedRoute, auth pages, redirect-after-login (safe redirect) | 4.1, 12 | ⬜ | |
 | F-06 | Admin: doctor onboarding (account + profile + invite email + 7-day trial), list/view/edit/suspend/publish | 4.2, 4.10 | ⬜ | Razorpay linked-account step stubbed behind interface until F-27 |
 | F-07 | Doctor set-password via invite link | 4.2 | ⬜ | |
@@ -125,6 +124,29 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 4 — 2026-10-03 — Antigravity Agent
+Goal: F-04 Email service
+Plan: Create EmailLog model, create nodemailer email service (queue-less for now), create base templates, and integrate with auth.service.js. Also fix lint issues and jest test setup.
+Done:
+- Fixed test environment by creating `tests/setup.js` with `mongodb-memory-server` for jest.
+- Fixed lint errors in `env.js`, `app.js`, and `auth.service.js`.
+- Installed `nodemailer`.
+- Created `EmailLog` Mongoose model.
+- Created `src/templates/emailTemplates.js` for base templates (verifyEmail, resetPassword, doctorInvite).
+- Created `src/services/email.service.js` with `sendEmail` function using nodemailer.
+- Integrated `sendEmail` into `auth.service.js` for `registerUser` and `forgotPassword`.
+- Added SMTP env variables to Zod schema in `env.js`.
+- Wrote basic jest tests for `email.service.js`.
+Files/modules touched: `src/models/EmailLog.js`, `src/services/email.service.js`, `src/templates/emailTemplates.js`, `src/services/auth.service.js`, `src/config/env.js`, `src/app.js`, `tests/setup.js`, `tests/email.service.test.js`.
+Tests added/updated: `tests/email.service.test.js` (mocked nodemailer).
+How to verify manually: Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` in `.env` (e.g., mailtrap credentials) and use the `/api/v1/auth/register` endpoint via `curl` to see if an email gets sent and an `EmailLog` is created in MongoDB.
+Decisions made: Used simple string replacements for templates instead of a full template engine to keep things lightweight. Email sending errors are caught and logged as `FAILED` in the database to allow retry jobs in the future without failing the HTTP request.
+New env vars / commands / endpoints / models:
+- Models: `EmailLog`
+- Env vars: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM`
+Left undone / known issues: Background retry job for failed emails is pending (F-35).
+NEXT STEP (specific): F-05 Frontend base (Vite + React Router + Layouts + Auth pages).
 
 ### Template (copy for each session)
 ```

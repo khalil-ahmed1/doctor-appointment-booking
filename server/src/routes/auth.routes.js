@@ -12,8 +12,16 @@ router.post('/refresh', authController.refresh);
 router.post('/logout', protect, authController.logout); // require valid token to logout properly
 
 router.get('/verify-email/:token', authController.verifyEmail);
-router.post('/forgot-password', validate(authValidation.forgotPasswordSchema), authController.forgotPassword);
-router.post('/reset-password/:token', validate(authValidation.resetPasswordSchema), authController.resetPassword);
+router.post(
+  '/forgot-password',
+  validate(authValidation.forgotPasswordSchema),
+  authController.forgotPassword,
+);
+router.post(
+  '/reset-password/:token',
+  validate(authValidation.resetPasswordSchema),
+  authController.resetPassword,
+);
 
 router.get('/me', protect, authController.getMe);
 

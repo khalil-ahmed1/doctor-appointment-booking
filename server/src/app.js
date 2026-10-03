@@ -3,7 +3,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
-const hpp = require('hpp');
+
 const cookieParser = require('cookie-parser');
 const env = require('./config/env');
 const errorHandler = require('./middlewares/error');

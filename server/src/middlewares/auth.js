@@ -20,7 +20,7 @@ const protect = async (req, res, next) => {
     if (!user) {
       throw new ApiError(401, 'UNAUTHORIZED', 'User not found');
     }
-    
+
     if (user.status === 'BLOCKED') {
       throw new ApiError(401, 'BLOCKED', 'User is blocked');
     }
