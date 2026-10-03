@@ -50,6 +50,39 @@ const updateDoctorPublish = asyncHandler(async (req, res) => {
   });
 });
 
+const getPatients = asyncHandler(async (req, res) => {
+  const result = await adminService.getPatients(req.query);
+  res.status(200).json({
+    success: true,
+    data: result.patients,
+    meta: result.meta,
+  });
+});
+
+const getPatientById = asyncHandler(async (req, res) => {
+  const patient = await adminService.getPatientById(req.params.id);
+  res.status(200).json({
+    success: true,
+    data: patient,
+  });
+});
+
+const updatePatient = asyncHandler(async (req, res) => {
+  const patient = await adminService.updatePatient(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    data: patient,
+  });
+});
+
+const updatePatientBlockStatus = asyncHandler(async (req, res) => {
+  const patient = await adminService.updatePatientBlockStatus(req.params.id, req.body.status);
+  res.status(200).json({
+    success: true,
+    data: patient,
+  });
+});
+
 module.exports = {
   onboardDoctor,
   getDoctors,
@@ -57,4 +90,8 @@ module.exports = {
   updateDoctor,
   updateDoctorStatus,
   updateDoctorPublish,
+  getPatients,
+  getPatientById,
+  updatePatient,
+  updatePatientBlockStatus,
 };

@@ -5,6 +5,9 @@ const Specialization = require('../models/Specialization');
 const router = express.Router();
 
 const slotController = require('../controllers/slot.controller');
+const publicController = require('../controllers/public.controller');
+const validate = require('../middlewares/validate');
+const { searchDoctorsSchema } = require('../validations/public.validation');
 
 router.get(
   '/specializations',
@@ -19,5 +22,8 @@ router.get(
 
 router.get('/doctors/:slug/slots', slotController.getSlotsForDate);
 router.get('/doctors/:slug/availability', slotController.getAvailability);
+
+router.get('/doctors', validate(searchDoctorsSchema), publicController.searchDoctors);
+router.get('/doctors/:slug', publicController.getDoctorBySlug);
 
 module.exports = router;

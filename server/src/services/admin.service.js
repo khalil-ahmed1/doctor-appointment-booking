@@ -270,6 +270,91 @@ const updateDoctorPublish = async (id, isPublished) => {
   return doctor;
 };
 
+const getPatients = async (query = {}) => {
+  const { page = 1, limit = 12, status, search } = query;
+
+  const filter = { role: 'PATIENT', isDeleted: false };
+  if (status) filter.status = status;
+
+  if (search) {
+    filter.$or = [
+      { name: { $regex: search, $options: 'i' } },
+      { email: { $regex: search, $options: 'i' } },
+      { phone: { $regex: search, $options: 'i' } },
+    ];
+  }
+
+  const skip = (page - 1) * limit;
+
+  const patients = await User.find(filter)
+    .select('-passwordHash -resetTokenHash -refreshTokens')
+    .skip(skip)
+    .limit(parseInt(limit, 10))
+    .sort({ createdAt: -1 });
+
+  const total = await User.countDocuments(filter);
+
+  return {
+    patients,
+    meta: {
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      total,
+    },
+  };
+};
+
+const getPatientById = async (id) => {
+  const patient = await User.findOne({ _id: id, role: 'PATIENT', isDeleted: false }).select(
+    '-passwordHash -resetTokenHash -refreshTokens',
+  );
+
+  if (!patient) {
+    throw new ApiError(404, 'NOT_FOUND', 'Patient not found');
+  }
+  return patient;
+};
+
+const updatePatient = async (id, updateData) => {
+  const patient = await User.findOne({ _id: id, role: 'PATIENT', isDeleted: false });
+  if (!patient) {
+    throw new ApiError(404, 'NOT_FOUND', 'Patient not found');
+  }
+
+  // Prevent email or role updates through this generic endpoint
+  delete updateData.email;
+  delete updateData.role;
+  delete updateData.passwordHash;
+
+  patient.set(updateData);
+  await patient.save();
+  
+  // Return without sensitive data
+  const updatedPatient = patient.toObject();
+  delete updatedPatient.passwordHash;
+  delete updatedPatient.resetTokenHash;
+  delete updatedPatient.refreshTokens;
+  
+  return updatedPatient;
+};
+
+const updatePatientBlockStatus = async (id, status) => {
+  const patient = await User.findOne({ _id: id, role: 'PATIENT', isDeleted: false });
+  if (!patient) {
+    throw new ApiError(404, 'NOT_FOUND', 'Patient not found');
+  }
+
+  patient.status = status;
+  await patient.save();
+  
+  const updatedPatient = patient.toObject();
+  delete updatedPatient.passwordHash;
+  delete updatedPatient.resetTokenHash;
+  delete updatedPatient.refreshTokens;
+  
+  return updatedPatient;
+};
+
 module.exports = {
   onboardDoctor,
   getDoctors,
@@ -277,4 +362,8 @@ module.exports = {
   updateDoctor,
   updateDoctorStatus,
   updateDoctorPublish,
+  getPatients,
+  getPatientById,
+  updatePatient,
+  updatePatientBlockStatus,
 };

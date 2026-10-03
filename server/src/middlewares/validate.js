@@ -11,15 +11,13 @@ const validate = (schema) => (req, res, next) => {
     // Assign validated and stripped data back to request
     req.body = parsed.body;
 
-    // In Express 5 req.query and req.params are getters, so we mutate the objects instead of reassigning
+    // In Express 5 req.query and req.params are getters, so we overwrite the property
     if (parsed.query) {
-      Object.keys(req.query).forEach((key) => delete req.query[key]);
-      Object.assign(req.query, parsed.query);
+      Object.defineProperty(req, 'query', { value: parsed.query, writable: true, configurable: true });
     }
 
     if (parsed.params) {
-      Object.keys(req.params).forEach((key) => delete req.params[key]);
-      Object.assign(req.params, parsed.params);
+      Object.defineProperty(req, 'params', { value: parsed.params, writable: true, configurable: true });
     }
 
     next();

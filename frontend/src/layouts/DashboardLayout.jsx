@@ -60,11 +60,30 @@ export const DashboardLayout = () => {
     }
 
     if (user.role === 'ADMIN') {
-      return (
-        <Link to="/admin/dashboard" className="block px-3 py-2 rounded-md bg-primary/10 text-primary font-medium">
-          Overview
-        </Link>
-      );
+      const adminLinks = [
+        { name: 'Overview', to: '/admin/dashboard', icon: LayoutDashboard },
+        { name: 'Doctors', to: '/admin/doctors', icon: Stethoscope },
+        { name: 'Patients', to: '/admin/patients', icon: UserCircle },
+      ];
+      return adminLinks.map((link) => {
+        const isActive = location.pathname.startsWith(link.to);
+        const Icon = link.icon;
+        return (
+          <Link
+            key={link.to}
+            to={link.to}
+            className={cn(
+              "flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors",
+              isActive 
+                ? "bg-primary/10 text-primary" 
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            <Icon className="h-4 w-4" />
+            {link.name}
+          </Link>
+        );
+      });
     }
 
     return (

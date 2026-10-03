@@ -30,4 +30,24 @@ export const adminApi = {
     const response = await axios.patch(`/admin/doctors/${id}/publish`, { isPublished });
     return response.data;
   },
+
+  getPatients: async (params = {}) => {
+    const response = await axios.get('/admin/patients', { params });
+    return response.data;
+  },
+
+  getPatientById: async (id) => {
+    const response = await axios.get(`/admin/patients/${id}`);
+    return response.data;
+  },
+
+  updatePatient: async (id, data) => {
+    const response = await axios.put(`/admin/patients/${id}`, data);
+    return response.data;
+  },
+
+  updatePatientBlockStatus: async (id, status) => {
+    const response = await axios.patch(`/admin/patients/${id}/block`, { status });
+    return response.data;
+  },
 };

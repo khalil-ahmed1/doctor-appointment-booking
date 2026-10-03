@@ -34,4 +34,20 @@ router.patch(
   adminController.updateDoctorPublish,
 );
 
+// Patient Management
+router
+  .route('/patients')
+  .get(adminController.getPatients);
+
+router
+  .route('/patients/:id')
+  .get(validate(adminValidation.getPatientParamsSchema), adminController.getPatientById)
+  .put(validate(adminValidation.updatePatientSchema), adminController.updatePatient);
+
+router.patch(
+  '/patients/:id/block',
+  validate(adminValidation.updatePatientBlockStatusSchema),
+  adminController.updatePatientBlockStatus,
+);
+
 module.exports = router;

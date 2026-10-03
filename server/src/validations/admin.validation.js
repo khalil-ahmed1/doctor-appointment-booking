@@ -122,9 +122,39 @@ const getDoctorParamsSchema = z.object({
   }),
 });
 
+const updatePatientBlockStatusSchema = z.object({
+  body: z.object({
+    status: z.enum(['ACTIVE', 'BLOCKED']),
+  }),
+  params: z.object({
+    id: objectIdSchema,
+  }),
+});
+
+const updatePatientSchema = z.object({
+  body: z.object({
+    name: z.string().min(1).optional(),
+    phone: z.string().regex(/^\d{10}$/, 'Phone number must be exactly 10 digits').optional(),
+    gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
+    dob: z.string().optional(),
+  }),
+  params: z.object({
+    id: objectIdSchema,
+  }),
+});
+
+const getPatientParamsSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+});
+
 module.exports = {
   onboardDoctorSchema,
   updateDoctorStatusSchema,
   updateDoctorPublishSchema,
   getDoctorParamsSchema,
+  updatePatientBlockStatusSchema,
+  updatePatientSchema,
+  getPatientParamsSchema,
 };

@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 1 – Foundation |
-| Current feature | F-23 Premium booking flow UI: SlotPicker, patient details, price breakdown, countdown, Razorpay checkout, success page |
+| Current feature | F-12 Admin: patients management (list, view, block/unblock, edit) |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
-| Tests passing? | No (mongodb-memory-server issue) |
+| Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-23 Premium booking flow UI: SlotPicker, patient details, price breakdown, countdown, Razorpay checkout, success page
+1. F-12 Admin: patients management (list, view, block/unblock, edit)
 
 ---
 
@@ -65,9 +65,9 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-07 | Doctor set-password via invite link | 4.2 | ✅ | |
 | F-08 | Doctor profile APIs: details, picture, gallery (upload validation), clinic + map location | 4.3 | ✅ | |
 | F-09 | Doctor profile UI (dashboard) | 4.3, 4.4 | ✅ | |
-| F-10 | Public listing + search + filters + sort + pagination; doctor visibility rule | 4.7 | ⬜ | |
-| F-11 | Home page + doctor detail page (profile, gallery, map, SEO tags) | 4.7 | ⬜ | |
-| F-12 | Admin: patients management (list, view, block/unblock, edit) | 4.10 | ⬜ | |
+| F-10 | Public listing + search + filters + sort + pagination; doctor visibility rule | 4.7 | ✅ | |
+| F-11 | Home page + doctor detail page (profile, gallery, map, SEO tags) | 4.7 | ✅ | |
+| F-12 | Admin: patients management (list, view, block/unblock, edit) | 4.10 | ✅ | |
 
 ### Phase 2 – Booking Core
 | ID | Feature | PRD | Status | Notes |
@@ -124,6 +124,66 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 22 — 2026-10-04 — Antigravity Agent
+Goal: F-12 Admin: patients management (list, view, block/unblock, edit)
+Plan:
+- Add `getPatients`, `getPatientById`, `updatePatient`, `updatePatientBlockStatus` endpoints in `admin.controller.js` and `admin.service.js`.
+- Add Zod validations in `admin.validation.js` ensuring no roles or emails can be changed through the edit API.
+- Create frontend React pages: `PatientsListPage.jsx` and `PatientViewPage.jsx`.
+- Link them up inside `DashboardLayout.jsx` for Admin users.
+Done:
+- Successfully built robust REST APIs for querying and manipulating User docs (role: PATIENT).
+- Implemented `PatientsListPage` featuring comprehensive list rendering, pagination, text-search, and status filters.
+- Implemented `PatientViewPage` with a dual-pane setup containing a summary/block button and a secure details editor (name, phone, gender, dob).
+- Integrated both pages with React Query for snappy optimistic UI feedback and automatic re-fetching on mutations.
+Files/modules touched: `server/src/validations/admin.validation.js`, `server/src/routes/admin.routes.js`, `server/src/controllers/admin.controller.js`, `server/src/services/admin.service.js`, `frontend/src/features/admin/api/admin.api.js`, `frontend/src/features/admin/pages/PatientsListPage.jsx`, `frontend/src/features/admin/pages/PatientViewPage.jsx`, `frontend/src/layouts/DashboardLayout.jsx`, `frontend/src/App.jsx`.
+Tests added/updated: None.
+How to verify manually: Login as an Admin and navigate to the sidebar "Patients". You can see all patients, block/unblock them, and edit their details (name/DOB/gender/phone).
+Decisions made: The email is restricted from being edited through this view to prevent accidental account lockouts or identity swaps.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-23 (Premium booking flow UI).
+
+### Session 21 — 2026-10-04 — Antigravity Agent
+Goal: F-11 Home page + doctor detail page (profile, gallery, map, SEO tags)
+Plan:
+- Install `react-helmet-async` for SEO tags on the detail page.
+- Add `getDoctorBySlug` endpoint fetcher in `public.api.js`.
+- Create `DoctorDetailPage.jsx` displaying the doctor's gallery, qualifications, biography, map location, and fee structures.
+- Use `@react-google-maps/api` for mapping the clinic coordinates.
+- Wrap `App.jsx` in `HelmetProvider` and configure the new `/doctors/:slug` route.
+Done:
+- Successfully implemented `DoctorDetailPage.jsx` with full responsive Tailwind styling.
+- Handled fallback loading and not-found states gracefully.
+- Configured dynamic React Helmet SEO tags utilizing the doctor's name, specialization, and image for OpenGraph meta properties.
+Files/modules touched: `frontend/src/features/public/api/public.api.js`, `frontend/src/features/public/pages/DoctorDetailPage.jsx`, `frontend/src/App.jsx`.
+Tests added/updated: None.
+How to verify manually: Browse to `http://localhost:5173/`, click on "Browse All Doctors" or a featured doctor. Clicking "View & Book" will navigate to the `/doctors/:slug` detail page.
+Decisions made: The "Book Appointment" button temporarily alerts that the booking flow is coming in F-23 or redirects to `/login` if unauthenticated.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-12 (Admin: patients management).
+
+### Session 20 — 2026-10-04 — Antigravity Agent
+Goal: F-10 Public listing + search + filters + sort + pagination; doctor visibility rule
+Plan:
+- Build `public.validation.js` with Zod to validate search parameters.
+- Build `public.service.js` with complex Mongoose aggregation pipeline for $text, $geoNear, $match, sorting, and pagination.
+- Build `public.controller.js` and update `public.routes.js`.
+- Create frontend `public.api.js` to fetch data.
+- Build `DoctorCard.jsx` and `HomePage.jsx` featuring dynamic filtering (types, specializations, locations) and sorting.
+Done:
+- Mongoose `$geoNear` implemented for distance sorting and radius filters.
+- Fallback `$text` vs `$regex` implemented when combined with `$geoNear`.
+- Pagination and Sorting dynamically built from query strings.
+- Frontend integrated with React Query + URL query params for shareable search URLs.
+- Visibility rules strictly enforce `ACTIVE` status and valid subscriptions for listing.
+Files/modules touched: `server/src/validations/public.validation.js`, `server/src/services/public.service.js`, `server/src/controllers/public.controller.js`, `server/src/routes/public.routes.js`, `frontend/src/features/public/api/public.api.js`, `frontend/src/features/public/components/DoctorCard.jsx`, `frontend/src/features/public/pages/HomePage.jsx`, `frontend/src/App.jsx`.
+Tests added/updated: `server/tests/public.service.test.js` adding tests for filters and visibility rule constraints.
+How to verify manually: Go to `http://localhost:5173/`. Search for "Test", apply "Cardiology" and "Premium" filters, and sort by "Experience".
+Decisions made: Used React Router's `useSearchParams` to keep UI state and URL fully synchronized. Put the primary search directly on `HomePage.jsx` rather than a separate `/search` page to improve user discovery.
+Left undone / known issues: Real-time availability for 'TODAY'/'THIS_WEEK' is a heavy DB call within the service since slots are generated on-the-fly. Kept it functional but it might need caching in production.
+NEXT STEP (specific): Start F-11 (Doctor detail page).
+
 
 ### Session 19 — 2026-10-04 — Antigravity Agent
 Goal: F-22 Normal appointment: token allocation (atomic), validity, daily limit, hold→pay→confirm
