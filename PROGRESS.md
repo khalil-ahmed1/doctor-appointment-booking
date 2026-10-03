@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 1 – Foundation |
-| Current feature | F-05 Frontend base |
+| Current feature | F-06 Admin: doctor onboarding |
 | Last updated | 2026-10-03 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | N/A |
 
 ### Next Up (exact next step)
-1. F-05 Frontend base: layouts, router, ProtectedRoute, auth pages, redirect-after-login (safe redirect)
+1. F-06 Admin: doctor onboarding (account + profile + invite email + 7-day trial), list/view/edit/suspend/publish
 
 ---
 
@@ -60,8 +60,8 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-02 | Core models: User, DoctorProfile, Specialization, Setting, AuditLog, Counter + seed script (admin, settings, specializations, plans) | 10 | ✅ | |
 | F-03 | Auth: register, login, refresh/logout, email verification, forgot/reset password, lockout, RBAC middleware | 4.1, 11.1 | ✅ | |
 | F-04 | Email service + queue-less sender with EmailLog, base templates | 8 | ✅ | |
-| F-05 | Frontend base: layouts, router, ProtectedRoute, auth pages, redirect-after-login (safe redirect) | 4.1, 12 | ⬜ | |
-| F-06 | Admin: doctor onboarding (account + profile + invite email + 7-day trial), list/view/edit/suspend/publish | 4.2, 4.10 | ⬜ | Razorpay linked-account step stubbed behind interface until F-27 |
+| F-05 | Frontend base: layouts, router, ProtectedRoute, auth pages, redirect-after-login (safe redirect) | 4.1, 12 | ✅ | |
+| F-06 | Admin: doctor onboarding (account + profile + invite email + 7-day trial), list/view/edit/suspend/publish | 4.2, 4.10 | 🚧 | Razorpay linked-account step stubbed behind interface until F-27 |
 | F-07 | Doctor set-password via invite link | 4.2 | ⬜ | |
 | F-08 | Doctor profile APIs: details, picture, gallery (upload validation), clinic + map location | 4.3 | ⬜ | |
 | F-09 | Doctor profile UI (dashboard) | 4.3, 4.4 | ⬜ | |
@@ -124,6 +124,28 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 5 — 2026-10-03 — Antigravity Agent
+Goal: F-05 Frontend base
+Plan: Install react-router-dom, react-query, axios, react-hook-form, zod, sonner. Setup AuthContext for global user state. Create layouts (Root, Auth, Dashboard), ProtectedRoute for RBAC and safe redirect. Create pages for login, register, forgot password, reset password, verify email.
+Done:
+- Installed routing and form validation dependencies.
+- Created `src/lib/axios.js` with auto-refresh interceptor and failed request queue.
+- Created `src/contexts/AuthContext.jsx` for global user state fetching and login/logout methods.
+- Added `sonner` via shadcn UI and wrapped the app in `Toaster`.
+- Implemented `ProtectedRoute` that redirects unauthenticated users to `/login?redirect=...`.
+- Built `AuthLayout`, `RootLayout`, `DashboardLayout`.
+- Built `LoginPage`, `RegisterPage` with React Hook Form, Zod validation, and safe redirect based on PRD.
+- Built `ForgotPasswordPage`, `ResetPasswordPage`, and `VerifyEmailPage`.
+- Added React Router with public and protected routes in `App.jsx`.
+Files/modules touched: `frontend/src/App.jsx`, `frontend/src/contexts/AuthContext.jsx`, `frontend/src/lib/axios.js`, `frontend/src/layouts/*`, `frontend/src/features/auth/pages/*`.
+Tests added/updated: N/A
+How to verify manually: Start backend server and frontend server (`npm run dev` in both). Navigate to `http://localhost:5173/`. Click "Login", enter invalid credentials to see sonner toast error. Enter valid credentials (from seed) to see safe redirect in action.
+Decisions made: Used TanStack Query context but placed auth state in standard React Context since it needs to interact with the Axios interceptor easily. Used standard sonner toasts per user instruction.
+New env vars / commands / endpoints / models: 
+- Env vars: `VITE_API_URL` (optional, defaults to `http://localhost:5000/api/v1`)
+Left undone / known issues: Dashboard placeholders need to be filled in later phases.
+NEXT STEP (specific): Start F-06 (Admin: doctor onboarding).
 
 ### Session 4 — 2026-10-03 — Antigravity Agent
 Goal: F-04 Email service
