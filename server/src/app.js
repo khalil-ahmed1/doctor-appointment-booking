@@ -58,6 +58,8 @@ app.use((req, res, next) => {
 
 // Routes
 const authRoutes = require('./routes/auth.routes');
+const adminRoutes = require('./routes/admin.routes');
+const publicRoutes = require('./routes/public.routes');
 
 // Health route
 app.get('/api/v1/healthz', (req, res) => {
@@ -65,6 +67,8 @@ app.get('/api/v1/healthz', (req, res) => {
 });
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1', publicRoutes);
 
 // Global Error Handler
 app.use(errorHandler);

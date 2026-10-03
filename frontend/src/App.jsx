@@ -15,7 +15,8 @@ import { RegisterPage } from './features/auth/pages/RegisterPage';
 import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage';
 import { VerifyEmailPage } from './features/auth/pages/VerifyEmailPage';
 import { ResetPasswordPage } from './features/auth/pages/ResetPasswordPage';
-
+import DoctorsListPage from './features/admin/pages/DoctorsListPage';
+import DoctorCreatePage from './features/admin/pages/DoctorCreatePage';
 const queryClient = new QueryClient();
 
 function App() {
@@ -46,6 +47,10 @@ function App() {
                 <Route path="/patient/dashboard" element={<div>Patient Dashboard Placeholder</div>} />
                 <Route path="/doctor/dashboard" element={<div>Doctor Dashboard Placeholder</div>} />
                 <Route path="/admin/dashboard" element={<div>Admin Dashboard Placeholder</div>} />
+                
+                {/* Admin Features */}
+                <Route path="/admin/doctors" element={<DoctorsListPage />} />
+                <Route path="/admin/doctors/new" element={<DoctorCreatePage />} />
               </Route>
             </Route>
           </Routes>
