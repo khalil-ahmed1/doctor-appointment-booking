@@ -4,6 +4,8 @@ const Specialization = require('../models/Specialization');
 
 const router = express.Router();
 
+const slotController = require('../controllers/slot.controller');
+
 router.get(
   '/specializations',
   asyncHandler(async (req, res) => {
@@ -14,5 +16,8 @@ router.get(
     });
   }),
 );
+
+router.get('/doctors/:slug/slots', slotController.getSlotsForDate);
+router.get('/doctors/:slug/availability', slotController.getAvailability);
 
 module.exports = router;

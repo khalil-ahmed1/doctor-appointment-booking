@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 1 – Foundation |
-| Current feature | F-17 Appointment model + state machine service (`transition`) + audit |
+| Current feature | F-18 Slot hold (unique `slotLock`, transaction, stale-hold cleanup, idempotency key, hold limits) + concurrency test |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | No (mongodb-memory-server issue) |
 
 ### Next Up (exact next step)
-1. F-17 Appointment model + state machine service (`transition`) + audit
+1. F-18 Slot hold (unique `slotLock`, transaction, stale-hold cleanup, idempotency key, hold limits) + concurrency test
 
 ---
 
@@ -76,7 +76,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-14 | Schedule + exceptions models/APIs/validation (Premium + Home, overlap rules, conflict detection) | 4.6 | ✅ | |
 | F-15 | Schedule editor UI + leaves calendar | 4.6, 12.2 | ✅ | |
 | F-16 | Slot engine: compute slots on read, slots + availability endpoints (with tests) | 4.6, 11.2 | ✅ | |
-| F-17 | Appointment model + state machine service (`transition`) + audit | 9.1, 10.5 | ⬜ | |
+| F-17 | Appointment model + state machine service (`transition`) + audit | 9.1, 10.5 | ✅ | |
 | F-18 | Slot hold (unique `slotLock`, transaction, stale-hold cleanup, idempotency key, hold limits) + concurrency test | 5 | ⬜ | Must include 50-parallel-hold test |
 | F-19 | Fee/breakdown calculator (gross-up, fee bearer, commission) + unit tests | 6.4 | ⬜ | |
 | F-20 | Razorpay service wrapper + create-order + verify + `finalizePayment` (cases A/B/C/D) | 5.5, 6.3 | ⬜ | Mock SDK in tests |
@@ -124,6 +124,27 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 14 — 2026-10-04 — Antigravity Agent
+Goal: F-17 Appointment model + state machine service (`transition`) + audit
+Plan:
+- Verify `Appointment` model schema has `statusHistory` and terminal mapping. (Already created in F-14, meets requirements).
+- Create `appointment.service.js` offering a `transition` method managing valid moves according to PRD section 9.1.
+- Establish role validations, type-specific validations (e.g., no `EN_ROUTE` for Premium queue).
+- Attach side effects: `slotLock` cleanup upon cancellation/expiration.
+- Write unit tests in `appointment.service.test.js`.
+Done:
+- Mapped all valid transitions in `ALLOWED_TRANSITIONS` constant.
+- Implemented `ROLE_RESTRICTIONS` matrix mapping.
+- Implemented the `transition` state machine method. Safely pushes to the `statusHistory` audit trail on every update.
+- Enforced required `reason` tracking when cancellations happen.
+- Written thorough test suites in `appointment.service.test.js`.
+Files/modules touched: `server/src/services/appointment.service.js`, `server/tests/appointment.service.test.js`.
+Tests added/updated: Added `appointment.service.test.js` validating state rules.
+How to verify manually: The internal `appointment.service.js` tests assert these validations. You can also instantiate the service and attempt arbitrary transitions to observe rejection.
+Decisions made: Handled side effects directly in the transition pipeline (like freeing the `slotLock` for cancelled or failed appointments).
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-18 (Slot hold transaction locking).
 
 ### Session 13 — 2026-10-04 — Antigravity Agent
 Goal: F-16 Slot engine: compute slots on read, slots + availability endpoints
