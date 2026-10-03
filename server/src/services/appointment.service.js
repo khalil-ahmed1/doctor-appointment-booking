@@ -46,7 +46,7 @@ const ROLE_RESTRICTIONS = {
  */
 const transition = async (appointmentId, toStatus, user, reason = '') => {
   const appointment = await Appointment.findById(appointmentId);
-  
+
   if (!appointment) {
     throw new ApiError(404, 'NOT_FOUND', 'Appointment not found');
   }
@@ -61,21 +61,37 @@ const transition = async (appointmentId, toStatus, user, reason = '') => {
   // 2. Validate transition
   const validNextStates = ALLOWED_TRANSITIONS[fromStatus] || [];
   if (!validNextStates.includes(toStatus)) {
-    throw new ApiError(400, 'INVALID_STATE_TRANSITION', `Cannot transition from ${fromStatus} to ${toStatus}`);
+    throw new ApiError(
+      400,
+      'INVALID_STATE_TRANSITION',
+      `Cannot transition from ${fromStatus} to ${toStatus}`,
+    );
   }
 
   // 3. Validate role
   const requiredRoles = ROLE_RESTRICTIONS[toStatus];
   if (requiredRoles && !requiredRoles.includes(user.role)) {
-    throw new ApiError(403, 'FORBIDDEN', `Role ${user.role} is not authorized to set status ${toStatus}`);
+    throw new ApiError(
+      403,
+      'FORBIDDEN',
+      `Role ${user.role} is not authorized to set status ${toStatus}`,
+    );
   }
 
   // Type specific restrictions
   if (toStatus === 'CHECKED_IN' && appointment.type !== 'PREMIUM') {
-    throw new ApiError(400, 'VALIDATION_ERROR', 'CHECKED_IN status is only for PREMIUM appointments');
+    throw new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      'CHECKED_IN status is only for PREMIUM appointments',
+    );
   }
   if (toStatus === 'EN_ROUTE' && appointment.type !== 'HOME_VISIT') {
-    throw new ApiError(400, 'VALIDATION_ERROR', 'EN_ROUTE status is only for HOME_VISIT appointments');
+    throw new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      'EN_ROUTE status is only for HOME_VISIT appointments',
+    );
   }
 
   // 4. Require reason for cancellations
@@ -102,10 +118,10 @@ const transition = async (appointmentId, toStatus, user, reason = '') => {
     'CANCELLED_BY_ADMIN',
     'PAYMENT_FAILED',
     'EXPIRED',
-    'NO_SHOW'
+    'NO_SHOW',
   ];
   if (releaseLockStates.includes(toStatus)) {
-    appointment.slotLock = null; 
+    appointment.slotLock = null;
   }
 
   // Add cancellation specific metadata
@@ -114,7 +130,7 @@ const transition = async (appointmentId, toStatus, user, reason = '') => {
       by: user.id,
       role: user.role,
       reason: reason,
-      at: new Date()
+      at: new Date(),
     };
   }
 
@@ -125,7 +141,7 @@ const transition = async (appointmentId, toStatus, user, reason = '') => {
     by: user.id,
     byRole: user.role,
     at: new Date(),
-    reason: reason
+    reason: reason,
   });
 
   await appointment.save();
@@ -136,5 +152,5 @@ const transition = async (appointmentId, toStatus, user, reason = '') => {
 };
 
 module.exports = {
-  transition
+  transition,
 };

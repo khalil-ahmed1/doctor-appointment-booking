@@ -35,6 +35,10 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
+// Webhook routes (must be before body parsers to keep raw body)
+const webhookRoutes = require('./routes/webhook.routes');
+app.use('/api/v1/webhooks', webhookRoutes);
+
 // Body parser
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));

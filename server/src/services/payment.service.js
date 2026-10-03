@@ -1,0 +1,286 @@
+const mongoose = require('mongoose');
+const Payment = require('../models/Payment');
+const Appointment = require('../models/Appointment');
+const DoctorProfile = require('../models/DoctorProfile');
+const razorpayService = require('./razorpay.service');
+const ApiError = require('../utils/ApiError');
+
+const createAppointmentOrder = async (appointmentId) => {
+  const appointment = await Appointment.findById(appointmentId).populate('doctor');
+  if (!appointment) {
+    throw new ApiError(404, 'NOT_FOUND', 'Appointment not found');
+  }
+
+  if (appointment.status !== 'PENDING_PAYMENT') {
+    throw new ApiError(400, 'INVALID_STATE', 'Appointment is not pending payment');
+  }
+
+  const { fee } = appointment;
+  if (!fee || !fee.total) {
+    throw new ApiError(500, 'SERVER_ERROR', 'Fee snapshot missing on appointment');
+  }
+
+  // Create Razorpay Order
+  const rzpOrder = await razorpayService.createOrder(fee.total, appointment.bookingCode, {
+    appointmentId: appointment._id.toString(),
+    doctorId: appointment.doctor._id.toString(),
+    type: appointment.type,
+    patientId: appointment.patient.toString(),
+  });
+
+  // Create Payment Document
+  const payment = await Payment.create({
+    type: 'CONSULTATION',
+    appointment: appointment._id,
+    razorpayOrderId: rzpOrder.id,
+    amount: fee.total,
+    status: 'CREATED',
+    breakdown: fee,
+  });
+
+  // Link payment to appointment
+  appointment.payment = payment._id;
+  await appointment.save();
+
+  return {
+    orderId: rzpOrder.id,
+    amount: fee.total,
+    currency: 'INR',
+    paymentId: payment._id,
+  };
+};
+
+const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
+  // Guard: Find payment by order ID and lock it (or at least check if already captured)
+  // We'll do an optimistic lock / status check
+  const payment = await Payment.findOne({ razorpayOrderId });
+  if (!payment) {
+    throw new ApiError(404, 'NOT_FOUND', 'Payment record not found');
+  }
+
+  if (payment.status === 'CAPTURED') {
+    return { status: 'ALREADY_PROCESSED', appointmentId: payment.appointment };
+  }
+
+  const appointment = await Appointment.findById(payment.appointment);
+  if (!appointment) {
+    throw new ApiError(404, 'NOT_FOUND', 'Associated appointment not found');
+  }
+
+  const now = new Date();
+  const isHoldExpired = appointment.holdExpiresAt && appointment.holdExpiresAt < now;
+
+  // CASE D: Duplicate capture for an ALREADY confirmed appointment
+  // E.g. User opened two tabs, paid in both. The first one confirmed the appointment.
+  if (['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS', 'COMPLETED'].includes(appointment.status)) {
+    if (appointment.payment.toString() !== payment._id.toString()) {
+      // It's a duplicate different payment for the same appointment
+      await refundPaymentProcess(
+        payment,
+        razorpayPaymentId,
+        'Duplicate payment for confirmed appointment',
+      );
+      return { status: 'REFUNDED_DUPLICATE', appointmentId: appointment._id };
+    }
+  }
+
+  // We need atomic operations to re-acquire locks if necessary
+  const session = await mongoose.startSession();
+  let finalStatus = '';
+
+  try {
+    await session.withTransaction(async () => {
+      // Reload appointment inside transaction
+      const appt = await Appointment.findById(appointment._id).session(session);
+
+      const assignNormalToken = async () => {
+        if (appt.type !== 'NORMAL') return true;
+        const Counter = require('../models/Counter');
+
+        // Final re-check if hold expired
+        if (isHoldExpired) {
+          const doctor = await DoctorProfile.findById(appt.doctor).session(session);
+          const limit = doctor.types.normal.dailyTokenLimit || 0;
+          if (limit > 0) {
+            const currentDaily = await Counter.findOne({
+              key: `ntoken:${appt.doctor}:${appt.dateStr}`,
+            }).session(session);
+            if (currentDaily && currentDaily.value >= limit) {
+              return false; // Slot lost (daily limit exceeded)
+            }
+          }
+        }
+
+        const seq = await Counter.findOneAndUpdate(
+          { key: `ntoken:${appt.doctor}` },
+          { $inc: { value: 1 } },
+          { upsert: true, new: true, session },
+        );
+        const daily = await Counter.findOneAndUpdate(
+          { key: `ntoken:${appt.doctor}:${appt.dateStr}` },
+          { $inc: { value: 1 } },
+          { upsert: true, new: true, session },
+        );
+
+        appt.tokenSeq = seq.value;
+        appt.tokenLabel = `N-${String(daily.value).padStart(3, '0')}`;
+
+        // Validity is today + 2 days (assuming setting default normalValidityDays = 2)
+        // In Phase 2 this comes from settings
+        const normalValidityDays = 2;
+        const nowMs = Date.now();
+        appt.validFrom = new Date(nowMs);
+        appt.validUntil = new Date(nowMs + normalValidityDays * 24 * 60 * 60 * 1000);
+
+        return true;
+      };
+
+      // CASE A: Normal happy path
+      if (appt.status === 'PENDING_PAYMENT' && !isHoldExpired) {
+        await assignNormalToken();
+
+        appt.status = 'CONFIRMED';
+        appt.confirmedAt = now;
+        appt.paymentStatus = 'PAID';
+        appt.statusHistory.push({
+          from: 'PENDING_PAYMENT',
+          to: 'CONFIRMED',
+          byRole: 'SYSTEM',
+          at: now,
+          reason: 'Payment captured',
+        });
+        await appt.save({ session });
+
+        payment.status = 'CAPTURED';
+        payment.razorpayPaymentId = razorpayPaymentId;
+        await payment.save({ session });
+
+        finalStatus = 'CONFIRMED';
+      }
+      // CASE B & C: Hold expired or failed, but user paid late
+      else if (
+        appt.status === 'EXPIRED' ||
+        appt.status === 'PAYMENT_FAILED' ||
+        (appt.status === 'PENDING_PAYMENT' && isHoldExpired)
+      ) {
+        // Try to re-acquire the slot lock or token limit
+        let canReacquire = true;
+
+        if (appt.type === 'NORMAL') {
+          canReacquire = await assignNormalToken();
+        } else {
+          const slotLock = `${appt.doctor}|${appt.dateStr}|${appt.startTime}`;
+          const conflictingAppt = await Appointment.findOne({
+            slotLock,
+            _id: { $ne: appt._id },
+          }).session(session);
+          if (conflictingAppt) canReacquire = false;
+          else appt.slotLock = slotLock; // re-lock it
+        }
+
+        if (canReacquire) {
+          // CASE B: Slot is still free! Re-acquire and confirm
+          appt.status = 'CONFIRMED';
+          appt.confirmedAt = now;
+          appt.paymentStatus = 'PAID';
+          appt.statusHistory.push({
+            from: appt.status,
+            to: 'CONFIRMED',
+            byRole: 'SYSTEM',
+            at: now,
+            reason: 'Late payment honored',
+          });
+          await appt.save({ session });
+
+          payment.status = 'CAPTURED';
+          payment.razorpayPaymentId = razorpayPaymentId;
+          await payment.save({ session });
+
+          finalStatus = 'CONFIRMED_LATE';
+        } else {
+          // CASE C: Slot was taken by someone else
+          // We must fail this appointment and trigger a refund
+          appt.status = 'PAYMENT_FAILED';
+          appt.paymentStatus = 'AUTO_REFUND_PENDING';
+          if (appt.type !== 'NORMAL') appt.slotLock = null; // Ensure unlocked
+          appt.statusHistory.push({
+            from: appt.status,
+            to: 'PAYMENT_FAILED',
+            byRole: 'SYSTEM',
+            at: now,
+            reason: 'Slot lost during late payment',
+          });
+          await appt.save({ session });
+
+          payment.status = 'AUTO_REFUND_PENDING';
+          payment.razorpayPaymentId = razorpayPaymentId;
+          await payment.save({ session });
+
+          finalStatus = 'SLOT_LOST_REFUNDING';
+        }
+      }
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      // CASE C alternative trigger (Index collision during transaction)
+      finalStatus = 'SLOT_LOST_REFUNDING';
+    } else {
+      throw error; // Re-throw unhandled DB errors
+    }
+  } finally {
+    await session.endSession();
+  }
+
+  // Process async refund outside transaction if CASE C
+  if (finalStatus === 'SLOT_LOST_REFUNDING') {
+    await refundPaymentProcess(
+      payment,
+      razorpayPaymentId,
+      'Slot no longer available, full refund initiated',
+    );
+  }
+
+  return { status: finalStatus, appointmentId: appointment._id };
+};
+
+const refundPaymentProcess = async (payment, rzpPaymentId, reason) => {
+  payment.razorpayPaymentId = payment.razorpayPaymentId || rzpPaymentId;
+  payment.status = 'REFUND_INITIATED';
+
+  try {
+    const refund = await razorpayService.refundPayment(payment.razorpayPaymentId, payment.amount, {
+      reason,
+    });
+    payment.refunds.push({
+      razorpayRefundId: refund.id,
+      amount: payment.amount,
+      status: 'PROCESSED',
+      reason,
+      createdAt: new Date(),
+    });
+    payment.status = 'REFUNDED';
+  } catch (e) {
+    payment.refunds.push({
+      razorpayRefundId: null,
+      amount: payment.amount,
+      status: 'FAILED',
+      reason: e.message || 'Refund API failed',
+      createdAt: new Date(),
+    });
+  }
+  await payment.save();
+};
+
+const verifyPaymentAndFinalize = async (razorpayOrderId, razorpayPaymentId, signature) => {
+  const isValid = razorpayService.verifySignature(razorpayOrderId, razorpayPaymentId, signature);
+  if (!isValid) {
+    throw new ApiError(400, 'INVALID_SIGNATURE', 'Payment signature verification failed');
+  }
+  return await finalizePayment(razorpayOrderId, razorpayPaymentId);
+};
+
+module.exports = {
+  createAppointmentOrder,
+  finalizePayment,
+  verifyPaymentAndFinalize,
+};

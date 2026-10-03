@@ -114,7 +114,7 @@ const appointmentSchema = new mongoose.Schema(
       dateStr: String,
       startTime: String,
     },
-    
+
     idempotencyKey: { type: String }, // For preventing double submission
   },
   { timestamps: true },

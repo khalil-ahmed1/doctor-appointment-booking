@@ -7,7 +7,11 @@ const HOLD_LIMIT = 3;
 const HOLD_DURATION_MINS = 10;
 
 const generateBookingCode = () => {
-  return 'B-' + Date.now().toString().slice(-6) + Math.random().toString(36).substring(2, 6).toUpperCase();
+  return (
+    'B-' +
+    Date.now().toString().slice(-6) +
+    Math.random().toString(36).substring(2, 6).toUpperCase()
+  );
 };
 
 const cleanupStaleHolds = async () => {
@@ -15,12 +19,12 @@ const cleanupStaleHolds = async () => {
   await Appointment.updateMany(
     {
       status: 'PENDING_PAYMENT',
-      holdExpiresAt: { $lt: now }
+      holdExpiresAt: { $lt: now },
     },
     {
       $set: {
         status: 'EXPIRED',
-        slotLock: null
+        slotLock: null,
       },
       $push: {
         statusHistory: {
@@ -28,10 +32,10 @@ const cleanupStaleHolds = async () => {
           to: 'EXPIRED',
           byRole: 'SYSTEM',
           at: now,
-          reason: 'Hold time expired'
-        }
-      }
-    }
+          reason: 'Hold time expired',
+        },
+      },
+    },
   );
 };
 
@@ -41,10 +45,10 @@ const holdSlot = async (userId, doctorId, type, dateStr, startTime, endTime, ide
 
   // 2. Check Idempotency Key
   if (idempotencyKey) {
-    const existing = await Appointment.findOne({ 
-      patient: userId, 
+    const existing = await Appointment.findOne({
+      patient: userId,
       idempotencyKey,
-      status: { $in: ['PENDING_PAYMENT', 'CONFIRMED'] }
+      status: { $in: ['PENDING_PAYMENT', 'CONFIRMED'] },
     });
     if (existing) {
       return existing; // Already held or confirmed
@@ -54,55 +58,109 @@ const holdSlot = async (userId, doctorId, type, dateStr, startTime, endTime, ide
   // 3. User hold limits
   const activeHolds = await Appointment.countDocuments({
     patient: userId,
-    status: 'PENDING_PAYMENT'
+    status: 'PENDING_PAYMENT',
   });
 
   if (activeHolds >= HOLD_LIMIT) {
-    throw new ApiError(429, 'HOLD_LIMIT_REACHED', `You cannot hold more than ${HOLD_LIMIT} slots simultaneously. Complete or cancel existing bookings.`);
+    throw new ApiError(
+      429,
+      'HOLD_LIMIT_REACHED',
+      `You cannot hold more than ${HOLD_LIMIT} slots simultaneously. Complete or cancel existing bookings.`,
+    );
   }
 
-  // 4. Validate slot logic (Must be AVAILABLE)
-  // To avoid circular dependency or full slot map generation, we can generate the map for the day and verify
-  // Actually, wait, getSlotsForDate takes doctor slug, not ID.
+  // 4. Validate limits or slots
   const DoctorProfile = require('../models/DoctorProfile');
   const doctor = await DoctorProfile.findById(doctorId);
   if (!doctor) {
     throw new ApiError(404, 'NOT_FOUND', 'Doctor not found');
   }
 
-  const slots = await slotService.getSlotsForDate(doctor.slug, type, dateStr);
-  const targetSlot = slots.find(s => s.startTime === startTime && s.endTime === endTime);
+  let targetSlot = null;
 
-  if (!targetSlot) {
-    throw new ApiError(400, 'VALIDATION_ERROR', 'Invalid slot time or outside working hours');
-  }
-  if (targetSlot.status !== 'AVAILABLE') {
-    throw new ApiError(409, 'SLOT_TAKEN', `This slot is currently ${targetSlot.status}`);
+  if (type === 'NORMAL') {
+    if (!doctor.types.normal.enabled) {
+      throw new ApiError(
+        400,
+        'TYPE_DISABLED',
+        'Normal appointments are not enabled for this doctor',
+      );
+    }
+    const dailyLimit = doctor.types.normal.dailyTokenLimit || 0;
+
+    if (dailyLimit > 0) {
+      // Check active + confirmed tokens for today
+      const currentTokens = await Appointment.countDocuments({
+        doctor: doctorId,
+        type: 'NORMAL',
+        dateStr,
+        status: { $in: ['PENDING_PAYMENT', 'CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS', 'COMPLETED'] },
+      });
+      if (currentTokens >= dailyLimit) {
+        throw new ApiError(409, 'LIMIT_REACHED', 'Daily token limit reached for this date');
+      }
+    }
+  } else {
+    // Validate slot logic for PREMIUM and HOME_VISIT
+    const slots = await slotService.getSlotsForDate(doctor.slug, type, dateStr);
+    targetSlot = slots.find((s) => s.startTime === startTime && s.endTime === endTime);
+
+    if (!targetSlot) {
+      throw new ApiError(400, 'VALIDATION_ERROR', 'Invalid slot time or outside working hours');
+    }
+    if (targetSlot.status !== 'AVAILABLE') {
+      throw new ApiError(409, 'SLOT_TAKEN', `This slot is currently ${targetSlot.status}`);
+    }
   }
 
-  // 5. Transaction for Atomic Insert
+  // 5. Calculate Fee Breakdown
+  // Defaulting settings for now, in Phase 2 this will be fetched from Admin Settings DB
+  const settings = {
+    feeBearer: 'PATIENT',
+    gatewayFeePercent: 2,
+    gstOnFeePercent: 18,
+    platformCommissionPercent: 0,
+  };
+
+  // Get doctor's fee based on appointment type
+  const baseFee = type === 'PREMIUM' ? doctor.fees.premium || 0 : doctor.fees.homeVisit || 0;
+  const feeSnapshot = require('./fee.service').calculateFeeBreakdown(baseFee, settings);
+
+  // 6. Transaction for Atomic Insert
   const session = await mongoose.startSession();
   let appointment;
 
   try {
     await session.withTransaction(async () => {
-      const slotLock = `${doctorId}|${dateStr}|${startTime}`;
-      
+      const slotLock = type === 'NORMAL' ? null : `${doctorId}|${dateStr}|${startTime}`;
+
       const holdExpiresAt = new Date(Date.now() + HOLD_DURATION_MINS * 60000);
 
-      const [newAppt] = await Appointment.create([{
-        bookingCode: generateBookingCode(),
-        patient: userId,
-        doctor: doctorId,
-        type,
-        status: 'PENDING_PAYMENT',
-        dateStr,
-        startTime,
-        endTime,
-        slotLock,
-        holdExpiresAt,
-        idempotencyKey
-      }], { session });
+      const [newAppt] = await Appointment.create(
+        [
+          {
+            bookingCode: generateBookingCode(),
+            patient: userId,
+            doctor: doctorId,
+            type,
+            status: 'PENDING_PAYMENT',
+            dateStr,
+            startTime,
+            endTime,
+            slotLock,
+            holdExpiresAt,
+            idempotencyKey,
+            fee: {
+              consultationFee: feeSnapshot.consultationFee,
+              convenienceFee: feeSnapshot.convenienceFee,
+              platformCommission: feeSnapshot.platformCommission,
+              total: feeSnapshot.total,
+              feeBearer: feeSnapshot.feeBearer,
+            },
+          },
+        ],
+        { session },
+      );
 
       appointment = newAppt;
     });
@@ -121,5 +179,5 @@ const holdSlot = async (userId, doctorId, type, dateStr, startTime, endTime, ide
 
 module.exports = {
   holdSlot,
-  cleanupStaleHolds
+  cleanupStaleHolds,
 };
