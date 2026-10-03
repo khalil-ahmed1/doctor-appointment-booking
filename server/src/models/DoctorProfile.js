@@ -33,7 +33,7 @@ const doctorProfileSchema = new mongoose.Schema(
       state: String,
       pincode: String,
       location: {
-        type: { type: String, enum: ['Point'], default: 'Point' },
+        type: { type: String, enum: ['Point'] },
         coordinates: { type: [Number] }, // [longitude, latitude]
       },
       mapsUrl: String,

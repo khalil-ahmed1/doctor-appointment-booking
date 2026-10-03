@@ -3,7 +3,7 @@ const env = require('../config/env');
 const templates = {
   verifyEmail: (data) => {
     const { name, token } = data;
-    const url = `${env.CLIENT_URL}/verify-email?token=${token}`;
+    const url = `${env.CLIENT_URL}/verify-email/${token}`;
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Verify your email address</h2>
@@ -18,7 +18,7 @@ const templates = {
 
   resetPassword: (data) => {
     const { token } = data;
-    const url = `${env.CLIENT_URL}/reset-password?token=${token}`;
+    const url = `${env.CLIENT_URL}/reset-password/${token}`;
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Reset your password</h2>
@@ -32,7 +32,7 @@ const templates = {
 
   doctorInvite: (data) => {
     const { name, token, trialEndDate } = data;
-    const url = `${env.CLIENT_URL}/reset-password?token=${token}`; // or specialized set-password route
+    const url = `${env.CLIENT_URL}/reset-password/${token}`; // or specialized set-password route
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Welcome to the Platform, Dr. ${name}!</h2>

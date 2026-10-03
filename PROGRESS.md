@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 1 – Foundation |
-| Current feature | F-07 Doctor set-password via invite link |
+| Current feature | F-08 Doctor profile APIs: details, picture, gallery (upload validation), clinic + map location |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | No (mongodb-memory-server issue) |
 
 ### Next Up (exact next step)
-1. F-07 Doctor set-password via invite link
+1. F-08 Doctor profile APIs
 
 ---
 
@@ -62,7 +62,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-04 | Email service + queue-less sender with EmailLog, base templates | 8 | ✅ | |
 | F-05 | Frontend base: layouts, router, ProtectedRoute, auth pages, redirect-after-login (safe redirect) | 4.1, 12 | ✅ | |
 | F-06 | Admin: doctor onboarding (account + profile + invite email + 7-day trial), list/view/edit/suspend/publish | 4.2, 4.10 | ✅ | Razorpay linked-account step stubbed behind interface until F-27 |
-| F-07 | Doctor set-password via invite link | 4.2 | ⬜ | |
+| F-07 | Doctor set-password via invite link | 4.2 | ✅ | |
 | F-08 | Doctor profile APIs: details, picture, gallery (upload validation), clinic + map location | 4.3 | ⬜ | |
 | F-09 | Doctor profile UI (dashboard) | 4.3, 4.4 | ⬜ | |
 | F-10 | Public listing + search + filters + sort + pagination; doctor visibility rule | 4.7 | ⬜ | |
@@ -124,6 +124,24 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 7 — 2026-10-04 — Antigravity Agent
+Goal: F-07 Doctor set-password via invite link
+Plan: Verify auth.service.js `resetPassword` logic sets the newly onboarded doctor from `INVITED` to `ACTIVE`. Update `admin.service.js` to set `status: 'INVITED'` explicitly for newly created User and DoctorProfile if an invite is sent. Fix email template URL paths for `resetPassword` and `verifyEmail` to match the frontend Router exactly (`/reset-password/${token}` instead of query params).
+Done:
+- Updated `auth.service.js` to change `User` and `DoctorProfile` status from `INVITED` to `ACTIVE` upon first password reset.
+- Updated `admin.service.js` to explicitly set `status: 'INVITED'` for new users/doctors if `sendInvite` is true.
+- Fixed `emailTemplates.js` to use React Router paths instead of query parameters.
+- Fixed a 2dsphere schema issue in `DoctorProfile` (removed default 'Point') so MongoDB doesn't crash on null location.
+- Fixed `emailService.sendEmail` invocation in `admin.service.js`.
+- Verified logic with a local scratch test script.
+Files/modules touched: `server/src/models/DoctorProfile.js`, `server/src/services/admin.service.js`, `server/src/services/auth.service.js`, `server/src/templates/emailTemplates.js`.
+Tests added/updated: Added a scratch test to test doctor onboarding + reset password. Tests pass.
+How to verify manually: Admin creates doctor with "send invite". Doctor gets email with `/reset-password/<token>` link. Clicking it opens the React `ResetPasswordPage`, setting the password makes them `ACTIVE`.
+Decisions made: None.
+New env vars / commands / endpoints / models: None.
+Left undone / known issues: Test suite is failing to boot due to `mongodb-memory-server` version compatibility issue with mongoose.
+NEXT STEP (specific): Start F-08 (Doctor profile APIs).
 
 ### Session 6 — 2026-10-04 — Antigravity Agent
 Goal: F-06 Admin: doctor onboarding (account + profile + invite email + 7-day trial), list/view/edit/suspend/publish

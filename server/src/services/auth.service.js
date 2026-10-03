@@ -213,6 +213,15 @@ const resetPassword = async (token, newPassword) => {
   // Also log out from all sessions (optional but good practice)
   user.refreshTokens = [];
 
+  // Update status from INVITED to ACTIVE upon first password set (e.g. Doctor Invite)
+  if (user.status === 'INVITED') {
+    user.status = 'ACTIVE';
+    if (user.role === 'DOCTOR' && user.doctorProfile) {
+      const DoctorProfile = require('../models/DoctorProfile');
+      await DoctorProfile.findByIdAndUpdate(user.doctorProfile, { status: 'ACTIVE' });
+    }
+  }
+
   await user.save();
 };
 

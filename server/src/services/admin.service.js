@@ -61,6 +61,7 @@ const onboardDoctor = async (doctorData, adminId) => {
       phone,
       passwordHash,
       role: 'DOCTOR',
+      status: sendInvite ? 'INVITED' : 'ACTIVE',
       gender,
       emailVerified: true, // Admin created
       resetTokenHash,
@@ -93,6 +94,7 @@ const onboardDoctor = async (doctorData, adminId) => {
       fees,
       types,
       payout,
+      status: sendInvite ? 'INVITED' : 'ACTIVE',
       onboardedAt: new Date(),
       onboardedBy: adminId,
     });
@@ -130,12 +132,12 @@ const onboardDoctor = async (doctorData, adminId) => {
 
     // 7. Send Invite Email (non-blocking)
     if (sendInvite && resetToken) {
-      emailService.sendEmail({
-        to: email,
-        template: 'doctorInvite',
-        subject: 'Welcome to the Platform - Set Your Password',
-        data: { name: fullName, token: resetToken, trialEndDate: endsAt.toISOString() },
-      }).catch(console.error); // Catch to prevent failure after tx commit
+      emailService.sendEmail(
+        email,
+        'Welcome to the Platform - Set Your Password',
+        'doctorInvite',
+        { name: fullName, token: resetToken, trialEndDate: endsAt.toISOString() }
+      ).catch(console.error); // Catch to prevent failure after tx commit
     }
 
     return doctorProfile;
