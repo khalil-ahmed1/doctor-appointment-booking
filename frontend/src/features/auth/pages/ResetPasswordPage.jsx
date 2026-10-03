@@ -36,7 +36,7 @@ export const ResetPasswordPage = () => {
       toast.success('Password has been reset successfully');
       navigate('/login');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to reset password');
+      toast.error(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to reset password');
     } finally {
       setIsLoading(false);
     }

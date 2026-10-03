@@ -30,7 +30,7 @@ export const LoginPage = () => {
     try {
       const result = await login(data);
       toast.success('Logged in successfully');
-      
+
       const redirectUrl = searchParams.get('redirect');
       // Validate safe redirect: starts with / but not //
       if (redirectUrl && redirectUrl.startsWith('/') && !redirectUrl.startsWith('//')) {
@@ -40,7 +40,7 @@ export const LoginPage = () => {
         navigate(role === 'PATIENT' ? '/' : `/${role.toLowerCase()}/dashboard`, { replace: true });
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to login');
+      toast.error(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to login');
     } finally {
       setIsLoading(false);
     }

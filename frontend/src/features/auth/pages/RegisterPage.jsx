@@ -36,7 +36,7 @@ export const RegisterPage = () => {
       toast.success('Account created successfully. Please check your email to verify and then log in.');
       navigate(`/login?${searchParams.toString()}`, { replace: true });
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to create account');
+      toast.error(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to create account');
     } finally {
       setIsLoading(false);
     }

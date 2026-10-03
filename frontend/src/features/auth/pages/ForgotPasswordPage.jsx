@@ -29,7 +29,7 @@ export const ForgotPasswordPage = () => {
       setIsSent(true);
       toast.success('Password reset link sent to your email');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to send reset link');
+      toast.error(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to send reset link');
     } finally {
       setIsLoading(false);
     }
