@@ -115,24 +115,29 @@ const reconcilePayments = async () => {
             `Reconciling captured payment ${capturedPayment.id} for order ${payment.razorpayOrderId}`,
           );
           await paymentService.finalizePayment(payment.razorpayOrderId, capturedPayment.id);
-        } else if (failedPayment) {
-          // It failed and was never captured
+        } else if (failedPayment || (payments && payments.items && payments.items.length === 0)) {
+          // It failed and was never captured, or was abandoned
           payment.status = 'FAILED';
           await payment.save();
 
           const appt = await Appointment.findById(payment.appointment);
           if (appt && appt.status === 'PENDING_PAYMENT') {
-            appt.status = 'PAYMENT_FAILED';
-            appt.statusHistory.push({
-              from: 'PENDING_PAYMENT',
-              to: 'PAYMENT_FAILED',
-              byRole: 'SYSTEM',
-              at: new Date(),
-              reason: 'Payment failed at gateway',
-            });
-            // If premium/home, we might need to unlock slotLock. But wait, expireHolds handles unlocking.
-            // We can just unset it here too if not already expired.
-            await appt.save();
+            await Appointment.updateOne(
+              { _id: appt._id, status: 'PENDING_PAYMENT' },
+              {
+                $set: { status: 'PAYMENT_FAILED' },
+                $unset: { slotLock: 1 },
+                $push: {
+                  statusHistory: {
+                    from: 'PENDING_PAYMENT',
+                    to: 'PAYMENT_FAILED',
+                    byRole: 'SYSTEM',
+                    at: new Date(),
+                    reason: 'Payment failed at gateway or abandoned',
+                  },
+                },
+              }
+            );
           }
         }
       } catch (innerErr) {
