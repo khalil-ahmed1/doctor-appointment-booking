@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 3 – Home Visit & Doctor Operations |
-| Current feature | F-38 Doctor subscription purchase |
+| Current feature | F-39 Earnings ledger |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-38 Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF
+1. F-39 Doctor earnings ledger (Phase 5 - Analytics)
 
 ---
 
@@ -105,7 +105,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | ID | Feature | PRD | Status | Notes |
 |---|---|---|---|---|
 | F-37 | Plans CRUD (admin) + subscription models + state computation (TRIAL/ACTIVE/GRACE/EXPIRED/SUSPENDED) | 7 | ✅ | |
-| F-38 | Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF | 7.3 | ⬜ | |
+| F-38 | Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF | 7.3 | ✅ | |
 | F-39 | Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI | 7.4, 4.4 | ⬜ | |
 | F-40 | Admin manual subscription controls (grant/extend/set-end/change/suspend) with audit + email | 4.10, 7.3 | ⬜ | |
 | F-41 | Admin appointments + payments/refunds views, retry transfer, manual refund | 4.10 | ⬜ | |
@@ -124,6 +124,26 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 37 — 2026-10-04 — Antigravity Agent
+Goal: F-38 Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF
+Plan:
+- Link planId and doctorId to Payment creation for easier access in verification.
+- Add complete finalizeSubscriptionPayment logic triggered from both the manual route verification and webhook `payment.captured`.
+- Set up automated invoice PDF generation wrapping Razorpay API flow.
+- Ensure correct computation of end dates (stacking) and accurate status updates.
+Done:
+- Successfully added comprehensive backend endpoints tracking subscription capture.
+- Designed `DoctorSubscriptionPage.jsx` where doctors can view active plans, pick new ones, and view past history with PDF invoice download links.
+- Updated `webhook.controller.js` to dispatch event to `finalizeSubscriptionPayment` for `SUBSCRIPTION` types dynamically.
+- Fixed accumulated React frontend linter warnings.
+Files/modules touched: `server/src/services/subscription.service.js`, `server/src/models/Payment.js`, `server/src/controllers/webhook.controller.js`, `frontend/src/features/doctor/pages/DoctorSubscriptionPage.jsx`, `frontend/src/features/doctor/api/doctor.api.js`, etc.
+Tests added/updated: Linter fixes applied successfully.
+How to verify manually: Login as Doctor. Go to Subscriptions. Click "Buy Now" on any plan. Complete fake Razorpay payment (success mode). Wait for redirect back. Observe the new plan listed inside the "Subscription History" with an active receipt download option.
+Decisions made: Mapped exact PRD stacking rules using `dayjs` math based on `max(now, previousEndsAt)`. Appended `planId` and `doctorId` inside the `Payment` schema root for rapid reverse-lookup during webhook processing.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-39 (Subscription jobs: hourly transitions + daily reminders).
+
 
 ### Session 36 — 2026-10-04 — Antigravity Agent
 Goal: F-37 Plans CRUD (admin) + subscription models + state computation

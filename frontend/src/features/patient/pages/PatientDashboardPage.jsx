@@ -1,4 +1,3 @@
-import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar, Users, CreditCard, User as UserIcon } from 'lucide-react';
 import AppointmentsTab from '../components/AppointmentsTab';
