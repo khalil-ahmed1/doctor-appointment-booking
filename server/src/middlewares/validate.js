@@ -13,11 +13,19 @@ const validate = (schema) => (req, res, next) => {
 
     // In Express 5 req.query and req.params are getters, so we overwrite the property
     if (parsed.query) {
-      Object.defineProperty(req, 'query', { value: parsed.query, writable: true, configurable: true });
+      Object.defineProperty(req, 'query', {
+        value: parsed.query,
+        writable: true,
+        configurable: true,
+      });
     }
 
     if (parsed.params) {
-      Object.defineProperty(req, 'params', { value: parsed.params, writable: true, configurable: true });
+      Object.defineProperty(req, 'params', {
+        value: parsed.params,
+        writable: true,
+        configurable: true,
+      });
     }
 
     next();

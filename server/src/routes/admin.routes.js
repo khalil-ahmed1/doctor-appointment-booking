@@ -35,9 +35,7 @@ router.patch(
 );
 
 // Patient Management
-router
-  .route('/patients')
-  .get(adminController.getPatients);
+router.route('/patients').get(adminController.getPatients);
 
 router
   .route('/patients/:id')

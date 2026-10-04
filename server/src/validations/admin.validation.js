@@ -134,7 +134,10 @@ const updatePatientBlockStatusSchema = z.object({
 const updatePatientSchema = z.object({
   body: z.object({
     name: z.string().min(1).optional(),
-    phone: z.string().regex(/^\d{10}$/, 'Phone number must be exactly 10 digits').optional(),
+    phone: z
+      .string()
+      .regex(/^\d{10}$/, 'Phone number must be exactly 10 digits')
+      .optional(),
     gender: z.enum(['MALE', 'FEMALE', 'OTHER']).optional(),
     dob: z.string().optional(),
   }),

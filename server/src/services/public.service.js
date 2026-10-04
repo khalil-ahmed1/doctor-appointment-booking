@@ -97,16 +97,22 @@ const searchDoctors = async (filters) => {
   // Type and Fees
   if (type === 'NORMAL') {
     matchQuery['types.normal.enabled'] = true;
-    if (minFee !== undefined) matchQuery['fees.normal'] = { ...matchQuery['fees.normal'], $gte: minFee };
-    if (maxFee !== undefined) matchQuery['fees.normal'] = { ...matchQuery['fees.normal'], $lte: maxFee };
+    if (minFee !== undefined)
+      matchQuery['fees.normal'] = { ...matchQuery['fees.normal'], $gte: minFee };
+    if (maxFee !== undefined)
+      matchQuery['fees.normal'] = { ...matchQuery['fees.normal'], $lte: maxFee };
   } else if (type === 'PREMIUM') {
     matchQuery['types.premium.enabled'] = true;
-    if (minFee !== undefined) matchQuery['fees.premium'] = { ...matchQuery['fees.premium'], $gte: minFee };
-    if (maxFee !== undefined) matchQuery['fees.premium'] = { ...matchQuery['fees.premium'], $lte: maxFee };
+    if (minFee !== undefined)
+      matchQuery['fees.premium'] = { ...matchQuery['fees.premium'], $gte: minFee };
+    if (maxFee !== undefined)
+      matchQuery['fees.premium'] = { ...matchQuery['fees.premium'], $lte: maxFee };
   } else if (type === 'HOME') {
     matchQuery['types.homeVisit.enabled'] = true;
-    if (minFee !== undefined) matchQuery['fees.homeVisit'] = { ...matchQuery['fees.homeVisit'], $gte: minFee };
-    if (maxFee !== undefined) matchQuery['fees.homeVisit'] = { ...matchQuery['fees.homeVisit'], $lte: maxFee };
+    if (minFee !== undefined)
+      matchQuery['fees.homeVisit'] = { ...matchQuery['fees.homeVisit'], $gte: minFee };
+    if (maxFee !== undefined)
+      matchQuery['fees.homeVisit'] = { ...matchQuery['fees.homeVisit'], $lte: maxFee };
   } else {
     // If type is not specified but fees are
     if (minFee !== undefined || maxFee !== undefined) {
@@ -204,7 +210,10 @@ const searchDoctors = async (filters) => {
     // In production, we'd cache it or compute simplified availability flags via cron.
     // We will do a quick check for Premium slots
     const today = dayjs().tz('Asia/Kolkata').format('YYYY-MM-DD');
-    const endDate = available === 'THIS_WEEK' ? dayjs().tz('Asia/Kolkata').add(7, 'day').format('YYYY-MM-DD') : today;
+    const endDate =
+      available === 'THIS_WEEK'
+        ? dayjs().tz('Asia/Kolkata').add(7, 'day').format('YYYY-MM-DD')
+        : today;
 
     const availabilityPromises = doctors.map(async (doc) => {
       // Find if any available slots between today and endDate
@@ -212,8 +221,12 @@ const searchDoctors = async (filters) => {
       let curr = dayjs(today);
       const end = dayjs(endDate);
       while (curr.isBefore(end) || curr.isSame(end, 'day')) {
-        const slots = await slotService.generateSlots(doc._id, 'PREMIUM', curr.format('YYYY-MM-DD'));
-        if (slots.some(s => s.status === 'AVAILABLE')) {
+        const slots = await slotService.generateSlots(
+          doc._id,
+          'PREMIUM',
+          curr.format('YYYY-MM-DD'),
+        );
+        if (slots.some((s) => s.status === 'AVAILABLE')) {
           hasSlots = true;
           break;
         }
@@ -223,7 +236,7 @@ const searchDoctors = async (filters) => {
     });
 
     const availabilityResults = await Promise.all(availabilityPromises);
-    doctors = availabilityResults.filter(r => r.hasSlots).map(r => r.doc);
+    doctors = availabilityResults.filter((r) => r.hasSlots).map((r) => r.doc);
     // Note: The total count will be slightly inaccurate due to post-filtering, but it's okay for Phase 1.
   }
 

@@ -328,13 +328,13 @@ const updatePatient = async (id, updateData) => {
 
   patient.set(updateData);
   await patient.save();
-  
+
   // Return without sensitive data
   const updatedPatient = patient.toObject();
   delete updatedPatient.passwordHash;
   delete updatedPatient.resetTokenHash;
   delete updatedPatient.refreshTokens;
-  
+
   return updatedPatient;
 };
 
@@ -346,12 +346,12 @@ const updatePatientBlockStatus = async (id, status) => {
 
   patient.status = status;
   await patient.save();
-  
+
   const updatedPatient = patient.toObject();
   delete updatedPatient.passwordHash;
   delete updatedPatient.resetTokenHash;
   delete updatedPatient.refreshTokens;
-  
+
   return updatedPatient;
 };
 
