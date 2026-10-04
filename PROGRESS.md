@@ -11,15 +11,15 @@
 
 | Item | Value |
 |---|---|
-| Current phase | Phase 3 – Home Visit & Doctor Operations |
-| Current feature | F-39 Earnings ledger |
+| Current phase | Phase 4 – Subscription & Admin Controls |
+| Current feature | F-39 Subscription jobs |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-39 Doctor earnings ledger (Phase 5 - Analytics)
+1. F-39 Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI
 
 ---
 
