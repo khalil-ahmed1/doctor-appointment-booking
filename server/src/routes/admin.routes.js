@@ -71,4 +71,42 @@ router.post(
   adminController.manualSubscriptionUpdate,
 );
 
+// Appointments
+router
+  .route('/appointments')
+  .get(validate(adminValidation.getAppointmentsSchema), adminController.getAppointments);
+
+router
+  .route('/appointments/:id')
+  .get(validate(adminValidation.getAppointmentParamsSchema), adminController.getAppointmentById);
+
+router.patch(
+  '/appointments/:id/cancel',
+  validate(adminValidation.cancelAppointmentSchema),
+  adminController.cancelAppointment,
+);
+
+router.patch(
+  '/appointments/:id/reschedule',
+  validate(adminValidation.rescheduleAppointmentSchema),
+  adminController.rescheduleAppointment,
+);
+
+// Payments
+router
+  .route('/payments')
+  .get(validate(adminValidation.getPaymentsSchema), adminController.getPayments);
+
+router.post(
+  '/payments/:id/retry-transfer',
+  validate(adminValidation.paymentActionParamsSchema),
+  adminController.retryTransfer,
+);
+
+router.post(
+  '/payments/:id/refund',
+  validate(adminValidation.manualRefundSchema),
+  adminController.manualRefund,
+);
+
 module.exports = router;

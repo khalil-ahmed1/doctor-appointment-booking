@@ -380,9 +380,57 @@ const verifyPaymentAndFinalize = async (razorpayOrderId, razorpayPaymentId, sign
   return await finalizePayment(razorpayOrderId, razorpayPaymentId);
 };
 
+const retryTransfer = async (paymentId) => {
+  const payment = await Payment.findById(paymentId);
+  if (!payment) {
+    throw new ApiError(404, 'NOT_FOUND', 'Payment not found');
+  }
+
+  if (payment.status !== 'CAPTURED') {
+    throw new ApiError(400, 'INVALID_STATE', 'Payment is not in CAPTURED state');
+  }
+
+  const failedTransfer = payment.transfers.find(t => t.status === 'failed');
+  if (!failedTransfer && payment.transfers.length > 0) {
+    throw new ApiError(400, 'INVALID_STATE', 'No failed transfers found to retry');
+  }
+
+  // Attempt the transfer logic again
+  await processTransfer(payment._id, payment.appointment, payment.razorpayPaymentId);
+  
+  const updatedPayment = await Payment.findById(paymentId);
+  return updatedPayment;
+};
+
+const manualRefund = async (paymentId, reason) => {
+  const payment = await Payment.findById(paymentId);
+  if (!payment) {
+    throw new ApiError(404, 'NOT_FOUND', 'Payment not found');
+  }
+
+  if (['REFUNDED', 'REFUND_INITIATED'].includes(payment.status)) {
+    throw new ApiError(400, 'INVALID_STATE', 'Payment is already refunded or refund initiated');
+  }
+
+  if (!payment.razorpayPaymentId) {
+    throw new ApiError(400, 'INVALID_STATE', 'Payment has no Razorpay Payment ID to refund');
+  }
+
+  await refundPaymentProcess(payment, payment.razorpayPaymentId, reason);
+
+  if (payment.appointment) {
+    const Appointment = require('../models/Appointment');
+    await Appointment.updateOne({ _id: payment.appointment }, { $set: { paymentStatus: 'REFUNDED' } });
+  }
+
+  return payment;
+};
+
 module.exports = {
   createAppointmentOrder,
   finalizePayment,
   verifyPaymentAndFinalize,
   processRefundForAppointment,
+  retryTransfer,
+  manualRefund,
 };

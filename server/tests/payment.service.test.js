@@ -154,4 +154,26 @@ describe('Payment Service - finalizePayment', () => {
     const updatedDup = await Payment.findById(dupPayment._id);
     expect(updatedDup.status).toBe('REFUNDED');
   });
+
+  describe('retryTransfer and manualRefund', () => {
+    it('retryTransfer should fail if payment is not CAPTURED', async () => {
+      payment.status = 'CREATED';
+      await payment.save();
+      await expect(paymentService.retryTransfer(payment._id)).rejects.toThrow('Payment is not in CAPTURED state');
+    });
+
+    it('manualRefund should successfully refund payment', async () => {
+      payment.status = 'CAPTURED';
+      payment.razorpayPaymentId = 'pay_123';
+      await payment.save();
+      
+      razorpayService.refundPayment.mockResolvedValue({ id: 'rfnd_manual' });
+      
+      const result = await paymentService.manualRefund(payment._id, 'Customer requested refund');
+      expect(result.status).toBe('REFUNDED');
+      
+      const updatedAppt = await Appointment.findById(appointment._id);
+      expect(updatedAppt.paymentStatus).toBe('REFUNDED');
+    });
+  });
 });

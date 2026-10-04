@@ -2,6 +2,8 @@ const User = require('../models/User');
 const DoctorProfile = require('../models/DoctorProfile');
 const Subscription = require('../models/Subscription');
 const Setting = require('../models/Setting');
+const Appointment = require('../models/Appointment');
+const Payment = require('../models/Payment');
 const ApiError = require('../utils/ApiError');
 const { generateRandomToken, hashToken } = require('../utils/token');
 const emailService = require('./email.service');
@@ -378,6 +380,79 @@ const updatePatientBlockStatus = async (id, status) => {
   return updatedPatient;
 };
 
+const getAppointments = async (query = {}) => {
+  const { page = 1, limit = 12, status, type } = query;
+
+  const filter = {};
+  if (status) filter.status = status;
+  if (type) filter.type = type;
+
+  const skip = (page - 1) * limit;
+
+  const appointments = await Appointment.find(filter)
+    .populate({ path: 'patient', select: 'name email phone' })
+    .populate({ path: 'doctor', select: 'fullName slug clinic.name' })
+    .skip(skip)
+    .limit(parseInt(limit, 10))
+    .sort({ createdAt: -1 });
+
+  const total = await Appointment.countDocuments(filter);
+
+  return {
+    appointments,
+    meta: {
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      total,
+    },
+  };
+};
+
+const getAppointmentById = async (id) => {
+  const appointment = await Appointment.findById(id)
+    .populate({ path: 'patient', select: 'name email phone' })
+    .populate({ path: 'doctor', select: 'fullName slug clinic.name clinic.location' })
+    .populate('payment');
+
+  if (!appointment) {
+    throw new ApiError(404, 'NOT_FOUND', 'Appointment not found');
+  }
+  return appointment;
+};
+
+const getPayments = async (query = {}) => {
+  const { page = 1, limit = 12, status } = query;
+
+  const filter = {};
+  if (status) filter.status = status;
+
+  const skip = (page - 1) * limit;
+
+  const payments = await Payment.find(filter)
+    .populate({
+      path: 'appointment',
+      select: 'bookingCode type patient doctor dateStr startTime',
+      populate: [
+        { path: 'patient', select: 'name' },
+        { path: 'doctor', select: 'fullName' },
+      ],
+    })
+    .skip(skip)
+    .limit(parseInt(limit, 10))
+    .sort({ createdAt: -1 });
+
+  const total = await Payment.countDocuments(filter);
+
+  return {
+    payments,
+    meta: {
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      total,
+    },
+  };
+};
+
 module.exports = {
   onboardDoctor,
   getDoctors,
@@ -389,4 +464,7 @@ module.exports = {
   getPatientById,
   updatePatient,
   updatePatientBlockStatus,
+  getAppointments,
+  getAppointmentById,
+  getPayments,
 };

@@ -215,6 +215,67 @@ const manualSubscriptionUpdateSchema = z.object({
   }),
 });
 
+const getAppointmentsSchema = z.object({
+  query: z
+    .object({
+      status: z.string().optional(),
+      type: z.string().optional(),
+      page: z.string().regex(/^\d+$/).optional(),
+      limit: z.string().regex(/^\d+$/).optional(),
+    })
+    .optional(),
+});
+
+const getAppointmentParamsSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+});
+
+const cancelAppointmentSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+  body: z.object({
+    reason: z.string().min(5, 'Reason is required (min 5 chars)'),
+  }),
+});
+
+const rescheduleAppointmentSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+  body: z.object({
+    dateStr: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD'),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Time must be HH:mm'),
+  }),
+});
+
+const getPaymentsSchema = z.object({
+  query: z
+    .object({
+      status: z.string().optional(),
+      page: z.string().regex(/^\d+$/).optional(),
+      limit: z.string().regex(/^\d+$/).optional(),
+    })
+    .optional(),
+});
+
+const paymentActionParamsSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+});
+
+const manualRefundSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+  body: z.object({
+    reason: z.string().min(5, 'Reason is required (min 5 chars)'),
+  }),
+});
+
 module.exports = {
   onboardDoctorSchema,
   updateDoctorStatusSchema,
@@ -228,4 +289,11 @@ module.exports = {
   getPlanParamsSchema,
   getSubscriptionsSchema,
   manualSubscriptionUpdateSchema,
+  getAppointmentsSchema,
+  getAppointmentParamsSchema,
+  cancelAppointmentSchema,
+  rescheduleAppointmentSchema,
+  getPaymentsSchema,
+  paymentActionParamsSchema,
+  manualRefundSchema,
 };

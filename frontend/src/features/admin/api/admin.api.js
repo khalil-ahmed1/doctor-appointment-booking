@@ -85,4 +85,39 @@ export const adminApi = {
     const response = await axios.post('/admin/subscriptions/manual', data);
     return response.data;
   },
+
+  getAppointments: async (params = {}) => {
+    const response = await axios.get('/admin/appointments', { params });
+    return response.data;
+  },
+
+  getAppointmentById: async (id) => {
+    const response = await axios.get(`/admin/appointments/${id}`);
+    return response.data;
+  },
+
+  cancelAppointment: async (id, reason) => {
+    const response = await axios.patch(`/admin/appointments/${id}/cancel`, { reason });
+    return response.data;
+  },
+
+  rescheduleAppointment: async (id, data) => {
+    const response = await axios.patch(`/admin/appointments/${id}/reschedule`, data);
+    return response.data;
+  },
+
+  getPayments: async (params = {}) => {
+    const response = await axios.get('/admin/payments', { params });
+    return response.data;
+  },
+
+  retryTransfer: async (id) => {
+    const response = await axios.post(`/admin/payments/${id}/retry-transfer`);
+    return response.data;
+  },
+
+  manualRefund: async (id, reason) => {
+    const response = await axios.post(`/admin/payments/${id}/refund`, { reason });
+    return response.data;
+  },
 };

@@ -2,6 +2,9 @@ const asyncHandler = require('../utils/asyncHandler');
 const adminService = require('../services/admin.service');
 const planService = require('../services/plan.service');
 const subscriptionService = require('../services/subscription.service');
+const appointmentService = require('../services/appointment.service');
+const paymentService = require('../services/payment.service');
+const ApiError = require('../utils/ApiError');
 
 const onboardDoctor = asyncHandler(async (req, res) => {
   const doctorProfile = await adminService.onboardDoctor(req.body, req.user._id);
@@ -142,6 +145,77 @@ const manualSubscriptionUpdate = asyncHandler(async (req, res) => {
   });
 });
 
+const getAppointments = asyncHandler(async (req, res) => {
+  const result = await adminService.getAppointments(req.query);
+  res.status(200).json({
+    success: true,
+    data: result.appointments,
+    meta: result.meta,
+  });
+});
+
+const getAppointmentById = asyncHandler(async (req, res) => {
+  const appointment = await adminService.getAppointmentById(req.params.id);
+  res.status(200).json({
+    success: true,
+    data: appointment,
+  });
+});
+
+const cancelAppointment = asyncHandler(async (req, res) => {
+  const appointment = await appointmentService.transition(
+    req.params.id,
+    'CANCELLED_BY_ADMIN',
+    req.user,
+    req.body.reason
+  );
+  res.status(200).json({
+    success: true,
+    data: appointment,
+  });
+});
+
+const rescheduleAppointment = asyncHandler(async (req, res) => {
+  const { dateStr, startTime } = req.body;
+  const appointment = await appointmentService.rescheduleAppointment(
+    req.params.id,
+    req.user,
+    dateStr,
+    startTime
+  );
+  res.status(200).json({
+    success: true,
+    data: appointment,
+  });
+});
+
+const getPayments = asyncHandler(async (req, res) => {
+  const result = await adminService.getPayments(req.query);
+  res.status(200).json({
+    success: true,
+    data: result.payments,
+    meta: result.meta,
+  });
+});
+
+const retryTransfer = asyncHandler(async (req, res) => {
+  const payment = await paymentService.retryTransfer(req.params.id);
+  res.status(200).json({
+    success: true,
+    data: payment,
+    message: 'Transfer retry initiated',
+  });
+});
+
+const manualRefund = asyncHandler(async (req, res) => {
+  const payment = await paymentService.manualRefund(req.params.id, req.body.reason);
+  res.status(200).json({
+    success: true,
+    data: payment,
+    message: 'Manual refund initiated',
+  });
+});
+
 module.exports = {
   onboardDoctor,
   getDoctors,
@@ -160,4 +234,11 @@ module.exports = {
   deletePlan,
   getSubscriptions,
   manualSubscriptionUpdate,
+  getAppointments,
+  getAppointmentById,
+  cancelAppointment,
+  rescheduleAppointment,
+  getPayments,
+  retryTransfer,
+  manualRefund,
 };

@@ -65,6 +65,8 @@ export const DashboardLayout = () => {
         { name: 'Overview', to: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Doctors', to: '/admin/doctors', icon: Stethoscope },
         { name: 'Patients', to: '/admin/patients', icon: UserCircle },
+        { name: 'Appointments', to: '/admin/appointments', icon: CalendarCheck },
+        { name: 'Payments', to: '/admin/payments', icon: Wallet },
         { name: 'Plans', to: '/admin/plans', icon: CreditCard },
         { name: 'Subscriptions', to: '/admin/subscriptions', icon: ListOrdered },
       ];
