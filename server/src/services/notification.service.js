@@ -228,9 +228,45 @@ const sendAppointmentReminder = async (appointment, customNote = '') => {
   }
 };
 
+const sendSubscriptionReminder = async (doctorProfileId, message) => {
+  try {
+    const doctorUser = await User.findOne({ doctorProfile: doctorProfileId }).populate(
+      'doctorProfile',
+    );
+    if (!doctorUser || !doctorUser.email) return;
+
+    const doctorName = doctorUser.doctorProfile?.fullName || 'Doctor';
+
+    const emailData = {
+      doctorName,
+      message,
+      dashboardUrl: `${env.CLIENT_URL}/doctor/dashboard`,
+    };
+
+    await sendEmail(
+      doctorUser.email,
+      `Subscription Notice: Dr. ${doctorName}`,
+      'SUBSCRIPTION_REMINDER',
+      emailData,
+    );
+
+    await Notification.create({
+      user: doctorUser._id,
+      type: 'SYSTEM',
+      title: 'Subscription Notice',
+      message: message,
+      link: '/doctor/dashboard',
+      relatedId: doctorProfileId,
+    });
+  } catch (error) {
+    logger.error(`Error in sendSubscriptionReminder: ${error.message}`);
+  }
+};
+
 module.exports = {
   sendBookingConfirmation,
   sendAppointmentCancellation,
   sendAppointmentReschedule,
   sendAppointmentReminder,
+  sendSubscriptionReminder,
 };

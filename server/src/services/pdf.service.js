@@ -125,9 +125,14 @@ const generateInvoicePDF = (subscription, doctor) => {
       doc.text(`GST (18%): INR ${(subscription.gst / 100).toFixed(2)}`);
       doc.moveDown(0.5);
       doc.font('Helvetica-Bold').text(`Total Paid: INR ${(subscription.total / 100).toFixed(2)}`);
-      
+
       doc.moveDown(2);
-      doc.font('Helvetica-Oblique').fontSize(10).text('This is a computer generated invoice and does not require a signature.', { align: 'center' });
+      doc
+        .font('Helvetica-Oblique')
+        .fontSize(10)
+        .text('This is a computer generated invoice and does not require a signature.', {
+          align: 'center',
+        });
 
       doc.end();
     } catch (error) {
@@ -140,4 +145,3 @@ module.exports = {
   generateReceiptPDF,
   generateInvoicePDF,
 };
-

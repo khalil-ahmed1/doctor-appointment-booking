@@ -8,7 +8,7 @@ import { Trash2, Upload, GripVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '../../../contexts/AuthContext';
 
-export function GallerySettings({ profile }) {
+export function GallerySettings({ profile, isExpired }) {
   const queryClient = useQueryClient();
   const { fetchUser } = useAuth();
   const [isUploadingPic, setIsUploadingPic] = useState(false);
@@ -97,7 +97,7 @@ export function GallerySettings({ profile }) {
               accept="image/jpeg,image/png,image/webp" 
               className="hidden" 
               onChange={handlePicUpload} 
-              disabled={isUploadingPic}
+              disabled={isUploadingPic || isExpired}
             />
             <p className="text-xs text-muted-foreground">JPEG, PNG, or WebP. Max 5MB.</p>
           </div>
@@ -119,7 +119,7 @@ export function GallerySettings({ profile }) {
               accept="image/jpeg,image/png,image/webp" 
               className="hidden" 
               onChange={handleGalleryUpload} 
-              disabled={isUploadingGallery || gallery.length >= 12}
+              disabled={isUploadingGallery || gallery.length >= 12 || isExpired}
             />
           </div>
         </div>
@@ -138,7 +138,7 @@ export function GallerySettings({ profile }) {
                     variant="destructive" 
                     size="icon"
                     onClick={() => deleteGalleryMutation.mutate(img._id)}
-                    disabled={deleteGalleryMutation.isPending}
+                    disabled={deleteGalleryMutation.isPending || isExpired}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

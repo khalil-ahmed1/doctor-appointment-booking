@@ -19,7 +19,7 @@ const defaultCenter = {
   lng: 77.2090
 };
 
-export function ClinicSettings({ profile }) {
+export function ClinicSettings({ profile, isExpired }) {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     name: profile?.clinic?.name || '',
@@ -160,7 +160,7 @@ export function ClinicSettings({ profile }) {
         )}
       </div>
 
-      <Button type="submit" disabled={updateClinicMutation.isPending}>
+      <Button type="submit" disabled={updateClinicMutation.isPending || isExpired}>
         {updateClinicMutation.isPending ? 'Saving...' : 'Save Clinic Settings'}
       </Button>
     </form>

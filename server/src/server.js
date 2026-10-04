@@ -4,6 +4,7 @@ const env = require('./config/env');
 const logger = require('./utils/logger');
 const { startReminderJobs } = require('./jobs/reminder.job');
 const { startMaintenanceJobs } = require('./jobs/maintenance.job');
+const { startSubscriptionJobs } = require('./jobs/subscription.job');
 
 let server;
 
@@ -13,6 +14,7 @@ mongoose
     logger.info('Connected to MongoDB');
     startReminderJobs();
     startMaintenanceJobs();
+    startSubscriptionJobs();
     server = app.listen(env.PORT, () => {
       logger.info(`Server is running on port ${env.PORT} in ${env.NODE_ENV} mode`);
     });

@@ -18,7 +18,7 @@ const processWebhookEvent = async (eventDoc) => {
         // Check payment type
         const Payment = require('../models/Payment');
         const paymentRecord = await Payment.findOne({ razorpayOrderId: orderId });
-        
+
         if (paymentRecord) {
           if (paymentRecord.type === 'SUBSCRIPTION') {
             const subscriptionService = require('../services/subscription.service');

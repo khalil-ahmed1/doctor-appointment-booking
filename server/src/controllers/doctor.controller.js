@@ -162,14 +162,14 @@ const verifySubscriptionPayment = asyncHandler(async (req, res) => {
 const getSubscriptions = asyncHandler(async (req, res) => {
   const subscriptionService = require('../services/subscription.service');
   const doctor = await doctorService.getDoctorProfileByUser(req.user._id);
-  const result = await subscriptionService.getSubscriptions({ 
-    ...req.query, 
-    doctorId: doctor._id 
+  const result = await subscriptionService.getSubscriptions({
+    ...req.query,
+    doctorId: doctor._id,
   });
-  res.status(200).json({ 
-    success: true, 
+  res.status(200).json({
+    success: true,
     data: result.subscriptions,
-    meta: result.meta 
+    meta: result.meta,
   });
 });
 

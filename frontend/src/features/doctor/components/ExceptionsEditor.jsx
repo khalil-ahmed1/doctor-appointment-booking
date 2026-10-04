@@ -11,7 +11,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, Plus, Loader2, CalendarX2, Clock } from 'lucide-react';
 import dayjs from 'dayjs';
 
-const ExceptionsEditor = () => {
+const ExceptionsEditor = ({ isExpired }) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState({
     dateStr: '',
@@ -86,6 +86,7 @@ const ExceptionsEditor = () => {
                 min={dayjs().format('YYYY-MM-DD')}
                 value={formData.dateStr} 
                 onChange={(e) => setFormData({...formData, dateStr: e.target.value})} 
+                disabled={isExpired}
               />
             </div>
             
@@ -94,6 +95,7 @@ const ExceptionsEditor = () => {
               <Select 
                 value={formData.kind} 
                 onValueChange={(val) => setFormData({...formData, kind: val})}
+                disabled={isExpired}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -114,6 +116,7 @@ const ExceptionsEditor = () => {
                       id={`type-${t}`} 
                       checked={formData.appliesTo.includes(t)}
                       onCheckedChange={() => handleTypeToggle(t)}
+                      disabled={isExpired}
                     />
                     <label htmlFor={`type-${t}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       {t.replace('_', ' ')}
@@ -137,6 +140,7 @@ const ExceptionsEditor = () => {
                         w[i].start = e.target.value;
                         setFormData({...formData, windows: w});
                       }} 
+                      disabled={isExpired}
                     />
                     <span>to</span>
                     <Input 
@@ -148,6 +152,7 @@ const ExceptionsEditor = () => {
                         w[i].end = e.target.value;
                         setFormData({...formData, windows: w});
                       }} 
+                      disabled={isExpired}
                     />
                     <Button 
                       type="button" 
@@ -159,6 +164,7 @@ const ExceptionsEditor = () => {
                         w.splice(i, 1);
                         setFormData({...formData, windows: w});
                       }}
+                      disabled={isExpired}
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -173,6 +179,7 @@ const ExceptionsEditor = () => {
                     onClick={() => {
                       setFormData({...formData, windows: [...formData.windows, { start: '10:00', end: '12:00' }]});
                     }}
+                    disabled={isExpired}
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Window
                   </Button>
@@ -186,10 +193,11 @@ const ExceptionsEditor = () => {
                 value={formData.reason} 
                 onChange={(e) => setFormData({...formData, reason: e.target.value})} 
                 placeholder="e.g., Diwali, Sick Leave" 
+                disabled={isExpired}
               />
             </div>
 
-            <Button type="submit" className="w-full" disabled={addMutation.isPending || formData.appliesTo.length === 0}>
+            <Button type="submit" className="w-full" disabled={addMutation.isPending || formData.appliesTo.length === 0 || isExpired}>
               {addMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Save Exception
             </Button>
@@ -242,7 +250,7 @@ const ExceptionsEditor = () => {
                     size="icon" 
                     className="text-destructive hover:bg-destructive/10"
                     onClick={() => deleteMutation.mutate(exc._id)}
-                    disabled={deleteMutation.isPending}
+                    disabled={deleteMutation.isPending || isExpired}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

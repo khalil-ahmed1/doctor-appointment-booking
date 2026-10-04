@@ -115,10 +115,7 @@ router.get(
 );
 
 // Subscription
-router.get(
-  '/subscriptions',
-  doctorController.getSubscriptions,
-);
+router.get('/subscriptions', doctorController.getSubscriptions);
 
 router.post(
   '/subscription/orders',

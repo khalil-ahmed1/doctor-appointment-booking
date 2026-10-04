@@ -229,4 +229,4 @@ module.exports = {
   createSubscriptionOrder,
   verifySubscriptionPayment,
   finalizeSubscriptionPayment,
-}
+};

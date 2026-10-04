@@ -164,6 +164,19 @@ const templates = {
       </div>
     `;
   },
+
+  SUBSCRIPTION_REMINDER: (data) => {
+    const { doctorName, message, dashboardUrl } = data;
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Subscription Notice</h2>
+        <p>Hello Dr. ${doctorName},</p>
+        <p>${message}</p>
+        <p><a href="${dashboardUrl}" style="display: inline-block; padding: 10px 20px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Manage Subscription</a></p>
+        <p>Thank you!</p>
+      </div>
+    `;
+  },
 };
 
 const getTemplate = (templateName, data) => {

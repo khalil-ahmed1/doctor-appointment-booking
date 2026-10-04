@@ -70,6 +70,13 @@ export default function DoctorProfilePage() {
         </p>
       </div>
 
+      {profile?.subscription?.status === 'EXPIRED' && (
+        <div className="bg-destructive/10 border border-destructive text-destructive p-4 rounded-md">
+          <h3 className="font-bold">Subscription Expired</h3>
+          <p>Your profile is currently read-only. Please renew your plan to edit details.</p>
+        </div>
+      )}
+
       <Tabs defaultValue="details" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="details">Details</TabsTrigger>
@@ -137,7 +144,7 @@ export default function DoctorProfilePage() {
                   </div>
                 </div>
 
-                <Button type="submit" disabled={updateProfileMutation.isPending}>
+                <Button type="submit" disabled={updateProfileMutation.isPending || profile?.subscription?.status === 'EXPIRED'}>
                   {updateProfileMutation.isPending ? 'Saving...' : 'Save Details'}
                 </Button>
               </form>
@@ -154,7 +161,7 @@ export default function DoctorProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <ClinicSettings profile={profile} />
+              <ClinicSettings profile={profile} isExpired={profile?.subscription?.status === 'EXPIRED'} />
             </CardContent>
           </Card>
         </TabsContent>
@@ -168,7 +175,7 @@ export default function DoctorProfilePage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <GallerySettings profile={profile} />
+              <GallerySettings profile={profile} isExpired={profile?.subscription?.status === 'EXPIRED'} />
             </CardContent>
           </Card>
         </TabsContent>

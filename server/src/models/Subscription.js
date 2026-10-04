@@ -16,6 +16,7 @@ const subscriptionSchema = new mongoose.Schema(
     invoiceUrl: String,
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     reason: String,
+    remindersSent: [{ type: String }],
   },
   { timestamps: true },
 );

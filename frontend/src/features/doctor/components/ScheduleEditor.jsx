@@ -11,7 +11,7 @@ import { Trash2, Plus, Loader2 } from 'lucide-react';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const ScheduleEditor = ({ type }) => {
+const ScheduleEditor = ({ type, isExpired }) => {
   const queryClient = useQueryClient();
   const [formData, setFormData] = useState(null);
 
@@ -68,6 +68,7 @@ const ScheduleEditor = ({ type }) => {
               step="5" 
               min="10" 
               max="120"
+              disabled={isExpired}
             />
           </div>
           <div className="space-y-2">
@@ -78,6 +79,7 @@ const ScheduleEditor = ({ type }) => {
               onChange={e => setFormData({...formData, bufferMin: parseInt(e.target.value) || 0})} 
               min="0" 
               max="60"
+              disabled={isExpired}
             />
           </div>
           <div className="space-y-2">
@@ -88,6 +90,7 @@ const ScheduleEditor = ({ type }) => {
               onChange={e => setFormData({...formData, advanceBookingDays: parseInt(e.target.value) || 30})} 
               min="1" 
               max="90"
+              disabled={isExpired}
             />
           </div>
           <div className="space-y-2">
@@ -97,6 +100,7 @@ const ScheduleEditor = ({ type }) => {
               value={formData.minNoticeMinutes} 
               onChange={e => setFormData({...formData, minNoticeMinutes: parseInt(e.target.value) || 0})} 
               min="0"
+              disabled={isExpired}
             />
           </div>
         </CardContent>
@@ -122,6 +126,7 @@ const ScheduleEditor = ({ type }) => {
                     }
                     setFormData({...formData, weeklyRules: newRules});
                   }}
+                  disabled={isExpired}
                 />
                 <span className="font-medium">{DAYS[rule.dayOfWeek]}</span>
               </div>
@@ -140,6 +145,7 @@ const ScheduleEditor = ({ type }) => {
                             setFormData({...formData, weeklyRules: newRules});
                           }}
                           className="w-32"
+                          disabled={isExpired}
                         />
                         <span className="text-muted-foreground">to</span>
                         <Input 
@@ -151,6 +157,7 @@ const ScheduleEditor = ({ type }) => {
                             setFormData({...formData, weeklyRules: newRules});
                           }}
                           className="w-32"
+                          disabled={isExpired}
                         />
                         <Button 
                           variant="ghost" 
@@ -161,6 +168,7 @@ const ScheduleEditor = ({ type }) => {
                             newRules[index].windows.splice(wIndex, 1);
                             setFormData({...formData, weeklyRules: newRules});
                           }}
+                          disabled={isExpired}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -176,6 +184,7 @@ const ScheduleEditor = ({ type }) => {
                           setFormData({...formData, weeklyRules: newRules});
                         }}
                         className="text-primary"
+                        disabled={isExpired}
                       >
                         <Plus className="w-4 h-4 mr-2" /> Add Hours
                       </Button>
@@ -191,7 +200,7 @@ const ScheduleEditor = ({ type }) => {
       </Card>
 
       <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={mutation.isPending} size="lg">
+        <Button onClick={handleSave} disabled={mutation.isPending || isExpired} size="lg">
           {mutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
           Save Schedule
         </Button>

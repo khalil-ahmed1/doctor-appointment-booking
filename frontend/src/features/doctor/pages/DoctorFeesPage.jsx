@@ -143,6 +143,13 @@ export default function DoctorFeesPage() {
         </p>
       </div>
 
+      {profile?.subscription?.status === 'EXPIRED' && (
+        <div className="bg-destructive/10 border border-destructive text-destructive p-4 rounded-md">
+          <h3 className="font-bold">Subscription Expired</h3>
+          <p>You cannot edit fees and services while your subscription is expired. Please renew your plan.</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Normal Appointment Settings */}
         <Card>
@@ -341,7 +348,7 @@ export default function DoctorFeesPage() {
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button onClick={handleSave} disabled={isPending} size="lg">
+        <Button onClick={handleSave} disabled={isPending || profile?.subscription?.status === 'EXPIRED'} size="lg">
           {isPending ? 'Saving...' : 'Save Settings'}
         </Button>
       </div>
