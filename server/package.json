@@ -1,8 +1,8 @@
 {
-  "name": "doctor-booking-server",
+  "name": "doctor-appointment-booking-server",
   "version": "1.0.0",
-  "description": "Backend for Doctor Booking & Appointment System",
-  "author": "Aniket Thapa <er.aniketthapa@gmail.com>",
+  "description": "Backend Server for Doctor Booking & Appointment System",
+  "author": "Aniket Thapa <er.aniketthapa@gmail.com>, Khalil Ahmed <ka8932007@gmail.com>",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {

@@ -1,7 +1,9 @@
 {
-  "name": "frontend",
+  "name": "doctor-appointment-booking-frontend",
+  "description": "Frontend Web Application for Doctor Appointment Booking",
+  "author": "Aniket Thapa <er.aniketthapa@gmail.com>, Khalil Ahmed <ka8932007@gmail.com>",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
