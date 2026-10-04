@@ -133,6 +133,18 @@ const rescheduleAppointment = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: appointment });
 });
 
+const getEarnings = asyncHandler(async (req, res) => {
+  const earnings = await doctorService.getEarnings(req.user._id, req.query);
+  res.status(200).json({ success: true, data: earnings });
+});
+
+const exportEarningsCSV = asyncHandler(async (req, res) => {
+  const csv = await doctorService.exportEarningsCSV(req.user._id, req.query);
+  res.header('Content-Type', 'text/csv');
+  res.attachment('earnings_ledger.csv');
+  res.send(csv);
+});
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -150,4 +162,6 @@ module.exports = {
   updateAppointmentStatus,
   updateAppointmentNote,
   rescheduleAppointment,
+  getEarnings,
+  exportEarningsCSV,
 };

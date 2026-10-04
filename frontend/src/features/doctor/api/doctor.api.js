@@ -120,4 +120,17 @@ export const doctorApi = {
     const response = await api.patch(`/doctor/appointments/${id}/reschedule`, { dateStr, startTime });
     return response.data.data;
   },
+
+  getEarnings: async (params) => {
+    const response = await api.get('/doctor/earnings', { params });
+    return response.data.data;
+  },
+
+  exportEarningsCSV: async (params) => {
+    const response = await api.get('/doctor/earnings/export', { 
+      params,
+      responseType: 'blob' // Important for file download
+    });
+    return response.data;
+  },
 };

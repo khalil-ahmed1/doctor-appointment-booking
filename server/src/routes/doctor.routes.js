@@ -105,4 +105,17 @@ router.patch(
   doctorController.rescheduleAppointment,
 );
 
+// Earnings Ledger
+router.get(
+  '/earnings',
+  validate(doctorValidation.getEarningsSchema),
+  doctorController.getEarnings,
+);
+
+router.get(
+  '/earnings/export',
+  validate(doctorValidation.getEarningsSchema),
+  doctorController.exportEarningsCSV,
+);
+
 module.exports = router;

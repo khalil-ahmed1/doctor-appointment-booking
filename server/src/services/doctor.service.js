@@ -234,16 +234,38 @@ const getDashboardKPIs = async (userId) => {
   });
 
   // 4. This month's earnings (net to doctor)
-  const thisMonthPayments = await Payment.find({
+  const thisMonthAppointments = await Appointment.find({
     doctor: profile._id,
+    dateStr: { $gte: dayjs(startOfMonth).format('YYYY-MM-DD') }, // approximate filter
+  }).select('_id');
+
+  const appointmentIds = thisMonthAppointments.map((a) => a._id);
+
+  const thisMonthPayments = await Payment.find({
+    appointment: { $in: appointmentIds },
     createdAt: { $gte: startOfMonth },
-    status: 'CAPTURED', // Simplified, assumes captured = earned for now
+    status: 'CAPTURED',
   });
 
   let thisMonthEarnings = 0;
   thisMonthPayments.forEach((p) => {
-    if (p.breakdown && p.breakdown.transferToDoctor) {
-      thisMonthEarnings += p.breakdown.transferToDoctor;
+    if (p.transfers && p.transfers.length > 0) {
+      // Sum successful transfers
+      p.transfers.forEach((t) => {
+        if (t.status !== 'failed') {
+          thisMonthEarnings += t.amount;
+        }
+      });
+    } else if (p.breakdown && p.breakdown.feeBearer === 'PATIENT') {
+       // Fallback if transfer hasn't processed yet but fee is PATIENT
+       const amount = p.breakdown.consultationFee - (p.breakdown.platformCommission || 0);
+       if (amount > 0) thisMonthEarnings += amount;
+    } else if (p.breakdown && p.breakdown.feeBearer === 'DOCTOR') {
+       // Fallback for DOCTOR estimation
+       const actualFee = p.breakdown.actualGatewayFee || 0;
+       const actualTax = p.breakdown.actualGatewayGst || 0;
+       const amount = p.breakdown.total - actualFee - actualTax - (p.breakdown.platformCommission || 0);
+       if (amount > 0) thisMonthEarnings += amount;
     }
   });
 
@@ -330,6 +352,133 @@ const getNormalQueue = async (userId) => {
   return queue;
 };
 
+const getEarnings = async (userId, queryParams) => {
+  const profile = await getDoctorProfileByUser(userId);
+  const Appointment = require('../models/Appointment');
+  const Payment = require('../models/Payment');
+
+  const { startDate, endDate, page = 1, limit = 10 } = queryParams;
+
+  const apptFilter = { doctor: profile._id };
+  if (startDate || endDate) {
+    apptFilter.dateStr = {};
+    if (startDate) apptFilter.dateStr.$gte = startDate;
+    if (endDate) apptFilter.dateStr.$lte = endDate;
+  }
+
+  const appointments = await Appointment.find(apptFilter).select('_id bookingCode type dateStr startTime patientDetails');
+  const appointmentMap = {};
+  const appointmentIds = appointments.map((a) => {
+    appointmentMap[a._id.toString()] = a;
+    return a._id;
+  });
+
+  const paymentFilter = {
+    appointment: { $in: appointmentIds },
+    status: { $in: ['CAPTURED', 'REFUNDED', 'PARTIALLY_REFUNDED'] },
+  };
+
+  const skip = (page - 1) * limit;
+
+  const [payments, total] = await Promise.all([
+    Payment.find(paymentFilter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Payment.countDocuments(paymentFilter),
+  ]);
+
+  const transactions = payments.map((p) => {
+    const appt = appointmentMap[p.appointment.toString()];
+    
+    // Calculate net to doctor
+    let netToDoctor = 0;
+    let transferStatus = 'PENDING';
+    let settlementId = null;
+
+    if (p.transfers && p.transfers.length > 0) {
+      const latestTransfer = p.transfers[p.transfers.length - 1];
+      if (latestTransfer.status !== 'failed') {
+        netToDoctor = latestTransfer.amount;
+        transferStatus = latestTransfer.status;
+        settlementId = latestTransfer.razorpayTransferId;
+      }
+    } else {
+      if (p.breakdown.feeBearer === 'PATIENT') {
+        netToDoctor = p.breakdown.consultationFee - (p.breakdown.platformCommission || 0);
+      } else {
+        const fee = p.breakdown.actualGatewayFee || Math.round(p.breakdown.total * 0.02);
+        const tax = p.breakdown.actualGatewayGst || Math.round(fee * 0.18);
+        netToDoctor = p.breakdown.total - fee - tax - (p.breakdown.platformCommission || 0);
+      }
+    }
+
+    const isRefunded = p.status === 'REFUNDED';
+    if (isRefunded) {
+      netToDoctor = -netToDoctor;
+      transferStatus = 'REFUNDED';
+    }
+
+    return {
+      id: p._id,
+      bookingCode: appt ? appt.bookingCode : 'N/A',
+      type: appt ? appt.type : 'N/A',
+      patientName: appt?.patientDetails?.name || 'N/A',
+      date: p.createdAt,
+      gross: p.breakdown?.consultationFee || 0,
+      totalPaidByPatient: p.breakdown?.total || 0,
+      gatewayFee: p.breakdown?.actualGatewayFee || 0,
+      gstOnFee: p.breakdown?.actualGatewayGst || 0,
+      platformCommission: p.breakdown?.platformCommission || 0,
+      netToDoctor,
+      transferStatus,
+      settlementId,
+      isRefunded
+    };
+  });
+
+  return {
+    transactions,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+const exportEarningsCSV = async (userId, queryParams) => {
+  // Same logic as getEarnings but no pagination
+  const { startDate, endDate } = queryParams;
+  const { transactions } = await getEarnings(userId, { startDate, endDate, page: 1, limit: 100000 });
+
+  const { Parser } = require('json2csv');
+  const fields = [
+    'bookingCode', 'date', 'type', 'patientName', 'gross', 'totalPaidByPatient',
+    'gatewayFee', 'gstOnFee', 'platformCommission', 'netToDoctor', 'transferStatus', 'settlementId'
+  ];
+  
+  const opts = { fields };
+  
+  try {
+    const parser = new Parser(opts);
+    const csv = parser.parse(transactions.map(t => ({
+      ...t,
+      date: t.date.toISOString(),
+      gross: (t.gross / 100).toFixed(2),
+      totalPaidByPatient: (t.totalPaidByPatient / 100).toFixed(2),
+      gatewayFee: (t.gatewayFee / 100).toFixed(2),
+      gstOnFee: (t.gstOnFee / 100).toFixed(2),
+      platformCommission: (t.platformCommission / 100).toFixed(2),
+      netToDoctor: (t.netToDoctor / 100).toFixed(2),
+    })));
+    return csv;
+  } catch (err) {
+    throw new ApiError(500, 'SERVER_ERROR', 'Could not generate CSV');
+  }
+};
+
 module.exports = {
   getDoctorProfileByUser,
   updateProfile,
@@ -344,4 +493,6 @@ module.exports = {
   getDashboardKPIs,
   getDoctorAppointments,
   getNormalQueue,
+  getEarnings,
+  exportEarningsCSV,
 };

@@ -170,6 +170,21 @@ const rescheduleAppointmentSchema = z.object({
   }),
 });
 
+const getEarningsSchema = z.object({
+  query: z.object({
+    startDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format')
+      .optional(),
+    endDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format')
+      .optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+  }),
+});
+
 module.exports = {
   updateProfileSchema,
   addGalleryItemSchema,
@@ -182,4 +197,5 @@ module.exports = {
   updateAppointmentStatusSchema,
   updateAppointmentNoteSchema,
   rescheduleAppointmentSchema,
+  getEarningsSchema,
 };
