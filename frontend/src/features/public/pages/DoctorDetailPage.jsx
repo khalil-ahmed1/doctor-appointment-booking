@@ -54,7 +54,8 @@ const DoctorDetailPage = () => {
     if (!user) {
       navigate(`/login?redirect=/doctors/${slug}`);
     } else {
-      alert('Booking flow will be implemented in F-23.');
+      // Default to premium if available, or just go to booking page and let user choose
+      navigate(`/doctors/${slug}/book?type=PREMIUM`);
     }
   };
 
@@ -199,7 +200,10 @@ const DoctorDetailPage = () => {
                           <p className="font-semibold text-foreground">Clinic Visit (Token)</p>
                           <p className="text-xs text-muted-foreground">{doctor.types.normal.walkInHoursText || 'Walk-in'}</p>
                         </div>
-                        <span className="font-bold text-blue-700">₹{(doctor.fees?.normal || 0) / 100}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="font-bold text-blue-700">₹{(doctor.fees?.normal || 0) / 100}</span>
+                          <Button size="sm" variant="outline" onClick={() => navigate(!user ? `/login?redirect=/doctors/${slug}` : `/doctors/${slug}/book?type=NORMAL`)}>Book</Button>
+                        </div>
                       </div>
                     )}
                     {doctor.types?.premium?.enabled && (
@@ -208,7 +212,10 @@ const DoctorDetailPage = () => {
                           <p className="font-semibold text-foreground">Premium Slot</p>
                           <p className="text-xs text-muted-foreground">Reserved timing</p>
                         </div>
-                        <span className="font-bold text-blue-700">₹{(doctor.fees?.premium || 0) / 100}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="font-bold text-blue-700">₹{(doctor.fees?.premium || 0) / 100}</span>
+                          <Button size="sm" variant="outline" onClick={() => navigate(!user ? `/login?redirect=/doctors/${slug}` : `/doctors/${slug}/book?type=PREMIUM`)}>Book</Button>
+                        </div>
                       </div>
                     )}
                     {doctor.types?.homeVisit?.enabled && (
@@ -217,7 +224,10 @@ const DoctorDetailPage = () => {
                           <p className="font-semibold text-foreground">Home Visit</p>
                           <p className="text-xs text-muted-foreground">Doctor visits you</p>
                         </div>
-                        <span className="font-bold text-blue-700">₹{(doctor.fees?.homeVisit || 0) / 100}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="font-bold text-blue-700">₹{(doctor.fees?.homeVisit || 0) / 100}</span>
+                          <Button size="sm" variant="outline" onClick={() => navigate(!user ? `/login?redirect=/doctors/${slug}` : `/doctors/${slug}/book?type=HOME_VISIT`)}>Book</Button>
+                        </div>
                       </div>
                     )}
                   </div>

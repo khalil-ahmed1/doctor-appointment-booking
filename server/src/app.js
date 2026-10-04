@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -73,6 +73,8 @@ const authRoutes = require('./routes/auth.routes');
 const adminRoutes = require('./routes/admin.routes');
 const publicRoutes = require('./routes/public.routes');
 const doctorRoutes = require('./routes/doctor.routes');
+const appointmentRoutes = require('./routes/appointment.routes');
+const paymentRoutes = require('./routes/payment.routes');
 
 // Health route
 app.get('/api/v1/healthz', (req, res) => {
@@ -82,6 +84,8 @@ app.get('/api/v1/healthz', (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/doctor', doctorRoutes);
+app.use('/api/v1/appointments', appointmentRoutes);
+app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1', publicRoutes);
 
 // Global Error Handler

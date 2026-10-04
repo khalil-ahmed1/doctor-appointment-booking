@@ -25,6 +25,8 @@ import PatientViewPage from './features/admin/pages/PatientViewPage';
 import DoctorProfilePage from './features/doctor/pages/DoctorProfilePage';
 import DoctorFeesPage from './features/doctor/pages/DoctorFeesPage';
 import DoctorSchedulePage from './features/doctor/pages/DoctorSchedulePage';
+import BookingPage from './features/public/pages/BookingPage';
+import BookingSuccessPage from './features/public/pages/BookingSuccessPage';
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,10 @@ function App() {
                   <Route path="/patient/dashboard" element={<div>Patient Dashboard Placeholder</div>} />
                   <Route path="/doctor/dashboard" element={<div>Doctor Dashboard Placeholder</div>} />
                   <Route path="/admin/dashboard" element={<div>Admin Dashboard Placeholder</div>} />
+                  
+                  {/* Booking Flow */}
+                  <Route path="/doctors/:slug/book" element={<BookingPage />} />
+                  <Route path="/doctors/:slug/book/success" element={<BookingSuccessPage />} />
                   
                   {/* Doctor Features */}
                   <Route path="/doctor/profile" element={<DoctorProfilePage />} />

@@ -11,15 +11,15 @@
 
 | Item | Value |
 |---|---|
-| Current phase | Phase 1 – Foundation |
-| Current feature | F-23 Premium booking flow UI: SlotPicker, patient details, price breakdown, countdown, Razorpay checkout, success page |
+| Current phase | Phase 2 – Booking Core |
+| Current feature | F-26 Patient dashboard: my appointments |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-23 Premium booking flow UI: SlotPicker, patient details, price breakdown, countdown, Razorpay checkout, success page
+1. F-26 Patient dashboard: my appointments, my doctors, payments, receipts, profile, no-cancel messaging
 
 ---
 
@@ -82,9 +82,9 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-20 | Razorpay service wrapper + create-order + verify + `finalizePayment` (cases A/B/C/D) | 5.5, 6.3 | ✅ | Mock SDK in tests |
 | F-21 | Webhook endpoint (raw body, signature, event idempotency, payment/refund events) | 6.7 | ✅ | |
 | F-22 | Normal appointment: token allocation (atomic), validity, daily limit, hold→pay→confirm | 3.2, 5.6 | ✅ | |
-| F-23 | Premium booking flow UI: SlotPicker, patient details, price breakdown, countdown, Razorpay checkout, success page | 4.8, 12 | ⬜ | |
-| F-24 | Normal booking flow UI | 4.8 | ⬜ | |
-| F-25 | Receipt PDF + booking confirmation email (token/receipt) + doctor new-booking email | 6.6, 8 | ⬜ | |
+| F-23 | Premium booking flow UI: SlotPicker, patient details, price breakdown, countdown, Razorpay checkout, success page | 4.8, 12 | ✅ | |
+| F-24 | Normal booking flow UI | 4.8 | ✅ | |
+| F-25 | Receipt PDF + booking confirmation email (token/receipt) + doctor new-booking email | 6.6, 8 | ✅ | |
 | F-26 | Patient dashboard: my appointments, my doctors, payments, receipts, profile, no-cancel messaging | 4.5 | ⬜ | |
 
 ### Phase 3 – Home Visit & Doctor Operations
@@ -124,6 +124,40 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 24 — 2026-10-04 — Antigravity Agent
+Goal: F-25 Receipt PDF + booking confirmation email + doctor new-booking email
+Plan:
+- Install `pdfkit` for PDF generation.
+- Implement `pdf.service.js` to dynamically generate PDF receipts for bookings.
+- Implement `email.service.js` with Nodemailer (using Mailtrap sandbox configuration).
+- Add email templates for `BOOKING_CONFIRMED` and `NEW_BOOKING_DOCTOR` in `emailTemplates.js`.
+- Create `notification.service.js` to coordinate generating the PDF and attaching it to the patient email, while also notifying the doctor.
+- Update `payment.service.js` to trigger notifications asynchronously upon `CONFIRMED` status.
+- Add `GET /api/v1/appointments/:id/receipt` endpoint for downloading receipts.
+- Update `BookingSuccessPage.jsx` to download the receipt using the new API endpoint.
+Done:
+- All planned items completed. PDFs are generated dynamically without requiring cloud storage uploads, aligning with the PRD endpoint requirements for downloading receipts.
+Files/modules touched: `server/package.json`, `server/src/services/pdf.service.js`, `server/src/services/email.service.js`, `server/src/services/notification.service.js`, `server/src/templates/emailTemplates.js`, `server/src/services/payment.service.js`, `server/src/controllers/appointment.controller.js`, `server/src/routes/appointment.routes.js`, `frontend/src/features/public/pages/BookingSuccessPage.jsx`.
+NEXT STEP (specific): Start F-26 (Patient dashboard: my appointments, my doctors, payments, receipts).
+
+### Session 23 — 2026-10-04 — Antigravity Agent
+Goal: F-23 Premium booking flow UI & F-24 Normal booking flow UI
+Plan:
+- Write controllers and routes for appointment hold and payment verification mapping to `booking.service.js` and `payment.service.js`.
+- Create `BookingPage.jsx` orchestrating the 3-step checkout: Type/Slot Selection, Patient Details, Review & Pay.
+- Implement Razorpay Checkout integration with dynamic script loading and polling countdown.
+- Create `BookingSuccessPage.jsx` to render the booking receipt details with token / slot timing.
+Done:
+- Added `/api/v1/appointments/hold`, `/api/v1/payments/create-order`, `/api/v1/payments/verify`.
+- Added frontend routes `/doctors/:slug/book` and `/doctors/:slug/book/success`.
+- Integrated `react-day-picker` and conditional rendering for all 3 booking types.
+Files/modules touched: `server/src/controllers/appointment.controller.js`, `server/src/routes/appointment.routes.js`, `server/src/controllers/payment.controller.js`, `server/src/routes/payment.routes.js`, `server/src/app.js`, `frontend/src/features/public/pages/BookingPage.jsx`, `frontend/src/features/public/pages/BookingSuccessPage.jsx`, `frontend/src/features/public/api/booking.api.js`, `frontend/src/features/public/pages/DoctorDetailPage.jsx`, `frontend/src/App.jsx`.
+Tests added/updated: N/A (tested backend services earlier).
+How to verify manually: Click "Book Appointment" on a Doctor's detail page, select Premium/Normal, choose time if needed, enter details, and hit Pay. Razorpay overlay will pop up.
+Decisions made: Combined F-23 and F-24 into a single unified `BookingPage.jsx` component that dynamically adapts based on the `type` query parameter, ensuring DRY principles and a seamless UI.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-25 (Receipt PDF + booking confirmation email).
 
 ### Session 22 — 2026-10-04 — Antigravity Agent
 Goal: F-22 Normal appointment: token allocation (atomic), validity, daily limit, hold→pay→confirm

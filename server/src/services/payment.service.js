@@ -151,9 +151,11 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
         });
         await appt.save({ session });
 
-        payment.status = 'CAPTURED';
-        payment.razorpayPaymentId = razorpayPaymentId;
-        await payment.save({ session });
+        await Payment.updateOne(
+          { _id: payment._id },
+          { $set: { status: 'CAPTURED', razorpayPaymentId } },
+          { session }
+        );
 
         finalStatus = 'CONFIRMED';
       }
@@ -192,9 +194,11 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
           });
           await appt.save({ session });
 
-          payment.status = 'CAPTURED';
-          payment.razorpayPaymentId = razorpayPaymentId;
-          await payment.save({ session });
+          await Payment.updateOne(
+            { _id: payment._id },
+            { $set: { status: 'CAPTURED', razorpayPaymentId } },
+            { session }
+          );
 
           finalStatus = 'CONFIRMED_LATE';
         } else {
@@ -212,9 +216,11 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
           });
           await appt.save({ session });
 
-          payment.status = 'AUTO_REFUND_PENDING';
-          payment.razorpayPaymentId = razorpayPaymentId;
-          await payment.save({ session });
+          await Payment.updateOne(
+            { _id: payment._id },
+            { $set: { status: 'AUTO_REFUND_PENDING', razorpayPaymentId } },
+            { session }
+          );
 
           finalStatus = 'SLOT_LOST_REFUNDING';
         }
@@ -238,6 +244,16 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
       razorpayPaymentId,
       'Slot no longer available, full refund initiated',
     );
+  }
+
+  // Trigger notifications
+  if (finalStatus === 'CONFIRMED' || finalStatus === 'CONFIRMED_LATE') {
+    const notificationService = require('./notification.service');
+    // Run asynchronously without waiting
+    notificationService.sendBookingConfirmation(appointment._id).catch(err => {
+       const logger = require('../utils/logger');
+       logger.error(`Notification trigger failed: ${err.message}`);
+    });
   }
 
   return { status: finalStatus, appointmentId: appointment._id };

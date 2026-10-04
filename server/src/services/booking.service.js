@@ -39,7 +39,7 @@ const cleanupStaleHolds = async () => {
   );
 };
 
-const holdSlot = async (userId, doctorId, type, dateStr, startTime, endTime, idempotencyKey) => {
+const holdSlot = async (userId, doctorId, type, dateStr, startTime, endTime, idempotencyKey, patientDetails, addressSnapshot) => {
   // 1. Cleanup stale holds
   await cleanupStaleHolds();
 
@@ -150,6 +150,8 @@ const holdSlot = async (userId, doctorId, type, dateStr, startTime, endTime, ide
             slotLock,
             holdExpiresAt,
             idempotencyKey,
+            patientDetails,
+            addressSnapshot,
             fee: {
               consultationFee: feeSnapshot.consultationFee,
               convenienceFee: feeSnapshot.convenienceFee,

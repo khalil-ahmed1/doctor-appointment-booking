@@ -44,6 +44,40 @@ const templates = {
       </div>
     `;
   },
+
+  BOOKING_CONFIRMED: (data) => {
+    const { patientName, doctorName, bookingCode, type, dateStr, startTime, tokenLabel, amount, clinicAddress, supportEmail } = data;
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Booking Confirmed</h2>
+        <p>Hi ${patientName},</p>
+        <p>Your ${type} appointment with <strong>Dr. ${doctorName}</strong> is confirmed.</p>
+        <p><strong>Booking ID:</strong> ${bookingCode}</p>
+        <p><strong>Date:</strong> ${dateStr} ${startTime ? `at ${startTime}` : ''}</p>
+        ${tokenLabel ? `<p><strong>Queue Token:</strong> ${tokenLabel}</p>` : ''}
+        <p><strong>Amount Paid:</strong> INR ${amount}</p>
+        ${clinicAddress ? `<p><strong>Clinic Address:</strong> ${clinicAddress}</p>` : ''}
+        <p>A receipt has been attached to this email.</p>
+        <p><small>Note: Appointments cannot be cancelled by patients online. Please contact the clinic for assistance or support at ${supportEmail || 'support@example.com'}.</small></p>
+      </div>
+    `;
+  },
+
+  NEW_BOOKING_DOCTOR: (data) => {
+    const { doctorName, patientName, bookingCode, type, dateStr, startTime, tokenLabel, dashboardUrl } = data;
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>New Appointment Booking</h2>
+        <p>Hello Dr. ${doctorName},</p>
+        <p>You have a new ${type} booking.</p>
+        <p><strong>Patient:</strong> ${patientName}</p>
+        <p><strong>Booking ID:</strong> ${bookingCode}</p>
+        <p><strong>Date:</strong> ${dateStr} ${startTime ? `at ${startTime}` : ''}</p>
+        ${tokenLabel ? `<p><strong>Token:</strong> ${tokenLabel}</p>` : ''}
+        <p><a href="${dashboardUrl}" style="display: inline-block; padding: 10px 20px; color: #fff; background-color: #28a745; text-decoration: none; border-radius: 5px;">View Dashboard</a></p>
+      </div>
+    `;
+  }
 };
 
 const getTemplate = (templateName, data) => {

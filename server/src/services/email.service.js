@@ -23,7 +23,7 @@ const transporter = nodemailer.createTransport({
  * @param {string} templateName - Name of the template in emailTemplates.js
  * @param {object} data - Data to inject into the template
  */
-const sendEmail = async (to, subject, templateName, data = {}) => {
+const sendEmail = async (to, subject, templateName, data = {}, attachments = []) => {
   let emailLog;
   try {
     // 1. Create PENDING log
@@ -44,6 +44,7 @@ const sendEmail = async (to, subject, templateName, data = {}) => {
       to,
       subject,
       html,
+      attachments,
     });
 
     // 4. Update log to SENT
