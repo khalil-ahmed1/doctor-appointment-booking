@@ -85,7 +85,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-23 | Premium booking flow UI: SlotPicker, patient details, price breakdown, countdown, Razorpay checkout, success page | 4.8, 12 | ✅ | |
 | F-24 | Normal booking flow UI | 4.8 | ✅ | |
 | F-25 | Receipt PDF + booking confirmation email (token/receipt) + doctor new-booking email | 6.6, 8 | ✅ | |
-| F-26 | Patient dashboard: my appointments, my doctors, payments, receipts, profile, no-cancel messaging | 4.5 | ⬜ | |
+| F-26 | Patient dashboard: my appointments, my doctors, payments, receipts, profile, no-cancel messaging | 4.5 | ✅ | |
 
 ### Phase 3 – Home Visit & Doctor Operations
 | ID | Feature | PRD | Status | Notes |
@@ -124,6 +124,21 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 25 — 2026-10-04 — Antigravity Agent
+Goal: F-26 Patient dashboard: my appointments, my doctors, payments, receipts, profile, no-cancel messaging
+Plan:
+- Create `patient.controller.js` and `patient.routes.js` with endpoints for getting patient appointments, doctors, payments, and updating profile.
+- Add `PatientDashboardPage.jsx` container utilizing `shadcn` Tabs.
+- Build `AppointmentsTab.jsx` with upcoming/past filtering, a receipt download button, and a warning note that cancellations are restricted.
+- Build `DoctorsTab.jsx` to display a unique list of past booked doctors.
+- Build `PaymentsTab.jsx` for history with refunds.
+- Build `ProfileTab.jsx` allowing patients to edit basic demographics via React Hook Form and Zod.
+- Update `DashboardLayout.jsx` and `App.jsx` to correctly map the new `/patient/dashboard` route.
+Done:
+- Completed all API and frontend integrations.
+Files/modules touched: `server/src/controllers/patient.controller.js`, `server/src/routes/patient.routes.js`, `server/src/app.js`, `frontend/src/features/patient/pages/PatientDashboardPage.jsx`, `frontend/src/features/patient/components/*`, `frontend/src/layouts/DashboardLayout.jsx`, `frontend/src/App.jsx`.
+NEXT STEP (specific): Start Phase 3, F-27 (Razorpay Route: linked account creation/sync) OR skip to F-28 (Home Visit logic) if Route is currently blocked.
 
 ### Session 24 — 2026-10-04 — Antigravity Agent
 Goal: F-25 Receipt PDF + booking confirmation email + doctor new-booking email

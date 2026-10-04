@@ -86,11 +86,24 @@ export const DashboardLayout = () => {
       });
     }
 
-    return (
-      <Link to="/dashboard" className="block px-3 py-2 rounded-md bg-primary/10 text-primary font-medium">
-        Overview
-      </Link>
-    );
+    if (user.role === 'PATIENT') {
+      return (
+        <Link 
+          to="/patient/dashboard" 
+          className={cn(
+            "flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors",
+            location.pathname.startsWith('/patient/dashboard')
+              ? "bg-primary/10 text-primary" 
+              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+          )}
+        >
+          <LayoutDashboard className="h-4 w-4" />
+          Dashboard
+        </Link>
+      );
+    }
+
+    return null;
   };
 
   return (

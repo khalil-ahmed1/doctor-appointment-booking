@@ -28,6 +28,8 @@ import DoctorSchedulePage from './features/doctor/pages/DoctorSchedulePage';
 import BookingPage from './features/public/pages/BookingPage';
 import BookingSuccessPage from './features/public/pages/BookingSuccessPage';
 
+import PatientDashboardPage from './features/patient/pages/PatientDashboardPage';
+
 const queryClient = new QueryClient();
 
 function App() {
@@ -56,8 +58,8 @@ function App() {
               {/* Protected Dashboard Routes */}
               <Route element={<ProtectedRoute allowedRoles={['PATIENT', 'DOCTOR', 'ADMIN', 'SUB_ADMIN']} />}>
                 <Route element={<DashboardLayout />}>
-                  {/* Placeholders */}
-                  <Route path="/patient/dashboard" element={<div>Patient Dashboard Placeholder</div>} />
+                  {/* Dashboards */}
+                  <Route path="/patient/dashboard" element={<PatientDashboardPage />} />
                   <Route path="/doctor/dashboard" element={<div>Doctor Dashboard Placeholder</div>} />
                   <Route path="/admin/dashboard" element={<div>Admin Dashboard Placeholder</div>} />
                   
