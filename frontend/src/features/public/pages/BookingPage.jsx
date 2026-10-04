@@ -40,7 +40,9 @@ const BookingPage = () => {
   const [date, setDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [patientDetails, setPatientDetails] = useState({ name: user?.name || '', phone: user?.phone || '', age: '', gender: '', relation: 'SELF' });
-  const [address, setAddress] = useState({ line1: '', city: '', state: '', pincode: '' });
+  const [address, setAddress] = useState({ line1: '', city: '', state: '', pincode: '', location: { lat: 20.5937, lng: 78.9629 } });
+  const [saveAddress, setSaveAddress] = useState(false);
+  const [useSavedAddress, setUseSavedAddress] = useState('new');
   
   const [heldAppointment, setHeldAppointment] = useState(null);
   const [countdown, setCountdown] = useState(0);
@@ -87,7 +89,8 @@ const BookingPage = () => {
         endTime: end,
         idempotencyKey: `${Date.now()}`,
         patientDetails,
-        addressSnapshot: address
+        addressSnapshot: type === 'HOME_VISIT' ? address : undefined,
+        saveAddress: useSavedAddress === 'new' ? saveAddress : false,
       });
 
       setHeldAppointment(res);
@@ -317,6 +320,34 @@ const BookingPage = () => {
               {type === 'HOME_VISIT' && (
                 <div className="mt-6 space-y-4 pt-4 border-t">
                   <h3 className="font-medium">Visit Address</h3>
+                  
+                  {user?.savedAddresses && user.savedAddresses.length > 0 && (
+                     <div className="space-y-2 mb-4">
+                        <Label>Select Address</Label>
+                        <Select 
+                           value={useSavedAddress} 
+                           onValueChange={v => {
+                              setUseSavedAddress(v);
+                              if (v !== 'new') {
+                                 const addr = user.savedAddresses[parseInt(v)];
+                                 setAddress(addr);
+                              } else {
+                                 setAddress({ line1: '', city: '', state: '', pincode: '', location: { lat: 20.5937, lng: 78.9629 } });
+                              }
+                           }}
+                        >
+                           <SelectTrigger><SelectValue placeholder="Choose address" /></SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="new">-- Enter New Address --</SelectItem>
+                             {user.savedAddresses.map((addr, idx) => (
+                               <SelectItem key={idx} value={`${idx}`}>{addr.line1}, {addr.city} - {addr.pincode}</SelectItem>
+                             ))}
+                           </SelectContent>
+                        </Select>
+                     </div>
+                  )}
+
+                  {useSavedAddress === 'new' && (
                   <div className="space-y-4">
                      <div className="space-y-2">
                         <Label>Address Line 1</Label>
@@ -332,7 +363,21 @@ const BookingPage = () => {
                           <Input value={address.pincode} onChange={e => setAddress({...address, pincode: e.target.value})}/>
                         </div>
                      </div>
+                     <div className="space-y-2">
+                        <Label className="flex items-center gap-2 text-sm text-blue-600 cursor-pointer" onClick={() => {
+                           toast.success("Location coordinates updated from Map Pin");
+                           setAddress({...address, location: { lat: 28.6139, lng: 77.2090 }});
+                        }}>
+                           <MapPin className="w-4 h-4"/> Set Location via Map Pin (Mocked)
+                        </Label>
+                        <p className="text-xs text-muted-foreground">Current: {address.location?.lat?.toFixed(4)}, {address.location?.lng?.toFixed(4)}</p>
+                     </div>
+                     <div className="flex items-center space-x-2 pt-2">
+                       <input type="checkbox" id="saveAddr" checked={saveAddress} onChange={e => setSaveAddress(e.target.checked)} className="rounded border-slate-300"/>
+                       <Label htmlFor="saveAddr" className="text-sm font-normal">Save this address for future bookings</Label>
+                     </div>
                   </div>
+                  )}
                 </div>
               )}
             </CardContent>

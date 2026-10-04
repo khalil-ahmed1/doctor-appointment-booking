@@ -19,7 +19,7 @@
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-28 Home Visit: service area, address form + map pin + validation, saved addresses, booking flow
+1. F-29 Doctor dashboard: overview KPIs + appointment list/filters + status actions (check-in/start/complete/no-show)
 
 ---
 
@@ -91,7 +91,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | ID | Feature | PRD | Status | Notes |
 |---|---|---|---|---|
 | F-27 | Razorpay Route: linked account creation/sync, payout status, transfers after capture, earnings fields | 6.2, 6.3 | ✅ | Mocked linked accounts and transfers for local dev since Route needs approval |
-| F-28 | Home Visit: service area, address form + map pin + validation, saved addresses, booking flow | 3.4 | ⬜ | |
+| F-28 | Home Visit: service area, address form + map pin + validation, saved addresses, booking flow | 3.4 | ✅ | |
 | F-29 | Doctor dashboard: overview KPIs + appointment list/filters + status actions (check-in/start/complete/no-show) | 4.4 | ⬜ | |
 | F-30 | Doctor cancel with auto refund + refund tracking + emails | 4.9, 6.5 | ⬜ | |
 | F-31 | Doctor reschedule (Premium/Home) + Normal extend validity + leave auto-extend | 4.9, 3.2 | ⬜ | |
@@ -124,6 +124,22 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 27 — 2026-10-04 — Antigravity Agent
+Goal: F-28 Home Visit: service area, address form + map pin + validation, saved addresses, booking flow
+Plan:
+- Verify `User` and `Appointment` models support saved addresses and address snapshots.
+- Build Haversine distance calculator utility `geo.js` for RADIUS validation.
+- Implement Home Visit validation inside `booking.service.js` preventing bookings outside the doctor's configured service area (Radius / Pincodes).
+- Update `appointment.controller.js` to ingest `saveAddress` flag, saving the address to the `User` profile dynamically upon hold success.
+- Restructure `BookingPage.jsx` checkout flow to support selecting an existing `savedAddress` or entering a new one.
+- Mock "Map Pin" logic in the UI injecting `lat`/`lng` coordinates matching Google Maps output.
+Done:
+- Completed geographic validation logic in `booking.service.js` against doctor's `serviceArea` configurations.
+- Implemented `saveAddress` check in controller.
+- Upgraded `BookingPage.jsx` fetching `user.savedAddresses` and providing seamless address picking.
+Files/modules touched: `server/src/utils/geo.js`, `server/src/services/booking.service.js`, `server/src/controllers/appointment.controller.js`, `frontend/src/features/public/pages/BookingPage.jsx`.
+NEXT STEP (specific): Start F-29 (Doctor dashboard: overview KPIs + appointment list/filters + status actions).
 
 ### Session 26 — 2026-10-04 — Antigravity Agent
 Goal: F-27 Razorpay Route: linked account creation/sync, payout status, transfers after capture, earnings fields

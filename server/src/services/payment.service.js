@@ -154,7 +154,7 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
         await Payment.updateOne(
           { _id: payment._id },
           { $set: { status: 'CAPTURED', razorpayPaymentId } },
-          { session }
+          { session },
         );
 
         finalStatus = 'CONFIRMED';
@@ -197,7 +197,7 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
           await Payment.updateOne(
             { _id: payment._id },
             { $set: { status: 'CAPTURED', razorpayPaymentId } },
-            { session }
+            { session },
           );
 
           finalStatus = 'CONFIRMED_LATE';
@@ -219,7 +219,7 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
           await Payment.updateOne(
             { _id: payment._id },
             { $set: { status: 'AUTO_REFUND_PENDING', razorpayPaymentId } },
-            { session }
+            { session },
           );
 
           finalStatus = 'SLOT_LOST_REFUNDING';
@@ -250,12 +250,12 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
   if (finalStatus === 'CONFIRMED' || finalStatus === 'CONFIRMED_LATE') {
     const notificationService = require('./notification.service');
     // Run asynchronously without waiting
-    notificationService.sendBookingConfirmation(appointment._id).catch(err => {
-       const logger = require('../utils/logger');
-       logger.error(`Notification trigger failed: ${err.message}`);
+    notificationService.sendBookingConfirmation(appointment._id).catch((err) => {
+      const logger = require('../utils/logger');
+      logger.error(`Notification trigger failed: ${err.message}`);
     });
 
-    processTransfer(payment._id, appointment._id, razorpayPaymentId).catch(err => {
+    processTransfer(payment._id, appointment._id, razorpayPaymentId).catch((err) => {
       const logger = require('../utils/logger');
       logger.error(`Transfer process trigger failed: ${err.message}`);
     });
@@ -282,7 +282,7 @@ const processTransfer = async (paymentId, appointmentId, razorpayPaymentId) => {
       const rzpPayment = await razorpayService.fetchPayment(razorpayPaymentId);
       const actualFee = rzpPayment.fee || 0;
       const actualTax = rzpPayment.tax || 0;
-      
+
       payment.breakdown.actualGatewayFee = actualFee;
       payment.breakdown.actualGatewayGst = actualTax;
 
@@ -295,15 +295,20 @@ const processTransfer = async (paymentId, appointmentId, razorpayPaymentId) => {
     transferAmount = Math.max(0, transferAmount);
 
     if (transferAmount > 0) {
-      const transfer = await razorpayService.createTransfer(razorpayPaymentId, transferAmount, doctor.payout.linkedAccountId, {
-        appointmentId: appointment._id.toString()
-      });
+      const transfer = await razorpayService.createTransfer(
+        razorpayPaymentId,
+        transferAmount,
+        doctor.payout.linkedAccountId,
+        {
+          appointmentId: appointment._id.toString(),
+        },
+      );
 
       payment.transfers.push({
         razorpayTransferId: transfer.id,
         amount: transferAmount,
         status: transfer.status || 'processed',
-        processedAt: new Date()
+        processedAt: new Date(),
       });
     }
 
@@ -316,7 +321,7 @@ const processTransfer = async (paymentId, appointmentId, razorpayPaymentId) => {
       amount: 0,
       status: 'failed',
       errorReason: err.message,
-      processedAt: new Date()
+      processedAt: new Date(),
     });
     await payment.save();
   }

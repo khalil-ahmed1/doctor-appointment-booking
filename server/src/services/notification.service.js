@@ -8,11 +8,13 @@ const logger = require('../utils/logger');
 
 const sendBookingConfirmation = async (appointmentId) => {
   try {
-    const appointment = await Appointment.findById(appointmentId).populate('doctor').populate('patient');
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('doctor')
+      .populate('patient');
     if (!appointment) return;
 
     const payment = await Payment.findOne({ appointment: appointment._id });
-    
+
     // 1. Generate PDF Receipt
     let pdfBuffer = null;
     try {
@@ -24,7 +26,9 @@ const sendBookingConfirmation = async (appointmentId) => {
     // 2. Prepare patient email data
     const patientName = appointment.patientDetails?.name || appointment.patient?.name || 'Patient';
     const doctorName = appointment.doctor?.fullName;
-    const clinicAddress = appointment.doctor?.clinic?.name ? `${appointment.doctor.clinic.name}, ${appointment.doctor.clinic.city}` : '';
+    const clinicAddress = appointment.doctor?.clinic?.name
+      ? `${appointment.doctor.clinic.name}, ${appointment.doctor.clinic.city}`
+      : '';
     const amount = appointment.fee?.total ? (appointment.fee.total / 100).toFixed(2) : '0.00';
 
     const patientEmailData = {
@@ -39,11 +43,15 @@ const sendBookingConfirmation = async (appointmentId) => {
       clinicAddress,
     };
 
-    const attachments = pdfBuffer ? [{
-      filename: `Receipt-${appointment.bookingCode}.pdf`,
-      content: pdfBuffer,
-      contentType: 'application/pdf',
-    }] : [];
+    const attachments = pdfBuffer
+      ? [
+          {
+            filename: `Receipt-${appointment.bookingCode}.pdf`,
+            content: pdfBuffer,
+            contentType: 'application/pdf',
+          },
+        ]
+      : [];
 
     // Send to Patient
     if (appointment.patient?.email) {
@@ -52,7 +60,7 @@ const sendBookingConfirmation = async (appointmentId) => {
         `Booking Confirmed: Dr. ${doctorName}`,
         'BOOKING_CONFIRMED',
         patientEmailData,
-        attachments
+        attachments,
       );
     }
 
@@ -72,7 +80,7 @@ const sendBookingConfirmation = async (appointmentId) => {
           startTime: appointment.startTime,
           tokenLabel: appointment.tokenLabel,
           dashboardUrl: `${env.CLIENT_URL}/doctor/dashboard`,
-        }
+        },
       );
     }
   } catch (error) {

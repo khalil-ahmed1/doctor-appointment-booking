@@ -60,7 +60,7 @@ const createLinkedAccount = async (accountData) => {
   return {
     id: 'acc_' + crypto.randomBytes(6).toString('hex'),
     status: 'created',
-    reference_id: accountData.reference_id
+    reference_id: accountData.reference_id,
   };
 };
 
@@ -73,7 +73,7 @@ const createTransfer = async (paymentId, amount, accountId, notes = {}) => {
     recipient: accountId,
     amount: amount,
     status: 'processed',
-    notes
+    notes,
   };
 };
 

@@ -39,7 +39,17 @@ const cleanupStaleHolds = async () => {
   );
 };
 
-const holdSlot = async (userId, doctorId, type, dateStr, startTime, endTime, idempotencyKey, patientDetails, addressSnapshot) => {
+const holdSlot = async (
+  userId,
+  doctorId,
+  type,
+  dateStr,
+  startTime,
+  endTime,
+  idempotencyKey,
+  patientDetails,
+  addressSnapshot,
+) => {
   // 1. Cleanup stale holds
   await cleanupStaleHolds();
 
@@ -101,6 +111,39 @@ const holdSlot = async (userId, doctorId, type, dateStr, startTime, endTime, ide
       }
     }
   } else {
+    if (type === 'HOME_VISIT') {
+      if (!doctor.types?.homeVisit?.enabled) {
+        throw new ApiError(400, 'TYPE_DISABLED', 'Home visits are not enabled for this doctor');
+      }
+      
+      if (!addressSnapshot) {
+        throw new ApiError(400, 'VALIDATION_ERROR', 'Address is required for home visit');
+      }
+
+      const sa = doctor.types.homeVisit.serviceArea || {};
+      if (sa.mode === 'PINCODES') {
+        if (!sa.pincodes || !sa.pincodes.includes(addressSnapshot.pincode)) {
+          throw new ApiError(400, 'SERVICE_AREA_ERROR', 'Doctor does not serve this pincode');
+        }
+      } else {
+        // RADIUS mode
+        const { getDistanceFromLatLonInKm } = require('../utils/geo');
+        if (!doctor.clinic?.location?.coordinates || !addressSnapshot.location) {
+           throw new ApiError(400, 'VALIDATION_ERROR', 'Invalid location coordinates for service area check');
+        }
+        const [docLng, docLat] = doctor.clinic.location.coordinates;
+        const dist = getDistanceFromLatLonInKm(docLat, docLng, addressSnapshot.location.lat, addressSnapshot.location.lng);
+        const radius = sa.radiusKm || 10;
+        if (dist > radius) {
+           throw new ApiError(400, 'SERVICE_AREA_ERROR', `Doctor does not serve this area (Distance: ${dist.toFixed(1)}km, Max: ${radius}km)`);
+        }
+      }
+    } else if (type === 'PREMIUM') {
+      if (!doctor.types?.premium?.enabled) {
+        throw new ApiError(400, 'TYPE_DISABLED', 'Premium appointments are not enabled for this doctor');
+      }
+    }
+
     // Validate slot logic for PREMIUM and HOME_VISIT
     const slots = await slotService.getSlotsForDate(doctor.slug, type, dateStr);
     targetSlot = slots.find((s) => s.startTime === startTime && s.endTime === endTime);

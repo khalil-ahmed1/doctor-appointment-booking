@@ -22,7 +22,7 @@ const generateReceiptPDF = (appointment, payment) => {
         .font('Helvetica-Bold')
         .text(`Dr. ${appointment.doctor.fullName || 'Doctor'}`)
         .moveDown(0.5);
-      
+
       const clinic = appointment.doctor.clinic || {};
       doc.font('Helvetica');
       if (clinic.name) doc.text(clinic.name);
@@ -53,7 +53,9 @@ const generateReceiptPDF = (appointment, payment) => {
       doc.font('Helvetica-Bold').text('Payment Summary:').moveDown(0.5);
       doc.font('Helvetica').text(`Payment ID: ${payment?.razorpayPaymentId || 'N/A'}`);
       doc.text(`Status: ${payment?.status || 'PAID'}`);
-      doc.text(`Date: ${payment?.createdAt ? new Date(payment.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`);
+      doc.text(
+        `Date: ${payment?.createdAt ? new Date(payment.createdAt).toLocaleDateString() : new Date().toLocaleDateString()}`,
+      );
       doc.moveDown();
 
       // Amount Breakdown
@@ -68,7 +70,12 @@ const generateReceiptPDF = (appointment, payment) => {
 
       // Footer
       doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke().moveDown();
-      doc.font('Helvetica-Oblique').fontSize(10).text('Thank you for using our platform. This is an auto-generated receipt.', { align: 'center' });
+      doc
+        .font('Helvetica-Oblique')
+        .fontSize(10)
+        .text('Thank you for using our platform. This is an auto-generated receipt.', {
+          align: 'center',
+        });
 
       doc.end();
     } catch (error) {

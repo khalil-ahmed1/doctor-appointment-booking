@@ -46,7 +46,18 @@ const templates = {
   },
 
   BOOKING_CONFIRMED: (data) => {
-    const { patientName, doctorName, bookingCode, type, dateStr, startTime, tokenLabel, amount, clinicAddress, supportEmail } = data;
+    const {
+      patientName,
+      doctorName,
+      bookingCode,
+      type,
+      dateStr,
+      startTime,
+      tokenLabel,
+      amount,
+      clinicAddress,
+      supportEmail,
+    } = data;
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>Booking Confirmed</h2>
@@ -64,7 +75,16 @@ const templates = {
   },
 
   NEW_BOOKING_DOCTOR: (data) => {
-    const { doctorName, patientName, bookingCode, type, dateStr, startTime, tokenLabel, dashboardUrl } = data;
+    const {
+      doctorName,
+      patientName,
+      bookingCode,
+      type,
+      dateStr,
+      startTime,
+      tokenLabel,
+      dashboardUrl,
+    } = data;
     return `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2>New Appointment Booking</h2>
@@ -77,7 +97,7 @@ const templates = {
         <p><a href="${dashboardUrl}" style="display: inline-block; padding: 10px 20px; color: #fff; background-color: #28a745; text-decoration: none; border-radius: 5px;">View Dashboard</a></p>
       </div>
     `;
-  }
+  },
 };
 
 const getTemplate = (templateName, data) => {

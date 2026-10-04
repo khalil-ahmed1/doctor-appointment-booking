@@ -20,7 +20,7 @@ const processWebhookEvent = async (eventDoc) => {
     } else if (eventType.startsWith('account.')) {
       const accountEntity = payload.payload.account.entity;
       const accountId = accountEntity.id;
-      
+
       let newStatus = 'UNDER_REVIEW';
       if (eventType === 'account.activated') newStatus = 'ACTIVE';
       else if (eventType === 'account.needs_clarification') newStatus = 'NEEDS_CLARIFICATION';
@@ -30,12 +30,12 @@ const processWebhookEvent = async (eventDoc) => {
       const DoctorProfile = require('../models/DoctorProfile');
       await DoctorProfile.updateOne(
         { 'payout.linkedAccountId': accountId },
-        { 
-           $set: { 
-             'payout.status': newStatus,
-             'payout.lastSyncedAt': new Date()
-           }
-        }
+        {
+          $set: {
+            'payout.status': newStatus,
+            'payout.lastSyncedAt': new Date(),
+          },
+        },
       );
     }
     // Add logic for refund.processed, refund.failed etc. in Phase 3
