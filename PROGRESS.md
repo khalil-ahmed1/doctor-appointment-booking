@@ -19,7 +19,7 @@
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-35 Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireNormalTokens
+1. F-36 Doctor earnings ledger + CSV export
 
 ---
 
@@ -98,7 +98,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-32 | Normal queue board (ordered by `tokenSeq`) | 4.4 | ✅ | |
 | F-33 | Reminders (Premium/Home/Normal) via scheduled jobs with sent-flags | 8 | ✅ | |
 | F-34 | In-app notifications (bell + list) | 8 | ✅ | |
-| F-35 | Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireNormalTokens | 13 | ⬜ | |
+| F-35 | Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireNormalTokens | 13 | ✅ | |
 | F-36 | Doctor earnings ledger + CSV export | 4.4, 6.4 | ⬜ | |
 
 ### Phase 4 – Subscription & Admin Controls
@@ -124,6 +124,26 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 34 — 2026-10-04 — Antigravity Agent
+Goal: F-35 Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireNormalTokens
+Plan:
+- Create `maintenance.job.js` in `server/src/jobs/`
+- Job 1: `expireHolds` runs every minute to mark `PENDING_PAYMENT` holds as `EXPIRED` and unlock the slot.
+- Job 2: `expireNormalTokens` runs every hour to mark unused confirmed normal tokens past `validUntil` as `EXPIRED_TOKEN`.
+- Job 3: `reconcilePayments` runs every 10 min to check `CREATED` or `ATTEMPTED` payments > 15m old. It will ping Razorpay's API and either finalize payment (calling `finalizePayment`) or fail them.
+- Job 4: `retryTransfersAndRefunds` runs every 15 min to retry refunds and transfers that are marked as `FAILED` or `failed` in the DB.
+- Hook into `server.js` startup via `startMaintenanceJobs()`.
+Done:
+- Created the jobs precisely adhering to PRD using `node-cron`.
+- Reused `paymentService.finalizePayment` logic securely for reconciliations.
+- Ensured idempotency within jobs.
+Files/modules touched: `server/src/jobs/maintenance.job.js`, `server/src/server.js`.
+Tests added/updated: None specifically for this cron, checked via linting.
+How to verify manually: The jobs will run periodically on their cron schedules in the background of `npm run dev`. You can observe logs printing when they execute.
+Decisions made: Used existing `node-cron` package.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-36 (Doctor earnings ledger + CSV export).
 
 ### Session 33 — 2026-10-04 — Antigravity Agent
 Goal: F-34 In-app notifications (bell + list)
