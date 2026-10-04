@@ -9,7 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 
@@ -24,14 +30,20 @@ const ProfileTab = () => {
   const { user, setUser } = useAuth();
   const queryClient = useQueryClient();
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: user?.name || '',
       phone: user?.phone || '',
       gender: user?.gender || '',
       dob: user?.dob ? new Date(user.dob).toISOString().split('T')[0] : '',
-    }
+    },
   });
 
   const genderValue = watch('gender');
@@ -53,7 +65,7 @@ const ProfileTab = () => {
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to update profile');
-    }
+    },
   });
 
   const onSubmit = (data) => {
@@ -74,13 +86,13 @@ const ProfileTab = () => {
             <Label htmlFor="email">Email (Read Only)</Label>
             <Input id="email" value={user?.email || ''} disabled />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
             <Input id="name" {...register('name')} />
             {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="phone">Phone Number</Label>
             <Input id="phone" {...register('phone')} />
@@ -101,7 +113,7 @@ const ProfileTab = () => {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="dob">Date of Birth</Label>
               <Input type="date" id="dob" {...register('dob')} />

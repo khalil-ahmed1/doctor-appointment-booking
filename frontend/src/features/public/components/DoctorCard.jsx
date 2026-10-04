@@ -49,7 +49,7 @@ const DoctorCard = ({ doctor }) => {
               )}
             </h3>
             <p className="text-sm text-slate-500 line-clamp-1 mb-1">
-              {doctor.headline || doctor.specializations?.map(s => s.name).join(', ')}
+              {doctor.headline || doctor.specializations?.map((s) => s.name).join(', ')}
             </p>
             <div className="flex items-center gap-3 text-sm text-slate-600 mb-2">
               <span className="flex items-center gap-1">
@@ -62,7 +62,8 @@ const DoctorCard = ({ doctor }) => {
             <div className="flex items-start gap-1 text-sm text-slate-500 line-clamp-2">
               <MapPin className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>
-                {doctor.clinic?.city ? `${doctor.clinic.city}, ` : ''}{doctor.clinic?.state || 'Location available'}
+                {doctor.clinic?.city ? `${doctor.clinic.city}, ` : ''}
+                {doctor.clinic?.state || 'Location available'}
               </span>
             </div>
           </div>
@@ -91,7 +92,8 @@ const DoctorCard = ({ doctor }) => {
         <div>
           <p className="text-xs text-slate-500 mb-0.5">Consultation Fee</p>
           <p className="font-semibold text-slate-900">
-            {minFee ? formatFee(minFee) : 'Varies'} {minFee && <span className="text-xs font-normal text-slate-500">onwards</span>}
+            {minFee ? formatFee(minFee) : 'Varies'}{' '}
+            {minFee && <span className="text-xs font-normal text-slate-500">onwards</span>}
           </p>
         </div>
         <Link

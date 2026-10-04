@@ -1,16 +1,29 @@
 import { useQuery } from '@tanstack/react-query';
 import { doctorApi } from '../api/doctor.api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Activity, CheckCircle, Clock, CalendarDays, ListOrdered, Wallet, CreditCard, Loader2 } from 'lucide-react';
+import {
+  Activity,
+  CheckCircle,
+  Clock,
+  CalendarDays,
+  ListOrdered,
+  Wallet,
+  CreditCard,
+  Loader2,
+} from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 export default function DoctorDashboardPage() {
-  const { data: kpis, isLoading, isError } = useQuery({
+  const {
+    data: kpis,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['doctor-dashboard-kpis'],
     queryFn: doctorApi.getDashboardKPIs,
-    refetchInterval: 30000 // refresh every 30s
+    refetchInterval: 30000, // refresh every 30s
   });
 
   if (isLoading) {
@@ -26,7 +39,9 @@ export default function DoctorDashboardPage() {
       <div className="p-4">
         <Alert variant="destructive">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription>Failed to load dashboard data. Please try again later.</AlertDescription>
+          <AlertDescription>
+            Failed to load dashboard data. Please try again later.
+          </AlertDescription>
         </Alert>
       </div>
     );
@@ -54,7 +69,10 @@ export default function DoctorDashboardPage() {
         <Alert variant="warning" className="bg-yellow-100 border-yellow-400 text-yellow-800">
           <AlertTitle>Subscription Grace Period</AlertTitle>
           <AlertDescription className="flex items-center justify-between mt-2">
-            <span>Your subscription has ended. You have a few days to renew before your profile is hidden.</span>
+            <span>
+              Your subscription has ended. You have a few days to renew before your profile is
+              hidden.
+            </span>
             <Button size="sm" variant="outline" className="border-yellow-400" asChild>
               <Link to="/doctor/subscription">Renew Now</Link>
             </Button>
@@ -81,7 +99,7 @@ export default function DoctorDashboardPage() {
             <div className="text-2xl font-bold">{kpis.today.confirmed}</div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Today Pending/Checkout</CardTitle>

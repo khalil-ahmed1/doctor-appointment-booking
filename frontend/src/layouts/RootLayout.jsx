@@ -18,8 +18,18 @@ export const RootLayout = () => {
           </Link>
 
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/doctors" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Find Doctors</Link>
-            <Link to="/#specialties" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">Specialties</Link>
+            <Link
+              to="/doctors"
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+            >
+              Find Doctors
+            </Link>
+            <Link
+              to="/#specialties"
+              className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+            >
+              Specialties
+            </Link>
           </nav>
 
           <div className="flex items-center space-x-4">
@@ -27,7 +37,11 @@ export const RootLayout = () => {
               <div className="flex items-center gap-4">
                 <NotificationBell />
                 <Link
-                  to={user.role === 'PATIENT' ? '/patient/dashboard' : `/${user.role.toLowerCase()}/dashboard`}
+                  to={
+                    user.role === 'PATIENT'
+                      ? '/patient/dashboard'
+                      : `/${user.role.toLowerCase()}/dashboard`
+                  }
                   className="hidden sm:flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-blue-600"
                 >
                   <LayoutDashboard className="w-4 h-4" /> Dashboard
@@ -35,14 +49,28 @@ export const RootLayout = () => {
                 <div className="h-8 w-8 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center font-bold text-sm">
                   {user.name.charAt(0)}
                 </div>
-                <button onClick={logout} className="text-slate-500 hover:text-red-600 transition-colors" title="Logout">
+                <button
+                  onClick={logout}
+                  className="text-slate-500 hover:text-red-600 transition-colors"
+                  title="Logout"
+                >
                   <LogOut className="w-5 h-5" />
                 </button>
               </div>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-medium text-slate-700 hover:text-blue-600 hidden sm:block">Log in</Link>
-                <Link to="/register" className="text-sm font-medium bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">Sign up</Link>
+                <Link
+                  to="/login"
+                  className="text-sm font-medium text-slate-700 hover:text-blue-600 hidden sm:block"
+                >
+                  Log in
+                </Link>
+                <Link
+                  to="/register"
+                  className="text-sm font-medium bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  Sign up
+                </Link>
               </>
             )}
           </div>
@@ -63,29 +91,58 @@ export const RootLayout = () => {
               <span className="font-bold text-lg text-slate-900 tracking-tight">DocBook</span>
             </Link>
             <p className="text-sm text-slate-500 mb-6">
-              Making quality healthcare accessible. Book appointments with the best doctors instantly.
+              Making quality healthcare accessible. Book appointments with the best doctors
+              instantly.
             </p>
           </div>
           <div>
             <h4 className="font-semibold text-slate-900 mb-4">For Patients</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><Link to="/doctors" className="hover:text-blue-600">Search for Doctors</Link></li>
-              <li><Link to="/login" className="hover:text-blue-600">Login</Link></li>
-              <li><Link to="/register" className="hover:text-blue-600">Register</Link></li>
+              <li>
+                <Link to="/doctors" className="hover:text-blue-600">
+                  Search for Doctors
+                </Link>
+              </li>
+              <li>
+                <Link to="/login" className="hover:text-blue-600">
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link to="/register" className="hover:text-blue-600">
+                  Register
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold text-slate-900 mb-4">For Doctors</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><Link to="/login" className="hover:text-blue-600">Doctor Dashboard</Link></li>
+              <li>
+                <Link to="/login" className="hover:text-blue-600">
+                  Doctor Dashboard
+                </Link>
+              </li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold text-slate-900 mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-slate-600">
-              <li><a href="#" className="hover:text-blue-600">Contact Us</a></li>
-              <li><a href="#" className="hover:text-blue-600">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-blue-600">Privacy Policy</a></li>
+              <li>
+                <a href="#" className="hover:text-blue-600">
+                  Contact Us
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-blue-600">
+                  Terms of Service
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-blue-600">
+                  Privacy Policy
+                </a>
+              </li>
             </ul>
           </div>
         </div>
@@ -93,7 +150,6 @@ export const RootLayout = () => {
           <p>© 2026 DocBook. All rights reserved.</p>
         </div>
       </footer>
-
     </div>
   );
 };

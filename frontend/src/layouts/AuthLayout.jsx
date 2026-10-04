@@ -14,7 +14,12 @@ export const AuthLayout = () => {
 
   // If already logged in, redirect to dashboard or home
   if (user) {
-    return <Navigate to={user.role === 'PATIENT' ? '/' : `/${user.role.toLowerCase()}/dashboard`} replace />;
+    return (
+      <Navigate
+        to={user.role === 'PATIENT' ? '/' : `/${user.role.toLowerCase()}/dashboard`}
+        replace
+      />
+    );
   }
 
   return (

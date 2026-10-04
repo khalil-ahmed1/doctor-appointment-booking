@@ -29,7 +29,7 @@ export function GallerySettings({ profile, isExpired }) {
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to upload picture');
       setIsUploadingPic(false);
-    }
+    },
   });
 
   const uploadGalleryMutation = useMutation({
@@ -42,7 +42,7 @@ export function GallerySettings({ profile, isExpired }) {
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to upload gallery image');
       setIsUploadingGallery(false);
-    }
+    },
   });
 
   const deleteGalleryMutation = useMutation({
@@ -50,7 +50,7 @@ export function GallerySettings({ profile, isExpired }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['doctorProfile'] });
       toast.success('Image deleted');
-    }
+    },
   });
 
   const handlePicUpload = (e) => {
@@ -87,16 +87,19 @@ export function GallerySettings({ profile, isExpired }) {
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="pic-upload" className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2">
+            <Label
+              htmlFor="pic-upload"
+              className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+            >
               <Upload className="mr-2 h-4 w-4" />
               {isUploadingPic ? 'Uploading...' : 'Upload New Picture'}
             </Label>
-            <Input 
-              id="pic-upload" 
-              type="file" 
-              accept="image/jpeg,image/png,image/webp" 
-              className="hidden" 
-              onChange={handlePicUpload} 
+            <Input
+              id="pic-upload"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handlePicUpload}
               disabled={isUploadingPic || isExpired}
             />
             <p className="text-xs text-muted-foreground">JPEG, PNG, or WebP. Max 5MB.</p>
@@ -109,16 +112,19 @@ export function GallerySettings({ profile, isExpired }) {
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium">Clinic Gallery ({gallery.length}/12)</h3>
           <div>
-            <Label htmlFor="gallery-upload" className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3">
+            <Label
+              htmlFor="gallery-upload"
+              className="cursor-pointer inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3"
+            >
               <Upload className="mr-2 h-4 w-4" />
               {isUploadingGallery ? 'Uploading...' : 'Add Photo'}
             </Label>
-            <Input 
-              id="gallery-upload" 
-              type="file" 
-              accept="image/jpeg,image/png,image/webp" 
-              className="hidden" 
-              onChange={handleGalleryUpload} 
+            <Input
+              id="gallery-upload"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleGalleryUpload}
               disabled={isUploadingGallery || gallery.length >= 12 || isExpired}
             />
           </div>
@@ -131,11 +137,18 @@ export function GallerySettings({ profile, isExpired }) {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {gallery.map((img) => (
-              <div key={img._id} className="group relative aspect-square rounded-md overflow-hidden bg-muted border">
-                <img src={img.url} alt={img.caption || 'Clinic photo'} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+              <div
+                key={img._id}
+                className="group relative aspect-square rounded-md overflow-hidden bg-muted border"
+              >
+                <img
+                  src={img.url}
+                  alt={img.caption || 'Clinic photo'}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                />
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button 
-                    variant="destructive" 
+                  <Button
+                    variant="destructive"
                     size="icon"
                     onClick={() => deleteGalleryMutation.mutate(img._id)}
                     disabled={deleteGalleryMutation.isPending || isExpired}
@@ -154,8 +167,18 @@ export function GallerySettings({ profile, isExpired }) {
 
 function UserPlaceholder() {
   return (
-    <svg className="h-12 w-12 text-muted-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+    <svg
+      className="h-12 w-12 text-muted-foreground/50"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={1}
+        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+      />
     </svg>
   );
 }

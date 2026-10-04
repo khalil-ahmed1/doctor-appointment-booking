@@ -9,12 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const planSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -37,7 +32,12 @@ export default function PlansPage() {
     queryFn: () => adminApi.getPlans(),
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(planSchema),
     defaultValues: {
       name: '',
@@ -101,7 +101,14 @@ export default function PlansPage() {
       });
     } else {
       reset({
-        name: '', code: '', durationDays: 30, price: 0, gstPercent: 18, isActive: true, displayOrder: 0, features: ''
+        name: '',
+        code: '',
+        durationDays: 30,
+        price: 0,
+        gstPercent: 18,
+        isActive: true,
+        displayOrder: 0,
+        features: '',
       });
     }
     setIsModalOpen(true);
@@ -116,7 +123,7 @@ export default function PlansPage() {
     const payload = {
       ...values,
       price: Math.round(values.price * 100), // INR to paise
-      features: values.features.split('\n').filter(f => f.trim() !== ''),
+      features: values.features.split('\n').filter((f) => f.trim() !== ''),
     };
 
     if (editingPlan) {
@@ -148,9 +155,13 @@ export default function PlansPage() {
                 <Button variant="ghost" size="icon" onClick={() => openModal(plan)}>
                   <Edit className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => {
-                  if (window.confirm('Delete this plan?')) deleteMutation.mutate(plan._id);
-                }}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    if (window.confirm('Delete this plan?')) deleteMutation.mutate(plan._id);
+                  }}
+                >
                   <Trash2 className="h-4 w-4 text-red-500" />
                 </Button>
               </div>
@@ -165,7 +176,9 @@ export default function PlansPage() {
                   <li key={i}>{f}</li>
                 ))}
               </ul>
-              {!plan.isActive && <div className="mt-4 text-red-500 text-sm font-semibold">INACTIVE</div>}
+              {!plan.isActive && (
+                <div className="mt-4 text-red-500 text-sm font-semibold">INACTIVE</div>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -191,19 +204,25 @@ export default function PlansPage() {
               <div>
                 <label className="text-sm font-medium">Duration (Days)</label>
                 <Input type="number" {...register('durationDays', { valueAsNumber: true })} />
-                {errors.durationDays && <p className="text-red-500 text-sm mt-1">{errors.durationDays.message}</p>}
+                {errors.durationDays && (
+                  <p className="text-red-500 text-sm mt-1">{errors.durationDays.message}</p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">Price (INR, Excl. GST)</label>
                 <Input type="number" step="0.01" {...register('price', { valueAsNumber: true })} />
-                {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>}
+                {errors.price && (
+                  <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium">GST %</label>
                 <Input type="number" {...register('gstPercent', { valueAsNumber: true })} />
-                {errors.gstPercent && <p className="text-red-500 text-sm mt-1">{errors.gstPercent.message}</p>}
+                {errors.gstPercent && (
+                  <p className="text-red-500 text-sm mt-1">{errors.gstPercent.message}</p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">Display Order</label>
@@ -220,11 +239,15 @@ export default function PlansPage() {
             </div>
             <div className="flex items-center gap-2">
               <input type="checkbox" id="isActive" {...register('isActive')} />
-              <label htmlFor="isActive" className="text-sm font-medium">Is Active (Visible)</label>
+              <label htmlFor="isActive" className="text-sm font-medium">
+                Is Active (Visible)
+              </label>
             </div>
 
             <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onClick={closeModal}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={closeModal}>
+                Cancel
+              </Button>
               <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
                 {editingPlan ? 'Update Plan' : 'Create Plan'}
               </Button>

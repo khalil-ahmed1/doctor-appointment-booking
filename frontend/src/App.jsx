@@ -71,7 +71,11 @@ function App() {
               </Route>
 
               {/* Protected Dashboard Routes */}
-              <Route element={<ProtectedRoute allowedRoles={['PATIENT', 'DOCTOR', 'ADMIN', 'SUB_ADMIN']} />}>
+              <Route
+                element={
+                  <ProtectedRoute allowedRoles={['PATIENT', 'DOCTOR', 'ADMIN', 'SUB_ADMIN']} />
+                }
+              >
                 <Route element={<DashboardLayout />}>
                   {/* Dashboards */}
                   <Route path="/patient/dashboard" element={<PatientDashboardPage />} />
@@ -79,11 +83,11 @@ function App() {
                   <Route path="/doctor/dashboard" element={<DoctorDashboardPage />} />
                   <Route path="/doctor/notifications" element={<NotificationsPage />} />
                   <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
-                  
+
                   {/* Booking Flow */}
                   <Route path="/doctors/:slug/book" element={<BookingPage />} />
                   <Route path="/doctors/:slug/book/success" element={<BookingSuccessPage />} />
-                  
+
                   {/* Doctor Features */}
                   <Route path="/doctor/profile" element={<DoctorProfilePage />} />
                   <Route path="/doctor/fees" element={<DoctorFeesPage />} />
@@ -92,7 +96,7 @@ function App() {
                   <Route path="/doctor/queue" element={<NormalQueuePage />} />
                   <Route path="/doctor/earnings" element={<DoctorEarningsPage />} />
                   <Route path="/doctor/subscription" element={<DoctorSubscriptionPage />} />
-                  
+
                   {/* Admin Features */}
                   <Route path="/admin/doctors" element={<DoctorsListPage />} />
                   <Route path="/admin/doctors/new" element={<DoctorCreatePage />} />

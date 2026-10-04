@@ -59,12 +59,18 @@ export default function SubscriptionsListPage() {
               <TableBody>
                 {subscriptions.map((sub) => (
                   <TableRow key={sub._id}>
-                    <TableCell className="font-medium">
-                      {sub.doctor?.fullName}
-                    </TableCell>
+                    <TableCell className="font-medium">{sub.doctor?.fullName}</TableCell>
                     <TableCell>{sub.plan?.name || 'Manual Grant'}</TableCell>
                     <TableCell>
-                      <Badge variant={sub.type === 'TRIAL' ? 'outline' : sub.type === 'ADMIN_GRANT' ? 'secondary' : 'default'}>
+                      <Badge
+                        variant={
+                          sub.type === 'TRIAL'
+                            ? 'outline'
+                            : sub.type === 'ADMIN_GRANT'
+                              ? 'secondary'
+                              : 'default'
+                        }
+                      >
                         {sub.type}
                       </Badge>
                     </TableCell>

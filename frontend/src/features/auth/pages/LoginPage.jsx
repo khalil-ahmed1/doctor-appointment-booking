@@ -6,7 +6,14 @@ import * as z from 'zod';
 import { useAuth } from '../../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
@@ -21,7 +28,11 @@ export const LoginPage = () => {
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(loginSchema),
   });
 
@@ -40,7 +51,9 @@ export const LoginPage = () => {
         navigate(role === 'PATIENT' ? '/' : `/${role.toLowerCase()}/dashboard`, { replace: true });
       }
     } catch (error) {
-      toast.error(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to login');
+      toast.error(
+        error.response?.data?.error?.message || error.response?.data?.message || 'Failed to login',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +62,9 @@ export const LoginPage = () => {
   return (
     <Card className="w-full max-w-md shadow-lg border-primary/20">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold tracking-tight text-center">Welcome back</CardTitle>
+        <CardTitle className="text-2xl font-bold tracking-tight text-center">
+          Welcome back
+        </CardTitle>
         <CardDescription className="text-center">
           Enter your email and password to access your account
         </CardDescription>
@@ -70,7 +85,10 @@ export const LoginPage = () => {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
-              <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+              <Link
+                to="/forgot-password"
+                className="text-sm font-medium text-primary hover:underline"
+              >
                 Forgot password?
               </Link>
             </div>
@@ -80,7 +98,9 @@ export const LoginPage = () => {
               {...register('password')}
               className={errors.password ? 'border-destructive' : ''}
             />
-            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+            {errors.password && (
+              <p className="text-sm text-destructive">{errors.password.message}</p>
+            )}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
@@ -89,7 +109,10 @@ export const LoginPage = () => {
           </Button>
           <div className="text-sm text-center text-muted-foreground">
             Don't have an account?{' '}
-            <Link to={`/register?${searchParams.toString()}`} className="text-primary hover:underline font-medium">
+            <Link
+              to={`/register?${searchParams.toString()}`}
+              className="text-primary hover:underline font-medium"
+            >
               Create one
             </Link>
           </div>

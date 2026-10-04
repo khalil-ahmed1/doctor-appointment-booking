@@ -117,7 +117,10 @@ export const doctorApi = {
   },
 
   rescheduleAppointment: async ({ id, dateStr, startTime }) => {
-    const response = await api.patch(`/doctor/appointments/${id}/reschedule`, { dateStr, startTime });
+    const response = await api.patch(`/doctor/appointments/${id}/reschedule`, {
+      dateStr,
+      startTime,
+    });
     return response.data.data;
   },
 
@@ -127,9 +130,9 @@ export const doctorApi = {
   },
 
   exportEarningsCSV: async (params) => {
-    const response = await api.get('/doctor/earnings/export', { 
+    const response = await api.get('/doctor/earnings/export', {
       params,
-      responseType: 'blob' // Important for file download
+      responseType: 'blob', // Important for file download
     });
     return response.data;
   },

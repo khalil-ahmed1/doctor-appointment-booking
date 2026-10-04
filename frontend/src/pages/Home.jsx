@@ -12,16 +12,19 @@ export const Home = () => {
           Find and book the <span className="text-primary">best doctors</span> near you.
         </h1>
         <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Book appointments online instantly. Choose from normal, premium, or home visits based on your convenience.
+          Book appointments online instantly. Choose from normal, premium, or home visits based on
+          your convenience.
         </p>
-        
+
         <div className="flex flex-wrap justify-center gap-4 pt-4">
           {user ? (
             <>
               <Button asChild size="lg">
                 <Link to={`/${user.role.toLowerCase()}/dashboard`}>Go to Dashboard</Link>
               </Button>
-              <Button variant="outline" size="lg" onClick={logout}>Logout</Button>
+              <Button variant="outline" size="lg" onClick={logout}>
+                Logout
+              </Button>
             </>
           ) : (
             <>

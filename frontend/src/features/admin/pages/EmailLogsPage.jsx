@@ -26,11 +26,12 @@ const EmailLogsPage = () => {
 
   const { data: result, isLoading } = useQuery({
     queryKey: ['admin-email-logs', page, status],
-    queryFn: () => adminApi.getEmailLogs({
-      page,
-      limit,
-      status: status === 'ALL' ? '' : status,
-    }),
+    queryFn: () =>
+      adminApi.getEmailLogs({
+        page,
+        limit,
+        status: status === 'ALL' ? '' : status,
+      }),
   });
 
   const logs = result?.data || [];
@@ -45,7 +46,13 @@ const EmailLogsPage = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <Select value={status} onValueChange={(val) => { setStatus(val); setPage(1); }}>
+        <Select
+          value={status}
+          onValueChange={(val) => {
+            setStatus(val);
+            setPage(1);
+          }}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
@@ -72,7 +79,9 @@ const EmailLogsPage = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">Loading...</TableCell>
+                <TableCell colSpan={5} className="text-center py-4">
+                  Loading...
+                </TableCell>
               </TableRow>
             ) : logs.length === 0 ? (
               <TableRow>
@@ -92,11 +101,15 @@ const EmailLogsPage = () => {
                     <div className="text-xs text-muted-foreground">{log.template}</div>
                   </TableCell>
                   <TableCell>
-                    <span className={`font-semibold text-xs px-2 py-1 rounded-full ${
-                      log.status === 'SENT' ? 'bg-green-100 text-green-800' :
-                      log.status === 'FAILED' ? 'bg-red-100 text-red-800' :
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
+                    <span
+                      className={`font-semibold text-xs px-2 py-1 rounded-full ${
+                        log.status === 'SENT'
+                          ? 'bg-green-100 text-green-800'
+                          : log.status === 'FAILED'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                      }`}
+                    >
                       {log.status}
                     </span>
                   </TableCell>

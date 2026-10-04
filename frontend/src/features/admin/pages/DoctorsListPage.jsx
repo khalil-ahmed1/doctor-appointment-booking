@@ -23,7 +23,7 @@ export default function DoctorsListPage() {
     },
     onError: (error) => {
       toast.error(error.response?.data?.error?.message || 'Failed to update publish status');
-    }
+    },
   });
 
   const statusMutation = useMutation({
@@ -34,7 +34,7 @@ export default function DoctorsListPage() {
     },
     onError: (error) => {
       toast.error(error.response?.data?.error?.message || 'Failed to update account status');
-    }
+    },
   });
 
   if (isLoading) {
@@ -51,8 +51,8 @@ export default function DoctorsListPage() {
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Manage Doctors</h1>
-        <Link 
-          to="/admin/doctors/new" 
+        <Link
+          to="/admin/doctors/new"
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
         >
           + Add Doctor
@@ -63,11 +63,21 @@ export default function DoctorsListPage() {
         <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Doctor</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Contact</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Published</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Doctor
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Contact
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Published
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-200">
@@ -87,7 +97,9 @@ export default function DoctorsListPage() {
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-slate-900">{doc.fullName}</div>
-                        <div className="text-sm text-slate-500">{doc.specializations?.map(s => s.name).join(', ')}</div>
+                        <div className="text-sm text-slate-500">
+                          {doc.specializations?.map((s) => s.name).join(', ')}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -96,33 +108,48 @@ export default function DoctorsListPage() {
                     <div className="text-sm text-slate-500">{doc.user?.phone}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      doc.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        doc.status === 'ACTIVE'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
                       {doc.status}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      doc.isPublished ? 'bg-blue-100 text-blue-800' : 'bg-slate-100 text-slate-800'
-                    }`}>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        doc.isPublished
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-slate-100 text-slate-800'
+                      }`}
+                    >
                       {doc.isPublished ? 'Published' : 'Hidden'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button 
-                      onClick={() => publishMutation.mutate({ id: doc._id, isPublished: !doc.isPublished })}
+                    <button
+                      onClick={() =>
+                        publishMutation.mutate({ id: doc._id, isPublished: !doc.isPublished })
+                      }
                       className="text-blue-600 hover:text-blue-900 mr-4"
                     >
                       {doc.isPublished ? 'Unpublish' : 'Publish'}
                     </button>
-                    <button 
-                      onClick={() => statusMutation.mutate({ id: doc._id, status: doc.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE' })}
+                    <button
+                      onClick={() =>
+                        statusMutation.mutate({
+                          id: doc._id,
+                          status: doc.status === 'ACTIVE' ? 'SUSPENDED' : 'ACTIVE',
+                        })
+                      }
                       className={`${doc.status === 'ACTIVE' ? 'text-red-600 hover:text-red-900' : 'text-green-600 hover:text-green-900'}`}
                     >
                       {doc.status === 'ACTIVE' ? 'Suspend' : 'Reactivate'}
                     </button>
-                    <button 
+                    <button
                       onClick={() => {
                         setSelectedDoctor(doc);
                         setIsSubModalOpen(true);
@@ -139,7 +166,7 @@ export default function DoctorsListPage() {
         </table>
       </div>
 
-      <ManualSubscriptionModal 
+      <ManualSubscriptionModal
         isOpen={isSubModalOpen}
         onClose={() => {
           setIsSubModalOpen(false);

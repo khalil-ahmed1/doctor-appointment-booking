@@ -12,11 +12,16 @@ const DoctorsTab = () => {
     queryFn: getMyDoctors,
   });
 
-  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
 
   return (
     <div className="space-y-4">
-      {(!doctors || doctors.length === 0) ? (
+      {!doctors || doctors.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
             <p className="text-muted-foreground">You haven't booked any doctors yet.</p>
@@ -32,8 +37,8 @@ const DoctorsTab = () => {
               <CardContent className="p-0">
                 <div className="p-6">
                   <div className="flex items-center gap-4 mb-4">
-                    <img 
-                      src={doctor.profilePicture || 'https://via.placeholder.com/150'} 
+                    <img
+                      src={doctor.profilePicture || 'https://via.placeholder.com/150'}
                       alt={doctor.fullName}
                       className="w-16 h-16 rounded-full object-cover border"
                     />
@@ -44,14 +49,16 @@ const DoctorsTab = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   {doctor.clinic?.name && (
                     <div className="flex items-start gap-2 text-sm text-muted-foreground mb-4">
                       <MapPin className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span className="line-clamp-2">{doctor.clinic.name}, {doctor.clinic.city}</span>
+                      <span className="line-clamp-2">
+                        {doctor.clinic.name}, {doctor.clinic.city}
+                      </span>
                     </div>
                   )}
-                  
+
                   <Button asChild className="w-full">
                     <Link to={`/doctors/${doctor.slug}`}>Book Again</Link>
                   </Button>

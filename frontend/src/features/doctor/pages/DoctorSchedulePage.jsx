@@ -8,9 +8,9 @@ import { CalendarDays, Home, Palmtree } from 'lucide-react';
 const DoctorSchedulePage = () => {
   const { data: profile } = useQuery({
     queryKey: ['doctorProfile'],
-    queryFn: doctorApi.getProfile
+    queryFn: doctorApi.getProfile,
   });
-  
+
   const isExpired = profile?.subscription?.status === 'EXPIRED';
 
   return (
@@ -25,7 +25,9 @@ const DoctorSchedulePage = () => {
       {isExpired && (
         <div className="bg-destructive/10 border border-destructive text-destructive p-4 rounded-md">
           <h3 className="font-bold">Subscription Expired</h3>
-          <p>You cannot edit schedules while your subscription is expired. Please renew your plan.</p>
+          <p>
+            You cannot edit schedules while your subscription is expired. Please renew your plan.
+          </p>
         </div>
       )}
 

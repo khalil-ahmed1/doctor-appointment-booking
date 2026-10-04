@@ -28,12 +28,13 @@ const AuditLogsPage = () => {
 
   const { data: result, isLoading } = useQuery({
     queryKey: ['admin-audit-logs', page, entityType, action],
-    queryFn: () => adminApi.getAuditLogs({
-      page,
-      limit,
-      entityType: entityType === 'ALL' ? '' : entityType,
-      action
-    }),
+    queryFn: () =>
+      adminApi.getAuditLogs({
+        page,
+        limit,
+        entityType: entityType === 'ALL' ? '' : entityType,
+        action,
+      }),
   });
 
   const logs = result?.data || [];
@@ -48,7 +49,13 @@ const AuditLogsPage = () => {
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <Select value={entityType} onValueChange={(val) => { setEntityType(val); setPage(1); }}>
+        <Select
+          value={entityType}
+          onValueChange={(val) => {
+            setEntityType(val);
+            setPage(1);
+          }}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Entity Type" />
           </SelectTrigger>
@@ -65,7 +72,10 @@ const AuditLogsPage = () => {
         <Input
           placeholder="Filter by action (e.g. UPDATE, CANCEL)"
           value={action}
-          onChange={(e) => { setAction(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setAction(e.target.value);
+            setPage(1);
+          }}
           className="w-full max-w-sm"
         />
       </div>
@@ -85,7 +95,9 @@ const AuditLogsPage = () => {
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-4">Loading...</TableCell>
+                <TableCell colSpan={6} className="text-center py-4">
+                  Loading...
+                </TableCell>
               </TableRow>
             ) : logs.length === 0 ? (
               <TableRow>
@@ -110,7 +122,9 @@ const AuditLogsPage = () => {
                   </TableCell>
                   <TableCell>{log.entityType}</TableCell>
                   <TableCell className="text-xs font-mono">{log.entityId}</TableCell>
-                  <TableCell className="max-w-xs truncate" title={log.note}>{log.note || '-'}</TableCell>
+                  <TableCell className="max-w-xs truncate" title={log.note}>
+                    {log.note || '-'}
+                  </TableCell>
                 </TableRow>
               ))
             )}

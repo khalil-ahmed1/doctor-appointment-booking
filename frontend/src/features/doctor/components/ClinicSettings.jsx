@@ -11,12 +11,12 @@ const mapContainerStyle = {
   width: '100%',
   height: '300px',
   borderRadius: '0.5rem',
-  marginTop: '0.5rem'
+  marginTop: '0.5rem',
 };
 
 const defaultCenter = {
   lat: 28.6139,
-  lng: 77.2090
+  lng: 77.209,
 };
 
 export function ClinicSettings({ profile, isExpired }) {
@@ -33,13 +33,13 @@ export function ClinicSettings({ profile, isExpired }) {
   const [mapCenter, setMapCenter] = useState(
     profile?.clinic?.location?.coordinates
       ? { lat: profile.clinic.location.coordinates[1], lng: profile.clinic.location.coordinates[0] }
-      : defaultCenter
+      : defaultCenter,
   );
-  
+
   const [markerPos, setMarkerPos] = useState(
     profile?.clinic?.location?.coordinates
       ? { lat: profile.clinic.location.coordinates[1], lng: profile.clinic.location.coordinates[0] }
-      : null
+      : null,
   );
 
   const autocompleteRef = useRef(null);
@@ -58,12 +58,12 @@ export function ClinicSettings({ profile, isExpired }) {
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to update clinic settings');
-    }
+    },
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const onMapClick = useCallback((e) => {
@@ -101,31 +101,61 @@ export function ClinicSettings({ profile, isExpired }) {
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="name">Clinic Name</Label>
-          <Input id="name" name="name" value={formData.name} onChange={handleInputChange} required />
+          <Input
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+          />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="line1">Address Line 1</Label>
-          <Input id="line1" name="line1" value={formData.line1} onChange={handleInputChange} required />
+          <Input
+            id="line1"
+            name="line1"
+            value={formData.line1}
+            onChange={handleInputChange}
+            required
+          />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="line2">Address Line 2 (Optional)</Label>
           <Input id="line2" name="line2" value={formData.line2} onChange={handleInputChange} />
         </div>
-        
+
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-2">
             <Label htmlFor="city">City</Label>
-            <Input id="city" name="city" value={formData.city} onChange={handleInputChange} required />
+            <Input
+              id="city"
+              name="city"
+              value={formData.city}
+              onChange={handleInputChange}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="state">State</Label>
-            <Input id="state" name="state" value={formData.state} onChange={handleInputChange} required />
+            <Input
+              id="state"
+              name="state"
+              value={formData.state}
+              onChange={handleInputChange}
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="pincode">Pincode</Label>
-            <Input id="pincode" name="pincode" value={formData.pincode} onChange={handleInputChange} required />
+            <Input
+              id="pincode"
+              name="pincode"
+              value={formData.pincode}
+              onChange={handleInputChange}
+              required
+            />
           </div>
         </div>
       </div>
@@ -134,7 +164,10 @@ export function ClinicSettings({ profile, isExpired }) {
         <Label>Location on Map</Label>
         {isLoaded ? (
           <div>
-            <Autocomplete onLoad={(ref) => (autocompleteRef.current = ref)} onPlaceChanged={onPlaceChanged}>
+            <Autocomplete
+              onLoad={(ref) => (autocompleteRef.current = ref)}
+              onPlaceChanged={onPlaceChanged}
+            >
               <Input placeholder="Search for your clinic location..." className="mb-2" />
             </Autocomplete>
             <GoogleMap
@@ -145,11 +178,7 @@ export function ClinicSettings({ profile, isExpired }) {
               options={{ disableDefaultUI: true, zoomControl: true }}
             >
               {markerPos && (
-                <Marker
-                  position={markerPos}
-                  draggable={true}
-                  onDragEnd={onMarkerDragEnd}
-                />
+                <Marker position={markerPos} draggable={true} onDragEnd={onMarkerDragEnd} />
               )}
             </GoogleMap>
           </div>

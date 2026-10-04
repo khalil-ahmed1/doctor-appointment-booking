@@ -40,10 +40,8 @@ export const NotificationBell = () => {
     if (e) e.stopPropagation();
     try {
       await api.patch(`/notifications/${id}/read`);
-      setNotifications(prev =>
-        prev.map(n => n._id === id ? { ...n, isRead: true } : n)
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setNotifications((prev) => prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)));
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
       console.error('Failed to mark read', error);
     }
@@ -52,7 +50,7 @@ export const NotificationBell = () => {
   const handleMarkAllRead = async () => {
     try {
       await api.patch('/notifications/read-all');
-      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Failed to mark all read', error);
@@ -63,12 +61,7 @@ export const NotificationBell = () => {
 
   return (
     <div className="relative">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="relative"
-        onClick={() => setIsOpen(!isOpen)}
-      >
+      <Button variant="ghost" size="icon" className="relative" onClick={() => setIsOpen(!isOpen)}>
         <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
@@ -79,10 +72,7 @@ export const NotificationBell = () => {
 
       {isOpen && (
         <>
-          <div
-            className="fixed inset-0 z-40"
-            onClick={() => setIsOpen(false)}
-          />
+          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 mt-2 w-80 rounded-md border bg-background p-4 shadow-lg z-50">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-sm">Notifications</h3>
@@ -98,11 +88,9 @@ export const NotificationBell = () => {
 
             <div className="space-y-3 max-h-80 overflow-y-auto">
               {notifications.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No notifications
-                </p>
+                <p className="text-sm text-muted-foreground text-center py-4">No notifications</p>
               ) : (
-                notifications.map(notification => (
+                notifications.map((notification) => (
                   <div
                     key={notification._id}
                     className={`flex flex-col gap-1 p-2 rounded transition-colors ${!notification.isRead ? 'bg-primary/5' : ''}`}

@@ -13,12 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 const SpecializationsPage = () => {
@@ -130,7 +125,9 @@ const SpecializationsPage = () => {
                   <TableCell>{spec.slug}</TableCell>
                   <TableCell>{spec.icon}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${spec.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-semibold ${spec.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}
+                    >
                       {spec.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </TableCell>
@@ -198,7 +195,12 @@ const SpecializationsPage = () => {
               <Label htmlFor="isActive">Active</Label>
             </div>
             <div className="flex justify-end pt-4">
-              <Button type="button" variant="outline" className="mr-2" onClick={() => setIsModalOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                className="mr-2"
+                onClick={() => setIsModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>

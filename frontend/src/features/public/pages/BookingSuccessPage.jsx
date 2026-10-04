@@ -11,7 +11,9 @@ const BookingSuccessPage = () => {
     return (
       <div className="flex flex-col items-center justify-center pt-32 text-center">
         <h2 className="text-2xl font-bold mb-4">No Booking Found</h2>
-        <Button asChild><Link to="/">Go Home</Link></Button>
+        <Button asChild>
+          <Link to="/">Go Home</Link>
+        </Button>
       </div>
     );
   }
@@ -46,13 +48,13 @@ const BookingSuccessPage = () => {
 
           <div className="space-y-3">
             <h3 className="font-semibold text-lg border-b pb-2">Appointment Details</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Doctor</p>
                 <p className="font-medium">Dr. {doctor?.fullName}</p>
               </div>
-              
+
               <div>
                 <p className="text-sm text-muted-foreground">Patient</p>
                 <p className="font-medium">{appointment.patientDetails?.name || 'Self'}</p>
@@ -63,43 +65,47 @@ const BookingSuccessPage = () => {
                   <Calendar className="w-4 h-4 mr-1" /> Date & Time
                 </p>
                 <p className="font-medium">
-                  {appointment.dateStr} 
-                  {appointment.type === 'NORMAL' 
-                    ? ' (Anytime during working hours)' 
+                  {appointment.dateStr}
+                  {appointment.type === 'NORMAL'
+                    ? ' (Anytime during working hours)'
                     : ` at ${appointment.startTime} - ${appointment.endTime}`}
                 </p>
               </div>
 
               {appointment.type === 'HOME_VISIT' && appointment.addressSnapshot && (
                 <div className="col-span-1 md:col-span-2">
-                   <p className="text-sm text-muted-foreground flex items-center">
+                  <p className="text-sm text-muted-foreground flex items-center">
                     <MapPin className="w-4 h-4 mr-1" /> Address
                   </p>
-                  <p className="font-medium">{appointment.addressSnapshot.line1}, {appointment.addressSnapshot.city}</p>
+                  <p className="font-medium">
+                    {appointment.addressSnapshot.line1}, {appointment.addressSnapshot.city}
+                  </p>
                 </div>
               )}
             </div>
           </div>
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 pt-6 border-t">
-          <Button 
-             variant="outline" 
-             className="w-full sm:w-auto" 
-             onClick={async () => {
-                try {
-                  const api = (await import('../../../lib/axios')).default;
-                  const response = await api.get(`/appointments/${appointment._id}/receipt`, { responseType: 'blob' });
-                  const url = window.URL.createObjectURL(new Blob([response.data]));
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.setAttribute('download', `Receipt-${appointment.bookingCode}.pdf`);
-                  document.body.appendChild(link);
-                  link.click();
-                  link.remove();
-                } catch {
-                  alert('Failed to download receipt');
-                }
-             }}
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={async () => {
+              try {
+                const api = (await import('../../../lib/axios')).default;
+                const response = await api.get(`/appointments/${appointment._id}/receipt`, {
+                  responseType: 'blob',
+                });
+                const url = window.URL.createObjectURL(new Blob([response.data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Receipt-${appointment.bookingCode}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+              } catch {
+                alert('Failed to download receipt');
+              }
+            }}
           >
             Download Receipt (PDF)
           </Button>

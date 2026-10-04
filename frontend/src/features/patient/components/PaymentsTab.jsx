@@ -12,11 +12,16 @@ const PaymentsTab = () => {
     queryFn: getMyPayments,
   });
 
-  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
 
   return (
     <div className="space-y-4">
-      {(!payments || payments.length === 0) ? (
+      {!payments || payments.length === 0 ? (
         <Card className="text-center py-12">
           <CardContent>
             <p className="text-muted-foreground">No payment history found.</p>
@@ -35,27 +40,33 @@ const PaymentsTab = () => {
                         {format(new Date(payment.createdAt), 'PP p')}
                       </span>
                     </div>
-                    
+
                     <div>
-                      <p className="font-semibold text-lg">Dr. {payment.appointment?.doctor?.fullName}</p>
-                      <p className="text-sm text-muted-foreground">Booking Code: {payment.appointment?.bookingCode}</p>
+                      <p className="font-semibold text-lg">
+                        Dr. {payment.appointment?.doctor?.fullName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Booking Code: {payment.appointment?.bookingCode}
+                      </p>
                     </div>
-                    
+
                     {payment.razorpayPaymentId && (
                       <p className="text-xs text-muted-foreground font-mono">
                         Payment ID: {payment.razorpayPaymentId}
                       </p>
                     )}
-                    
+
                     {payment.refunds?.length > 0 && (
                       <div className="mt-2 text-sm text-amber-600 bg-amber-50 p-2 rounded border border-amber-100">
-                        {payment.refunds.map(r => (
-                          <div key={r._id}>Refund: ₹{r.amount / 100} - {r.status}</div>
+                        {payment.refunds.map((r) => (
+                          <div key={r._id}>
+                            Refund: ₹{r.amount / 100} - {r.status}
+                          </div>
                         ))}
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="text-right flex flex-col justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground">Amount</p>

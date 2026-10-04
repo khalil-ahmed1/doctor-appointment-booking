@@ -21,7 +21,7 @@ export default function AdminPaymentsPage() {
     },
     onError: (error) => {
       toast.error(error.response?.data?.error?.message || 'Failed to retry transfer');
-    }
+    },
   });
 
   const manualRefundMutation = useMutation({
@@ -32,7 +32,7 @@ export default function AdminPaymentsPage() {
     },
     onError: (error) => {
       toast.error(error.response?.data?.error?.message || 'Failed to initiate refund');
-    }
+    },
   });
 
   if (isLoading) {
@@ -50,8 +50,8 @@ export default function AdminPaymentsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-slate-800">All Payments</h1>
         <div className="flex space-x-4">
-          <select 
-            value={statusFilter} 
+          <select
+            value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="border-slate-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500"
           >
@@ -69,12 +69,24 @@ export default function AdminPaymentsPage() {
         <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Payment ID</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Appointment</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Amount</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Transfers</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Payment ID
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Appointment
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Amount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Transfers
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-200">
@@ -89,13 +101,19 @@ export default function AdminPaymentsPage() {
                 <tr key={payment._id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
                     <div>{payment._id}</div>
-                    <div className="text-xs text-slate-400">RZP: {payment.razorpayPaymentId || '-'}</div>
+                    <div className="text-xs text-slate-400">
+                      RZP: {payment.razorpayPaymentId || '-'}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {payment.appointment ? (
                       <>
-                        <div className="text-sm font-medium text-slate-900">{payment.appointment.bookingCode}</div>
-                        <div className="text-sm text-slate-500">{payment.appointment.doctor?.fullName}</div>
+                        <div className="text-sm font-medium text-slate-900">
+                          {payment.appointment.bookingCode}
+                        </div>
+                        <div className="text-sm text-slate-500">
+                          {payment.appointment.doctor?.fullName}
+                        </div>
                       </>
                     ) : (
                       <span className="text-sm text-slate-500">-</span>
@@ -105,7 +123,9 @@ export default function AdminPaymentsPage() {
                     ₹{(payment.amount / 100).toFixed(2)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800`}>
+                    <span
+                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-slate-100 text-slate-800`}
+                    >
                       {payment.status}
                     </span>
                   </td>
@@ -113,7 +133,10 @@ export default function AdminPaymentsPage() {
                     {payment.transfers?.length > 0 ? (
                       <div className="flex flex-col gap-1">
                         {payment.transfers.map((t, idx) => (
-                          <div key={idx} className={`text-xs ${t.status === 'failed' ? 'text-red-600 font-bold' : 'text-green-600'}`}>
+                          <div
+                            key={idx}
+                            className={`text-xs ${t.status === 'failed' ? 'text-red-600 font-bold' : 'text-green-600'}`}
+                          >
                             {t.status} (₹{(t.amount / 100).toFixed(2)})
                           </div>
                         ))}
@@ -123,17 +146,17 @@ export default function AdminPaymentsPage() {
                     )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    {payment.transfers?.some(t => t.status === 'failed') && (
-                      <button 
+                    {payment.transfers?.some((t) => t.status === 'failed') && (
+                      <button
                         onClick={() => retryTransferMutation.mutate(payment._id)}
                         className="text-blue-600 hover:text-blue-900 mr-4"
                       >
                         Retry Transfer
                       </button>
                     )}
-                    
+
                     {['CAPTURED', 'TRANSFERRED'].includes(payment.status) && (
-                      <button 
+                      <button
                         onClick={() => {
                           const reason = prompt('Enter manual refund reason (min 5 characters):');
                           if (reason && reason.length >= 5) {

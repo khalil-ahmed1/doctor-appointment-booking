@@ -8,17 +8,67 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { toast } from 'sonner';
 
 const SETTING_FIELDS = [
-  { key: 'trialDays', label: 'Trial Days', type: 'number', description: 'Days granted for initial trial.' },
-  { key: 'holdMinutes', label: 'Hold Minutes', type: 'number', description: 'Slot reservation duration.' },
-  { key: 'normalValidityDays', label: 'Normal Validity Days', type: 'number', description: 'Validity duration for normal queue tokens.' },
-  { key: 'graceDays', label: 'Grace Days', type: 'number', description: 'Days of grace after subscription expiry.' },
-  { key: 'advanceBookingDaysMax', label: 'Max Advance Booking Days', type: 'number', description: 'Maximum allowed days in advance for Premium.' },
-  { key: 'maxActiveHoldsPerUser', label: 'Max Active Holds Per User', type: 'number', description: 'Concurrent hold limit.' },
+  {
+    key: 'trialDays',
+    label: 'Trial Days',
+    type: 'number',
+    description: 'Days granted for initial trial.',
+  },
+  {
+    key: 'holdMinutes',
+    label: 'Hold Minutes',
+    type: 'number',
+    description: 'Slot reservation duration.',
+  },
+  {
+    key: 'normalValidityDays',
+    label: 'Normal Validity Days',
+    type: 'number',
+    description: 'Validity duration for normal queue tokens.',
+  },
+  {
+    key: 'graceDays',
+    label: 'Grace Days',
+    type: 'number',
+    description: 'Days of grace after subscription expiry.',
+  },
+  {
+    key: 'advanceBookingDaysMax',
+    label: 'Max Advance Booking Days',
+    type: 'number',
+    description: 'Maximum allowed days in advance for Premium.',
+  },
+  {
+    key: 'maxActiveHoldsPerUser',
+    label: 'Max Active Holds Per User',
+    type: 'number',
+    description: 'Concurrent hold limit.',
+  },
   { key: 'feeBearer', label: 'Fee Bearer', type: 'text', description: 'PATIENT or DOCTOR' },
-  { key: 'gatewayFeePercent', label: 'Gateway Fee %', type: 'number', description: 'Razorpay processing fee.' },
-  { key: 'gstOnFeePercent', label: 'GST on Fee %', type: 'number', description: 'Tax applied to gateway fee.' },
-  { key: 'platformCommissionPercent', label: 'Platform Commission %', type: 'number', description: 'Our revenue cut.' },
-  { key: 'refundFeeBearer', label: 'Refund Fee Bearer', type: 'text', description: 'PLATFORM or DOCTOR' },
+  {
+    key: 'gatewayFeePercent',
+    label: 'Gateway Fee %',
+    type: 'number',
+    description: 'Razorpay processing fee.',
+  },
+  {
+    key: 'gstOnFeePercent',
+    label: 'GST on Fee %',
+    type: 'number',
+    description: 'Tax applied to gateway fee.',
+  },
+  {
+    key: 'platformCommissionPercent',
+    label: 'Platform Commission %',
+    type: 'number',
+    description: 'Our revenue cut.',
+  },
+  {
+    key: 'refundFeeBearer',
+    label: 'Refund Fee Bearer',
+    type: 'text',
+    description: 'PLATFORM or DOCTOR',
+  },
 ];
 
 const SettingsPage = () => {

@@ -2,20 +2,20 @@ import { Outlet, Navigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { 
-  LayoutDashboard, 
-  CalendarCheck, 
-  ListOrdered, 
-  CalendarDays, 
-  UserCircle, 
-  Stethoscope, 
-  Wallet, 
-  CreditCard, 
-  Bell, 
+import {
+  LayoutDashboard,
+  CalendarCheck,
+  ListOrdered,
+  CalendarDays,
+  UserCircle,
+  Stethoscope,
+  Wallet,
+  CreditCard,
+  Bell,
   Settings,
   ShieldAlert,
   Mail,
-  Tags
+  Tags,
 } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 
@@ -50,10 +50,10 @@ export const DashboardLayout = () => {
             key={link.to}
             to={link.to}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors",
-              isActive 
-                ? "bg-primary/10 text-primary" 
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              'flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors',
+              isActive
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >
             <Icon className="h-4 w-4" />
@@ -85,10 +85,10 @@ export const DashboardLayout = () => {
             key={link.to}
             to={link.to}
             className={cn(
-              "flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors",
-              isActive 
-                ? "bg-primary/10 text-primary" 
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              'flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors',
+              isActive
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
             )}
           >
             <Icon className="h-4 w-4" />
@@ -100,13 +100,13 @@ export const DashboardLayout = () => {
 
     if (user.role === 'PATIENT') {
       return (
-        <Link 
-          to="/patient/dashboard" 
+        <Link
+          to="/patient/dashboard"
           className={cn(
-            "flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors",
+            'flex items-center gap-3 px-3 py-2 rounded-md font-medium text-sm transition-colors',
             location.pathname.startsWith('/patient/dashboard')
-              ? "bg-primary/10 text-primary" 
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              ? 'bg-primary/10 text-primary'
+              : 'text-muted-foreground hover:bg-muted hover:text-foreground',
           )}
         >
           <LayoutDashboard className="h-4 w-4" />
@@ -122,7 +122,9 @@ export const DashboardLayout = () => {
     <div className="min-h-screen bg-muted/20 flex flex-col">
       <header className="border-b bg-background shadow-sm">
         <div className="container flex h-16 items-center px-4 justify-between">
-          <Link to="/" className="font-bold text-xl text-primary">DocBook Dashboard</Link>
+          <Link to="/" className="font-bold text-xl text-primary">
+            DocBook Dashboard
+          </Link>
           <div className="flex items-center space-x-4">
             <NotificationBell />
             <span className="text-sm font-medium">{user.name}</span>
@@ -134,9 +136,7 @@ export const DashboardLayout = () => {
       </header>
       <div className="container flex-1 flex py-6 px-4">
         <aside className="w-64 border-r pr-6 hidden md:block">
-          <nav className="space-y-1">
-            {renderNavLinks()}
-          </nav>
+          <nav className="space-y-1">{renderNavLinks()}</nav>
         </aside>
         <main className="flex-1 md:pl-6 max-w-full overflow-hidden">
           <Outlet />
@@ -145,4 +145,3 @@ export const DashboardLayout = () => {
     </div>
   );
 };
-

@@ -71,7 +71,7 @@ const AllDoctorsPage = () => {
   });
 
   const handleFilterChange = (e) => {
-    setFilters(prev => ({ ...prev, [e.target.name]: e.target.value, page: 1 }));
+    setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value, page: 1 }));
   };
 
   const clearFilters = () => {
@@ -120,7 +120,6 @@ const AllDoctorsPage = () => {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-grow flex flex-col md:flex-row gap-8">
-        
         {/* Sidebar Filters (Desktop) */}
         <aside className="hidden md:block w-64 flex-shrink-0">
           <div className="bg-white p-5 rounded-xl border border-slate-200 sticky top-24">
@@ -144,8 +143,10 @@ const AllDoctorsPage = () => {
                     className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 appearance-none"
                   >
                     <option value="">All Specialties</option>
-                    {specializations?.map(spec => (
-                      <option key={spec._id} value={spec._id}>{spec.name}</option>
+                    {specializations?.map((spec) => (
+                      <option key={spec._id} value={spec._id}>
+                        {spec.name}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -156,7 +157,10 @@ const AllDoctorsPage = () => {
                 <Label className="mb-2 block">Consultation Type</Label>
                 <div className="space-y-3 mt-2">
                   {['', 'PREMIUM', 'HOME', 'NORMAL'].map((typeOption) => (
-                    <label key={typeOption} className="flex items-center gap-3 cursor-pointer group">
+                    <label
+                      key={typeOption}
+                      className="flex items-center gap-3 cursor-pointer group"
+                    >
                       <input
                         type="radio"
                         name="type"
@@ -166,7 +170,13 @@ const AllDoctorsPage = () => {
                         className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-600 focus:ring-offset-0 bg-white"
                       />
                       <span className="text-sm text-slate-700 group-hover:text-slate-900">
-                        {typeOption === '' ? 'Any Type' : typeOption === 'HOME' ? 'Home Visit' : typeOption === 'PREMIUM' ? 'Premium (Slot)' : 'Walk-in (Token)'}
+                        {typeOption === ''
+                          ? 'Any Type'
+                          : typeOption === 'HOME'
+                            ? 'Home Visit'
+                            : typeOption === 'PREMIUM'
+                              ? 'Premium (Slot)'
+                              : 'Walk-in (Token)'}
                       </span>
                     </label>
                   ))}
@@ -178,10 +188,8 @@ const AllDoctorsPage = () => {
 
         {/* Mobile Filter Toggle */}
         <div className="md:hidden flex items-center justify-between mb-4">
-          <p className="text-slate-600 font-medium">
-            {data?.total || 0} Doctors found
-          </p>
-          <Button 
+          <p className="text-slate-600 font-medium">{data?.total || 0} Doctors found</p>
+          <Button
             variant="outline"
             onClick={() => setIsMobileFilterOpen(true)}
             className="flex items-center gap-2"
@@ -194,7 +202,8 @@ const AllDoctorsPage = () => {
         <main className="flex-1">
           <div className="flex justify-between items-center mb-6 hidden md:flex">
             <p className="text-slate-600">
-              Showing <span className="font-semibold text-slate-900">{data?.total || 0}</span> doctors
+              Showing <span className="font-semibold text-slate-900">{data?.total || 0}</span>{' '}
+              doctors
             </p>
             <div className="flex items-center gap-3">
               <span className="text-sm text-muted-foreground">Sort by:</span>
@@ -215,8 +224,11 @@ const AllDoctorsPage = () => {
 
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="bg-white rounded-xl h-64 border border-slate-100 animate-pulse"></div>
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-xl h-64 border border-slate-100 animate-pulse"
+                ></div>
               ))}
             </div>
           ) : isError ? (
@@ -229,12 +241,10 @@ const AllDoctorsPage = () => {
                 <Search className="w-8 h-8 text-slate-400" />
               </div>
               <h3 className="text-lg font-semibold text-slate-900 mb-1">No doctors found</h3>
-              <p className="text-slate-500">Try adjusting your search or filters to find what you're looking for.</p>
-              <Button 
-                variant="outline"
-                onClick={clearFilters}
-                className="mt-4"
-              >
+              <p className="text-slate-500">
+                Try adjusting your search or filters to find what you're looking for.
+              </p>
+              <Button variant="outline" onClick={clearFilters} className="mt-4">
                 Clear all filters
               </Button>
             </div>
@@ -252,7 +262,7 @@ const AllDoctorsPage = () => {
                   <Button
                     variant="outline"
                     disabled={filters.page === 1}
-                    onClick={() => setFilters(p => ({ ...p, page: p.page - 1 }))}
+                    onClick={() => setFilters((p) => ({ ...p, page: p.page - 1 }))}
                   >
                     Previous
                   </Button>
@@ -262,7 +272,7 @@ const AllDoctorsPage = () => {
                   <Button
                     variant="outline"
                     disabled={filters.page === data.totalPages}
-                    onClick={() => setFilters(p => ({ ...p, page: p.page + 1 }))}
+                    onClick={() => setFilters((p) => ({ ...p, page: p.page + 1 }))}
                   >
                     Next
                   </Button>
@@ -276,17 +286,23 @@ const AllDoctorsPage = () => {
       {/* Mobile Filter Modal */}
       {isMobileFilterOpen && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsMobileFilterOpen(false)}></div>
+          <div
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => setIsMobileFilterOpen(false)}
+          ></div>
           <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white ml-auto h-full shadow-2xl animate-in slide-in-from-right">
             <div className="flex items-center justify-between p-4 border-b border-slate-100">
               <h2 className="font-semibold text-lg">Filters</h2>
-              <button onClick={() => setIsMobileFilterOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full">
+              <button
+                onClick={() => setIsMobileFilterOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 bg-slate-100 rounded-full"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
-               <div>
+              <div>
                 <Label className="block mb-2">Sort By</Label>
                 <div className="relative">
                   <select
@@ -315,8 +331,10 @@ const AllDoctorsPage = () => {
                     className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 appearance-none"
                   >
                     <option value="">All Specialties</option>
-                    {specializations?.map(spec => (
-                      <option key={spec._id} value={spec._id}>{spec.name}</option>
+                    {specializations?.map((spec) => (
+                      <option key={spec._id} value={spec._id}>
+                        {spec.name}
+                      </option>
                     ))}
                   </select>
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
@@ -337,7 +355,13 @@ const AllDoctorsPage = () => {
                         className="w-4 h-4 text-blue-600 focus:ring-blue-600"
                       />
                       <span className="text-sm text-slate-700">
-                        {typeOption === '' ? 'Any Type' : typeOption === 'HOME' ? 'Home Visit' : typeOption === 'PREMIUM' ? 'Premium (Slot)' : 'Walk-in (Token)'}
+                        {typeOption === ''
+                          ? 'Any Type'
+                          : typeOption === 'HOME'
+                            ? 'Home Visit'
+                            : typeOption === 'PREMIUM'
+                              ? 'Premium (Slot)'
+                              : 'Walk-in (Token)'}
                       </span>
                     </label>
                   ))}
@@ -346,17 +370,10 @@ const AllDoctorsPage = () => {
             </div>
 
             <div className="p-4 border-t border-slate-100 flex gap-3 bg-slate-50">
-              <Button 
-                variant="outline"
-                onClick={clearFilters}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={clearFilters} className="flex-1">
                 Clear All
               </Button>
-              <Button 
-                onClick={() => setIsMobileFilterOpen(false)}
-                className="flex-1"
-              >
+              <Button onClick={() => setIsMobileFilterOpen(false)} className="flex-1">
                 Apply Filters
               </Button>
             </div>

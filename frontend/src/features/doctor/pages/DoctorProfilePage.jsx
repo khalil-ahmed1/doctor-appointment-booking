@@ -13,10 +13,10 @@ import { GallerySettings } from '../components/GallerySettings';
 
 export default function DoctorProfilePage() {
   const queryClient = useQueryClient();
-  
+
   const { data: profile, isLoading } = useQuery({
     queryKey: ['doctorProfile'],
-    queryFn: doctorApi.getProfile
+    queryFn: doctorApi.getProfile,
   });
 
   const updateProfileMutation = useMutation({
@@ -27,7 +27,7 @@ export default function DoctorProfilePage() {
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to update profile');
-    }
+    },
   });
 
   const [formData, setFormData] = useState({
@@ -56,7 +56,10 @@ export default function DoctorProfilePage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: name === 'experienceYears' ? Number(value) : value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'experienceYears' ? Number(value) : value,
+    }));
   };
 
   if (isLoading) return <div className="p-8">Loading profile...</div>;
@@ -83,36 +86,34 @@ export default function DoctorProfilePage() {
           <TabsTrigger value="clinic">Clinic & Map</TabsTrigger>
           <TabsTrigger value="gallery">Gallery</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="details">
           <Card>
             <CardHeader>
               <CardTitle>Basic Details</CardTitle>
-              <CardDescription>
-                Update your professional information.
-              </CardDescription>
+              <CardDescription>Update your professional information.</CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleProfileSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="headline">Headline</Label>
-                  <Input 
-                    id="headline" 
-                    name="headline" 
-                    value={formData.headline} 
-                    onChange={handleInputChange} 
-                    placeholder="e.g. Senior Cardiologist" 
+                  <Input
+                    id="headline"
+                    name="headline"
+                    value={formData.headline}
+                    onChange={handleInputChange}
+                    placeholder="e.g. Senior Cardiologist"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="bio">Bio</Label>
-                  <Textarea 
-                    id="bio" 
-                    name="bio" 
-                    value={formData.bio} 
-                    onChange={handleInputChange} 
-                    placeholder="Tell patients about yourself..." 
+                  <Textarea
+                    id="bio"
+                    name="bio"
+                    value={formData.bio}
+                    onChange={handleInputChange}
+                    placeholder="Tell patients about yourself..."
                     rows={4}
                   />
                 </div>
@@ -120,20 +121,20 @@ export default function DoctorProfilePage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="experienceYears">Experience (Years)</Label>
-                    <Input 
-                      id="experienceYears" 
-                      name="experienceYears" 
-                      type="number" 
-                      value={formData.experienceYears} 
-                      onChange={handleInputChange} 
+                    <Input
+                      id="experienceYears"
+                      name="experienceYears"
+                      type="number"
+                      value={formData.experienceYears}
+                      onChange={handleInputChange}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="gender">Gender</Label>
-                    <select 
-                      id="gender" 
-                      name="gender" 
-                      value={formData.gender} 
+                    <select
+                      id="gender"
+                      name="gender"
+                      value={formData.gender}
                       onChange={handleInputChange}
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
@@ -144,7 +145,12 @@ export default function DoctorProfilePage() {
                   </div>
                 </div>
 
-                <Button type="submit" disabled={updateProfileMutation.isPending || profile?.subscription?.status === 'EXPIRED'}>
+                <Button
+                  type="submit"
+                  disabled={
+                    updateProfileMutation.isPending || profile?.subscription?.status === 'EXPIRED'
+                  }
+                >
                   {updateProfileMutation.isPending ? 'Saving...' : 'Save Details'}
                 </Button>
               </form>
@@ -156,12 +162,13 @@ export default function DoctorProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle>Clinic Information</CardTitle>
-              <CardDescription>
-                Update your clinic address and map location.
-              </CardDescription>
+              <CardDescription>Update your clinic address and map location.</CardDescription>
             </CardHeader>
             <CardContent>
-              <ClinicSettings profile={profile} isExpired={profile?.subscription?.status === 'EXPIRED'} />
+              <ClinicSettings
+                profile={profile}
+                isExpired={profile?.subscription?.status === 'EXPIRED'}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -170,12 +177,13 @@ export default function DoctorProfilePage() {
           <Card>
             <CardHeader>
               <CardTitle>Photo Gallery</CardTitle>
-              <CardDescription>
-                Manage photos of your clinic. Maximum 12 photos.
-              </CardDescription>
+              <CardDescription>Manage photos of your clinic. Maximum 12 photos.</CardDescription>
             </CardHeader>
             <CardContent>
-              <GallerySettings profile={profile} isExpired={profile?.subscription?.status === 'EXPIRED'} />
+              <GallerySettings
+                profile={profile}
+                isExpired={profile?.subscription?.status === 'EXPIRED'}
+              />
             </CardContent>
           </Card>
         </TabsContent>

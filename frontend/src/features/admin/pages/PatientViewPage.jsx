@@ -66,7 +66,11 @@ export default function PatientViewPage() {
 
   const handleBlockToggle = () => {
     const newStatus = patient?.data?.status === 'BLOCKED' ? 'ACTIVE' : 'BLOCKED';
-    if (window.confirm(`Are you sure you want to ${newStatus === 'BLOCKED' ? 'block' : 'unblock'} this patient?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to ${newStatus === 'BLOCKED' ? 'block' : 'unblock'} this patient?`,
+      )
+    ) {
       blockMutation.mutate(newStatus);
     }
   };
@@ -105,16 +109,20 @@ export default function PatientViewPage() {
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <div>
-                <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                  pData.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 
-                  pData.status === 'BLOCKED' ? 'bg-red-100 text-red-800' : 
-                  'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span
+                  className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    pData.status === 'ACTIVE'
+                      ? 'bg-green-100 text-green-800'
+                      : pData.status === 'BLOCKED'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                  }`}
+                >
                   {pData.status}
                 </span>
               </div>
-              <Button 
-                variant={pData.status === 'BLOCKED' ? 'outline' : 'destructive'} 
+              <Button
+                variant={pData.status === 'BLOCKED' ? 'outline' : 'destructive'}
                 className="w-full"
                 onClick={handleBlockToggle}
                 disabled={blockMutation.isPending}
@@ -123,7 +131,7 @@ export default function PatientViewPage() {
               </Button>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardHeader>
               <CardTitle className="text-lg">Account Info</CardTitle>
@@ -131,7 +139,9 @@ export default function PatientViewPage() {
             <CardContent className="space-y-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Joined</span>
-                <span className="font-medium">{new Date(pData.createdAt).toLocaleDateString()}</span>
+                <span className="font-medium">
+                  {new Date(pData.createdAt).toLocaleDateString()}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Patient ID</span>

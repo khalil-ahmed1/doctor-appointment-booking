@@ -3,14 +3,21 @@ import { useQuery } from '@tanstack/react-query';
 import { doctorApi } from '../api/doctor.api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Download, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function DoctorEarningsPage() {
   const [page, setPage] = useState(1);
-  
+
   const { data, isLoading } = useQuery({
     queryKey: ['doctor-earnings', page],
     queryFn: () => doctorApi.getEarnings({ page, limit: 20 }),
@@ -37,7 +44,11 @@ export default function DoctorEarningsPage() {
       case 'processed':
         return <Badge className="bg-green-100 text-green-800">Processed</Badge>;
       case 'PENDING':
-        return <Badge variant="outline" className="text-yellow-600 border-yellow-600">Pending</Badge>;
+        return (
+          <Badge variant="outline" className="text-yellow-600 border-yellow-600">
+            Pending
+          </Badge>
+        );
       case 'failed':
         return <Badge variant="destructive">Failed</Badge>;
       case 'REFUNDED':
@@ -101,20 +112,30 @@ export default function DoctorEarningsPage() {
                   <TableBody>
                     {transactions.map((tx) => (
                       <TableRow key={tx.id}>
-                        <TableCell className="whitespace-nowrap">{format(new Date(tx.date), 'dd MMM yyyy, HH:mm')}</TableCell>
+                        <TableCell className="whitespace-nowrap">
+                          {format(new Date(tx.date), 'dd MMM yyyy, HH:mm')}
+                        </TableCell>
                         <TableCell className="font-medium">{tx.bookingCode}</TableCell>
                         <TableCell>{tx.patientName}</TableCell>
                         <TableCell>
                           {tx.type === 'NORMAL' && 'Normal'}
                           {tx.type === 'PREMIUM' && 'Premium'}
                           {tx.type === 'HOME_VISIT' && 'Home Visit'}
-                          {!['NORMAL','PREMIUM','HOME_VISIT'].includes(tx.type) && tx.type}
+                          {!['NORMAL', 'PREMIUM', 'HOME_VISIT'].includes(tx.type) && tx.type}
                         </TableCell>
                         <TableCell className="text-right">₹{(tx.gross / 100).toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-red-600">-₹{(tx.gatewayFee / 100).toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-red-600">-₹{(tx.gstOnFee / 100).toFixed(2)}</TableCell>
-                        <TableCell className="text-right text-red-600">-₹{(tx.platformCommission / 100).toFixed(2)}</TableCell>
-                        <TableCell className={`text-right font-bold ${tx.isRefunded ? 'text-red-600' : 'text-green-600'}`}>
+                        <TableCell className="text-right text-red-600">
+                          -₹{(tx.gatewayFee / 100).toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right text-red-600">
+                          -₹{(tx.gstOnFee / 100).toFixed(2)}
+                        </TableCell>
+                        <TableCell className="text-right text-red-600">
+                          -₹{(tx.platformCommission / 100).toFixed(2)}
+                        </TableCell>
+                        <TableCell
+                          className={`text-right font-bold ${tx.isRefunded ? 'text-red-600' : 'text-green-600'}`}
+                        >
                           {tx.isRefunded ? '-' : ''}₹{(Math.abs(tx.netToDoctor) / 100).toFixed(2)}
                         </TableCell>
                         <TableCell>{getStatusBadge(tx.transferStatus)}</TableCell>
@@ -123,7 +144,7 @@ export default function DoctorEarningsPage() {
                   </TableBody>
                 </Table>
               </div>
-              
+
               {pagination.totalPages > 1 && (
                 <div className="flex justify-between items-center mt-6">
                   <div className="text-sm text-muted-foreground">

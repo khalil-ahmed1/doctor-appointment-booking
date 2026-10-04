@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 const mapContainerStyle = {
   width: '100%',
   height: '300px',
-  borderRadius: '0.5rem'
+  borderRadius: '0.5rem',
 };
 
 const DoctorDetailPage = () => {
@@ -19,10 +19,14 @@ const DoctorDetailPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const { data: doctor, isLoading, isError } = useQuery({
+  const {
+    data: doctor,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['doctor', slug],
     queryFn: () => getDoctorBySlug(slug),
-    retry: false
+    retry: false,
   });
 
   const { isLoaded } = useLoadScript({
@@ -42,7 +46,9 @@ const DoctorDetailPage = () => {
       <div className="w-full flex flex-col pt-32 pb-20 items-center px-4 text-center">
         <AlertCircle className="w-16 h-16 text-red-500 mb-4" />
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Doctor Not Found</h1>
-        <p className="text-muted-foreground mb-6 max-w-md">The doctor profile you are looking for does not exist or is no longer available.</p>
+        <p className="text-muted-foreground mb-6 max-w-md">
+          The doctor profile you are looking for does not exist or is no longer available.
+        </p>
         <Button asChild>
           <Link to="/doctors">Browse All Doctors</Link>
         </Button>
@@ -63,21 +69,26 @@ const DoctorDetailPage = () => {
     ? { lat: doctor.clinic.location.coordinates[1], lng: doctor.clinic.location.coordinates[0] }
     : null;
 
-  const profileImageUrl = doctor.gallery?.find((g) => g.caption === 'Profile Picture')?.url
-    || `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.fullName)}&background=e0e7ff&color=4f46e5&size=256`;
+  const profileImageUrl =
+    doctor.gallery?.find((g) => g.caption === 'Profile Picture')?.url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.fullName)}&background=e0e7ff&color=4f46e5&size=256`;
 
   return (
     <>
       <Helmet>
-        <title>Dr. {doctor.fullName} - {doctor.specializations?.map(s => s.name).join(', ')}</title>
-        <meta name="description" content={`Book an appointment with Dr. ${doctor.fullName}. ${doctor.headline || doctor.bio?.substring(0, 100) || 'Expert doctor available for consultation.'}`} />
+        <title>
+          Dr. {doctor.fullName} - {doctor.specializations?.map((s) => s.name).join(', ')}
+        </title>
+        <meta
+          name="description"
+          content={`Book an appointment with Dr. ${doctor.fullName}. ${doctor.headline || doctor.bio?.substring(0, 100) || 'Expert doctor available for consultation.'}`}
+        />
         <meta property="og:title" content={`Dr. ${doctor.fullName}`} />
         <meta property="og:image" content={profileImageUrl} />
       </Helmet>
 
       <div className="w-full pt-8 pb-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-
           {/* Header Profile Section */}
           <Card className="overflow-hidden">
             <CardContent className="p-6 md:p-8 flex flex-col md:flex-row gap-8 items-start md:items-center">
@@ -89,12 +100,18 @@ const DoctorDetailPage = () => {
               <div className="flex-1">
                 <div className="flex items-start justify-between flex-wrap gap-4">
                   <div>
-                    <h1 className="text-3xl font-bold tracking-tight mb-2">Dr. {doctor.fullName}</h1>
+                    <h1 className="text-3xl font-bold tracking-tight mb-2">
+                      Dr. {doctor.fullName}
+                    </h1>
                     <p className="text-lg text-blue-600 font-medium mb-4">
-                      {doctor.specializations?.map(s => s.name).join(', ')}
+                      {doctor.specializations?.map((s) => s.name).join(', ')}
                     </p>
                   </div>
-                  <Button size="lg" onClick={handleBookNow} className="whitespace-nowrap font-bold px-8">
+                  <Button
+                    size="lg"
+                    onClick={handleBookNow}
+                    className="whitespace-nowrap font-bold px-8"
+                  >
                     Book Appointment
                   </Button>
                 </div>
@@ -102,7 +119,9 @@ const DoctorDetailPage = () => {
                 <div className="flex flex-wrap gap-x-6 gap-y-3 text-muted-foreground mt-2">
                   <div className="flex items-center gap-2">
                     <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                    <span className="font-medium text-slate-800">{doctor.stats?.rating > 0 ? doctor.stats.rating.toFixed(1) : 'New'}</span>
+                    <span className="font-medium text-slate-800">
+                      {doctor.stats?.rating > 0 ? doctor.stats.rating.toFixed(1) : 'New'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-5 h-5 opacity-70" />
@@ -128,7 +147,6 @@ const DoctorDetailPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Content */}
             <div className="lg:col-span-2 space-y-8">
-
               {/* About */}
               <Card>
                 <CardHeader>
@@ -154,7 +172,9 @@ const DoctorDetailPage = () => {
                       {doctor.qualifications.map((qual, idx) => (
                         <li key={idx} className="flex flex-col">
                           <span className="font-semibold text-foreground">{qual.degree}</span>
-                          <span>{qual.institute} {qual.year ? `(${qual.year})` : ''}</span>
+                          <span>
+                            {qual.institute} {qual.year ? `(${qual.year})` : ''}
+                          </span>
                         </li>
                       ))}
                     </ul>
@@ -163,28 +183,35 @@ const DoctorDetailPage = () => {
               )}
 
               {/* Gallery */}
-              {doctor.gallery?.filter(g => g.caption !== 'Profile Picture').length > 0 && (
+              {doctor.gallery?.filter((g) => g.caption !== 'Profile Picture').length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-xl">Clinic Photos</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {doctor.gallery.filter(g => g.caption !== 'Profile Picture').map((img, idx) => (
-                        <div key={idx} className="aspect-square rounded-md overflow-hidden border border-border">
-                          <img src={img.url} alt={img.caption || 'Clinic photo'} className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
-                        </div>
-                      ))}
+                      {doctor.gallery
+                        .filter((g) => g.caption !== 'Profile Picture')
+                        .map((img, idx) => (
+                          <div
+                            key={idx}
+                            className="aspect-square rounded-md overflow-hidden border border-border"
+                          >
+                            <img
+                              src={img.url}
+                              alt={img.caption || 'Clinic photo'}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                          </div>
+                        ))}
                     </div>
                   </CardContent>
                 </Card>
               )}
-
             </div>
 
             {/* Right Content - Sidebar */}
             <div className="space-y-8">
-
               {/* Services & Fees */}
               <Card>
                 <CardHeader>
@@ -198,11 +225,27 @@ const DoctorDetailPage = () => {
                       <div className="flex justify-between items-center pb-3 border-b border-slate-100 last:border-0 last:pb-0">
                         <div>
                           <p className="font-semibold text-foreground">Clinic Visit (Token)</p>
-                          <p className="text-xs text-muted-foreground">{doctor.types.normal.walkInHoursText || 'Walk-in'}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {doctor.types.normal.walkInHoursText || 'Walk-in'}
+                          </p>
                         </div>
                         <div className="flex items-center gap-4">
-                          <span className="font-bold text-blue-700">₹{(doctor.fees?.normal || 0) / 100}</span>
-                          <Button size="sm" variant="outline" onClick={() => navigate(!user ? `/login?redirect=/doctors/${slug}` : `/doctors/${slug}/book?type=NORMAL`)}>Book</Button>
+                          <span className="font-bold text-blue-700">
+                            ₹{(doctor.fees?.normal || 0) / 100}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              navigate(
+                                !user
+                                  ? `/login?redirect=/doctors/${slug}`
+                                  : `/doctors/${slug}/book?type=NORMAL`,
+                              )
+                            }
+                          >
+                            Book
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -213,8 +256,22 @@ const DoctorDetailPage = () => {
                           <p className="text-xs text-muted-foreground">Reserved timing</p>
                         </div>
                         <div className="flex items-center gap-4">
-                          <span className="font-bold text-blue-700">₹{(doctor.fees?.premium || 0) / 100}</span>
-                          <Button size="sm" variant="outline" onClick={() => navigate(!user ? `/login?redirect=/doctors/${slug}` : `/doctors/${slug}/book?type=PREMIUM`)}>Book</Button>
+                          <span className="font-bold text-blue-700">
+                            ₹{(doctor.fees?.premium || 0) / 100}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              navigate(
+                                !user
+                                  ? `/login?redirect=/doctors/${slug}`
+                                  : `/doctors/${slug}/book?type=PREMIUM`,
+                              )
+                            }
+                          >
+                            Book
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -225,8 +282,22 @@ const DoctorDetailPage = () => {
                           <p className="text-xs text-muted-foreground">Doctor visits you</p>
                         </div>
                         <div className="flex items-center gap-4">
-                          <span className="font-bold text-blue-700">₹{(doctor.fees?.homeVisit || 0) / 100}</span>
-                          <Button size="sm" variant="outline" onClick={() => navigate(!user ? `/login?redirect=/doctors/${slug}` : `/doctors/${slug}/book?type=HOME_VISIT`)}>Book</Button>
+                          <span className="font-bold text-blue-700">
+                            ₹{(doctor.fees?.homeVisit || 0) / 100}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() =>
+                              navigate(
+                                !user
+                                  ? `/login?redirect=/doctors/${slug}`
+                                  : `/doctors/${slug}/book?type=HOME_VISIT`,
+                              )
+                            }
+                          >
+                            Book
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -246,7 +317,9 @@ const DoctorDetailPage = () => {
                     <p className="font-semibold text-foreground mb-1">{doctor.clinic.name}</p>
                   )}
                   <p className="text-muted-foreground text-sm mb-4">
-                    {doctor.clinic?.line1}{doctor.clinic?.line2 ? `, ${doctor.clinic.line2}` : ''}<br />
+                    {doctor.clinic?.line1}
+                    {doctor.clinic?.line2 ? `, ${doctor.clinic.line2}` : ''}
+                    <br />
                     {doctor.clinic?.city}, {doctor.clinic?.state} {doctor.clinic?.pincode}
                   </p>
 
@@ -266,7 +339,6 @@ const DoctorDetailPage = () => {
                   )}
                 </CardContent>
               </Card>
-
             </div>
           </div>
         </div>

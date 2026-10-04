@@ -2,20 +2,8 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { adminApi } from '../api/admin.api';
 
-import {
-  Users,
-  Activity,
-  Calendar,
-  CreditCard,
-  TrendingUp,
-  Award,
-} from 'lucide-react';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Users, Activity, Calendar, CreditCard, TrendingUp, Award } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const StatCard = ({ title, value, icon: Icon, description }) => (
   <Card>
@@ -31,7 +19,11 @@ const StatCard = ({ title, value, icon: Icon, description }) => (
 );
 
 const AdminDashboardPage = () => {
-  const { data: result, isLoading, isError } = useQuery({
+  const {
+    data: result,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['admin-dashboard-kpis'],
     queryFn: adminApi.getDashboardKPIs,
   });
@@ -50,9 +42,7 @@ const AdminDashboardPage = () => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">
-          Platform overview and key performance indicators.
-        </p>
+        <p className="text-muted-foreground">Platform overview and key performance indicators.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

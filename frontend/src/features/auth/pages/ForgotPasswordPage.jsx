@@ -6,7 +6,14 @@ import * as z from 'zod';
 import api from '../../../lib/axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 
@@ -18,7 +25,11 @@ export const ForgotPasswordPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSent, setIsSent] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
     resolver: zodResolver(forgotPasswordSchema),
   });
 
@@ -29,7 +40,11 @@ export const ForgotPasswordPage = () => {
       setIsSent(true);
       toast.success('Password reset link sent to your email');
     } catch (error) {
-      toast.error(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to send reset link');
+      toast.error(
+        error.response?.data?.error?.message ||
+          error.response?.data?.message ||
+          'Failed to send reset link',
+      );
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +54,9 @@ export const ForgotPasswordPage = () => {
     return (
       <Card className="w-full max-w-md shadow-lg border-primary/20">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold tracking-tight text-center">Check your email</CardTitle>
+          <CardTitle className="text-2xl font-bold tracking-tight text-center">
+            Check your email
+          </CardTitle>
           <CardDescription className="text-center">
             We have sent a password reset link to your email address. Please check your inbox.
           </CardDescription>
@@ -56,7 +73,9 @@ export const ForgotPasswordPage = () => {
   return (
     <Card className="w-full max-w-md shadow-lg border-primary/20">
       <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold tracking-tight text-center">Reset password</CardTitle>
+        <CardTitle className="text-2xl font-bold tracking-tight text-center">
+          Reset password
+        </CardTitle>
         <CardDescription className="text-center">
           Enter your email address and we will send you a link to reset your password.
         </CardDescription>

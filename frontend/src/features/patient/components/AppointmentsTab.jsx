@@ -16,18 +16,35 @@ const AppointmentsTab = () => {
 
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming | past
 
-  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin" /></div>;
+  if (isLoading)
+    return (
+      <div className="flex justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
 
   const now = new Date();
 
   // A naive filter for upcoming vs past.
   // Real logic would be slightly more complex handling NO_SHOW, COMPLETED etc.
-  const upcoming = appointments?.filter(a => {
-    if (['COMPLETED', 'NO_SHOW', 'CANCELLED_BY_DOCTOR', 'CANCELLED_BY_ADMIN', 'EXPIRED_TOKEN', 'EXPIRED', 'PAYMENT_FAILED'].includes(a.status)) return false;
-    return true; // PENDING_PAYMENT, CONFIRMED, CHECKED_IN, IN_PROGRESS
-  }) || [];
+  const upcoming =
+    appointments?.filter((a) => {
+      if (
+        [
+          'COMPLETED',
+          'NO_SHOW',
+          'CANCELLED_BY_DOCTOR',
+          'CANCELLED_BY_ADMIN',
+          'EXPIRED_TOKEN',
+          'EXPIRED',
+          'PAYMENT_FAILED',
+        ].includes(a.status)
+      )
+        return false;
+      return true; // PENDING_PAYMENT, CONFIRMED, CHECKED_IN, IN_PROGRESS
+    }) || [];
 
-  const past = appointments?.filter(a => !upcoming.includes(a)) || [];
+  const past = appointments?.filter((a) => !upcoming.includes(a)) || [];
 
   const displayed = activeTab === 'upcoming' ? upcoming : past;
 
@@ -93,9 +110,13 @@ const AppointmentsTab = () => {
 
                     <div className="text-sm text-muted-foreground">
                       {appt.type === 'NORMAL' ? (
-                        <p>Valid from: {appt.validFrom ? format(new Date(appt.validFrom), 'PP') : ''}</p>
+                        <p>
+                          Valid from: {appt.validFrom ? format(new Date(appt.validFrom), 'PP') : ''}
+                        </p>
                       ) : (
-                        <p>{format(new Date(appt.dateStr), 'PP')} at {appt.startTime}</p>
+                        <p>
+                          {format(new Date(appt.dateStr), 'PP')} at {appt.startTime}
+                        </p>
                       )}
                     </div>
 
@@ -122,8 +143,15 @@ const AppointmentsTab = () => {
                       <p className="mt-2 font-semibold">₹{(appt.fee?.total || 0) / 100}</p>
                     </div>
 
-                    {['CONFIRMED', 'COMPLETED', 'CHECKED_IN', 'IN_PROGRESS'].includes(appt.status) && (
-                      <Button variant="outline" size="sm" className="mt-4" onClick={() => handleDownloadReceipt(appt._id)}>
+                    {['CONFIRMED', 'COMPLETED', 'CHECKED_IN', 'IN_PROGRESS'].includes(
+                      appt.status,
+                    ) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-4"
+                        onClick={() => handleDownloadReceipt(appt._id)}
+                      >
                         <Download className="mr-2 h-4 w-4" /> Receipt
                       </Button>
                     )}

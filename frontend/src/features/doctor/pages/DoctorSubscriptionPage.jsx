@@ -130,9 +130,7 @@ export default function DoctorSubscriptionPage() {
     <div className="space-y-8 max-w-5xl mx-auto">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Subscription Plans</h1>
-        <p className="text-muted-foreground mt-2">
-          Manage your subscription and billing details.
-        </p>
+        <p className="text-muted-foreground mt-2">Manage your subscription and billing details.</p>
       </div>
 
       {/* Current Status */}
@@ -145,12 +143,18 @@ export default function DoctorSubscriptionPage() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <span className="font-semibold text-lg">{sub.planName || 'No active plan'}</span>
-                <Badge variant={sub.status === 'ACTIVE' || sub.status === 'TRIAL' ? 'default' : 'destructive'}>
+                <Badge
+                  variant={
+                    sub.status === 'ACTIVE' || sub.status === 'TRIAL' ? 'default' : 'destructive'
+                  }
+                >
                   {sub.status || 'EXPIRED'}
                 </Badge>
               </div>
               <div className="text-sm text-muted-foreground">
-                {sub.endsAt ? `Valid until: ${format(new Date(sub.endsAt), 'PPP')}` : 'You do not have any valid subscriptions.'}
+                {sub.endsAt
+                  ? `Valid until: ${format(new Date(sub.endsAt), 'PPP')}`
+                  : 'You do not have any valid subscriptions.'}
               </div>
             </div>
           </div>
@@ -162,24 +166,31 @@ export default function DoctorSubscriptionPage() {
         <Info className="h-4 w-4" />
         <AlertTitle>How subscriptions work</AlertTitle>
         <AlertDescription>
-          If you currently have time remaining on an active subscription, purchasing a new plan will stack the duration. Your new billing cycle will start immediately after your current one ends.
+          If you currently have time remaining on an active subscription, purchasing a new plan will
+          stack the duration. Your new billing cycle will start immediately after your current one
+          ends.
         </AlertDescription>
       </Alert>
 
       {/* Plans List */}
       <div className="grid md:grid-cols-3 gap-6">
         {plans?.map((plan) => {
-          const totalAmount = plan.price + Math.round(plan.price * plan.gstPercent / 100);
+          const totalAmount = plan.price + Math.round((plan.price * plan.gstPercent) / 100);
 
           return (
-            <Card key={plan._id} className="flex flex-col relative overflow-hidden transition-all hover:shadow-lg">
+            <Card
+              key={plan._id}
+              className="flex flex-col relative overflow-hidden transition-all hover:shadow-lg"
+            >
               <CardHeader className="text-center pb-4">
                 <CardTitle className="text-2xl">{plan.name}</CardTitle>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">₹{(plan.price / 100).toFixed(0)}</span>
                   <span className="text-muted-foreground text-sm"> / {plan.durationDays} days</span>
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">+ {plan.gstPercent}% GST (Total: ₹{(totalAmount / 100).toFixed(2)})</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  + {plan.gstPercent}% GST (Total: ₹{(totalAmount / 100).toFixed(2)})
+                </div>
               </CardHeader>
               <CardContent className="flex-1">
                 <ul className="space-y-3 text-sm">
@@ -249,7 +260,9 @@ export default function DoctorSubscriptionPage() {
                 </TableBody>
               </Table>
             ) : (
-              <div className="p-8 text-center text-muted-foreground">No subscription history found.</div>
+              <div className="p-8 text-center text-muted-foreground">
+                No subscription history found.
+              </div>
             )}
           </CardContent>
         </Card>

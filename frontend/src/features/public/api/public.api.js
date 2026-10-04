@@ -8,7 +8,7 @@ export const getSpecializations = async () => {
 export const searchDoctors = async (params) => {
   // Remove empty string values
   const cleanParams = Object.fromEntries(
-    Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+    Object.entries(params).filter(([, v]) => v !== '' && v !== null && v !== undefined),
   );
 
   const { data } = await api.get('/doctors', { params: cleanParams });

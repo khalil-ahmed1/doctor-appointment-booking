@@ -14,7 +14,7 @@ export default function DoctorFeesPage() {
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['doctorProfile'],
-    queryFn: doctorApi.getProfile
+    queryFn: doctorApi.getProfile,
   });
 
   const updateFeesMutation = useMutation({
@@ -24,7 +24,7 @@ export default function DoctorFeesPage() {
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to update fees');
-    }
+    },
   });
 
   const updateTypesMutation = useMutation({
@@ -35,7 +35,7 @@ export default function DoctorFeesPage() {
     },
     onError: (err) => {
       toast.error(err.response?.data?.message || 'Failed to update settings');
-    }
+    },
   });
 
   const [formData, setFormData] = useState({
@@ -59,9 +59,9 @@ export default function DoctorFeesPage() {
           mode: 'RADIUS',
           radiusKm: 5,
           pincodes: '',
-        }
-      }
-    }
+        },
+      },
+    },
   });
 
   useEffect(() => {
@@ -87,9 +87,9 @@ export default function DoctorFeesPage() {
               mode: profile.types?.homeVisit?.serviceArea?.mode || 'RADIUS',
               radiusKm: profile.types?.homeVisit?.serviceArea?.radiusKm || 5,
               pincodes: profile.types?.homeVisit?.serviceArea?.pincodes?.join(', ') || '',
-            }
-          }
-        }
+            },
+          },
+        },
       });
     }
   }, [profile]);
@@ -117,10 +117,13 @@ export default function DoctorFeesPage() {
             mode: formData.types.homeVisit.serviceArea.mode,
             radiusKm: Number(formData.types.homeVisit.serviceArea.radiusKm),
             pincodes: formData.types.homeVisit.serviceArea.pincodes
-              ? formData.types.homeVisit.serviceArea.pincodes.split(',').map(p => p.trim()).filter(Boolean)
+              ? formData.types.homeVisit.serviceArea.pincodes
+                  .split(',')
+                  .map((p) => p.trim())
+                  .filter(Boolean)
               : [],
-          }
-        }
+          },
+        },
       };
 
       await updateFeesMutation.mutateAsync(feesPayload);
@@ -146,7 +149,10 @@ export default function DoctorFeesPage() {
       {profile?.subscription?.status === 'EXPIRED' && (
         <div className="bg-destructive/10 border border-destructive text-destructive p-4 rounded-md">
           <h3 className="font-bold">Subscription Expired</h3>
-          <p>You cannot edit fees and services while your subscription is expired. Please renew your plan.</p>
+          <p>
+            You cannot edit fees and services while your subscription is expired. Please renew your
+            plan.
+          </p>
         </div>
       )}
 
@@ -159,23 +165,29 @@ export default function DoctorFeesPage() {
                 <CardTitle>Normal Appointment</CardTitle>
                 <CardDescription>Queue-based walk-in / basic consultation</CardDescription>
               </div>
-              <Switch 
+              <Switch
                 checked={formData.types.normal.enabled}
-                onCheckedChange={(checked) => setFormData(prev => ({
-                  ...prev, types: { ...prev.types, normal: { ...prev.types.normal, enabled: checked } }
-                }))}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    types: { ...prev.types, normal: { ...prev.types.normal, enabled: checked } },
+                  }))
+                }
               />
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Consultation Fee (₹)</Label>
-              <Input 
-                type="number" 
+              <Input
+                type="number"
                 value={formData.fees.normal}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev, fees: { ...prev.fees, normal: e.target.value }
-                }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    fees: { ...prev.fees, normal: e.target.value },
+                  }))
+                }
                 min="0"
                 placeholder="e.g. 500"
               />
@@ -183,12 +195,18 @@ export default function DoctorFeesPage() {
             <div className="space-y-2">
               <Label>Daily Token Limit</Label>
               <div className="flex gap-2 items-center">
-                <Input 
-                  type="number" 
+                <Input
+                  type="number"
                   value={formData.types.normal.dailyTokenLimit}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev, types: { ...prev.types, normal: { ...prev.types.normal, dailyTokenLimit: e.target.value } }
-                  }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      types: {
+                        ...prev.types,
+                        normal: { ...prev.types.normal, dailyTokenLimit: e.target.value },
+                      },
+                    }))
+                  }
                   min="0"
                   className="flex-1"
                 />
@@ -197,11 +215,17 @@ export default function DoctorFeesPage() {
             </div>
             <div className="space-y-2">
               <Label>Walk-in Hours (Text)</Label>
-              <Input 
+              <Input
                 value={formData.types.normal.walkInHoursText}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev, types: { ...prev.types, normal: { ...prev.types.normal, walkInHoursText: e.target.value } }
-                }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    types: {
+                      ...prev.types,
+                      normal: { ...prev.types.normal, walkInHoursText: e.target.value },
+                    },
+                  }))
+                }
                 placeholder="e.g. Mon-Sat 10:00 - 13:00"
               />
               <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -219,30 +243,37 @@ export default function DoctorFeesPage() {
                 <CardTitle>Premium Appointment</CardTitle>
                 <CardDescription>Fixed time-slot bookings</CardDescription>
               </div>
-              <Switch 
+              <Switch
                 checked={formData.types.premium.enabled}
-                onCheckedChange={(checked) => setFormData(prev => ({
-                  ...prev, types: { ...prev.types, premium: { ...prev.types.premium, enabled: checked } }
-                }))}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    types: { ...prev.types, premium: { ...prev.types.premium, enabled: checked } },
+                  }))
+                }
               />
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label>Consultation Fee (₹)</Label>
-              <Input 
-                type="number" 
+              <Input
+                type="number"
                 value={formData.fees.premium}
-                onChange={(e) => setFormData(prev => ({
-                  ...prev, fees: { ...prev.fees, premium: e.target.value }
-                }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    fees: { ...prev.fees, premium: e.target.value },
+                  }))
+                }
                 min="0"
                 placeholder="e.g. 1000"
               />
             </div>
             <div className="rounded-md bg-muted p-4 mt-4">
               <p className="text-sm text-muted-foreground">
-                To accept premium appointments, you must also define your working hours in the <strong>Schedule</strong> section.
+                To accept premium appointments, you must also define your working hours in the{' '}
+                <strong>Schedule</strong> section.
               </p>
             </div>
           </CardContent>
@@ -256,11 +287,17 @@ export default function DoctorFeesPage() {
                 <CardTitle>Home Visit</CardTitle>
                 <CardDescription>Consultations at the patient's address</CardDescription>
               </div>
-              <Switch 
+              <Switch
                 checked={formData.types.homeVisit.enabled}
-                onCheckedChange={(checked) => setFormData(prev => ({
-                  ...prev, types: { ...prev.types, homeVisit: { ...prev.types.homeVisit, enabled: checked } }
-                }))}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    types: {
+                      ...prev.types,
+                      homeVisit: { ...prev.types.homeVisit, enabled: checked },
+                    },
+                  }))
+                }
               />
             </div>
           </CardHeader>
@@ -268,31 +305,40 @@ export default function DoctorFeesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Consultation Fee (₹)</Label>
-                <Input 
-                  type="number" 
+                <Input
+                  type="number"
                   value={formData.fees.homeVisit}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev, fees: { ...prev.fees, homeVisit: e.target.value }
-                  }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      fees: { ...prev.fees, homeVisit: e.target.value },
+                    }))
+                  }
                   min="0"
                   placeholder="e.g. 2500"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label>Service Area Mode</Label>
-                <select 
+                <select
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   value={formData.types.homeVisit.serviceArea.mode}
-                  onChange={(e) => setFormData(prev => ({
-                    ...prev, types: { 
-                      ...prev.types, 
-                      homeVisit: { 
-                        ...prev.types.homeVisit, 
-                        serviceArea: { ...prev.types.homeVisit.serviceArea, mode: e.target.value } 
-                      } 
-                    }
-                  }))}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      types: {
+                        ...prev.types,
+                        homeVisit: {
+                          ...prev.types.homeVisit,
+                          serviceArea: {
+                            ...prev.types.homeVisit.serviceArea,
+                            mode: e.target.value,
+                          },
+                        },
+                      },
+                    }))
+                  }
                 >
                   <option value="RADIUS">Radius (Km) from Clinic</option>
                   <option value="PINCODES">Specific Pincodes</option>
@@ -302,18 +348,24 @@ export default function DoctorFeesPage() {
               {formData.types.homeVisit.serviceArea.mode === 'RADIUS' ? (
                 <div className="space-y-2">
                   <Label>Radius (Km)</Label>
-                  <Input 
-                    type="number" 
+                  <Input
+                    type="number"
                     value={formData.types.homeVisit.serviceArea.radiusKm}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev, types: { 
-                        ...prev.types, 
-                        homeVisit: { 
-                          ...prev.types.homeVisit, 
-                          serviceArea: { ...prev.types.homeVisit.serviceArea, radiusKm: e.target.value } 
-                        } 
-                      }
-                    }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        types: {
+                          ...prev.types,
+                          homeVisit: {
+                            ...prev.types.homeVisit,
+                            serviceArea: {
+                              ...prev.types.homeVisit.serviceArea,
+                              radiusKm: e.target.value,
+                            },
+                          },
+                        },
+                      }))
+                    }
                     min="1"
                     max="100"
                   />
@@ -321,18 +373,24 @@ export default function DoctorFeesPage() {
               ) : (
                 <div className="space-y-2">
                   <Label>Serviceable Pincodes (Comma separated)</Label>
-                  <Input 
-                    type="text" 
+                  <Input
+                    type="text"
                     value={formData.types.homeVisit.serviceArea.pincodes}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev, types: { 
-                        ...prev.types, 
-                        homeVisit: { 
-                          ...prev.types.homeVisit, 
-                          serviceArea: { ...prev.types.homeVisit.serviceArea, pincodes: e.target.value } 
-                        } 
-                      }
-                    }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        types: {
+                          ...prev.types,
+                          homeVisit: {
+                            ...prev.types.homeVisit,
+                            serviceArea: {
+                              ...prev.types.homeVisit.serviceArea,
+                              pincodes: e.target.value,
+                            },
+                          },
+                        },
+                      }))
+                    }
                     placeholder="e.g. 400001, 400002"
                   />
                 </div>
@@ -340,7 +398,8 @@ export default function DoctorFeesPage() {
             </div>
             <div className="rounded-md bg-muted p-4 mt-4">
               <p className="text-sm text-muted-foreground">
-                Make sure you also define your home visit working hours in the <strong>Schedule</strong> section.
+                Make sure you also define your home visit working hours in the{' '}
+                <strong>Schedule</strong> section.
               </p>
             </div>
           </CardContent>
@@ -348,7 +407,11 @@ export default function DoctorFeesPage() {
       </div>
 
       <div className="flex justify-end pt-4">
-        <Button onClick={handleSave} disabled={isPending || profile?.subscription?.status === 'EXPIRED'} size="lg">
+        <Button
+          onClick={handleSave}
+          disabled={isPending || profile?.subscription?.status === 'EXPIRED'}
+          size="lg"
+        >
           {isPending ? 'Saving...' : 'Save Settings'}
         </Button>
       </div>
