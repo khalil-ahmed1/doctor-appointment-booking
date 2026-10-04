@@ -804,7 +804,7 @@ Common codes: `VALIDATION_ERROR`(422), `UNAUTHENTICATED`(401), `FORBIDDEN`(403),
 
 ## 12. Frontend Specification
 
-**Stack:** React 18 + Vite, React Router v6, TanStack Query (server state), Zustand or Redux Toolkit (auth/UI state), Axios (interceptor for refresh), React Hook Form + Zod, Tailwind CSS (+ shadcn/ui or MUI), dayjs, react-helmet-async, @react-google-maps/api (or Leaflet/OpenStreetMap as a free alternative), react-hot-toast, Recharts (dashboards).
+**Stack:** React 18 + Vite, React Router v6, TanStack Query (server state), Zustand or Redux Toolkit (auth/UI state), Axios (interceptor for refresh), React Hook Form + Zod, Tailwind CSS (+ shadcn/ui or MUI), dayjs, react-helmet-async, @react-google-maps/api (or Leaflet/OpenStreetMap as a free alternative), sonner (toasts), Recharts (dashboards).
 
 ### 12.1 Route Map
 | Area | Routes |

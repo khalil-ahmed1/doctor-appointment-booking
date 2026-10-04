@@ -276,6 +276,50 @@ const manualRefundSchema = z.object({
   }),
 });
 
+const createSpecializationSchema = z.object({
+  body: z.object({
+    name: z.string().min(1, 'Name is required'),
+    slug: z.string().min(1, 'Slug is required'),
+    icon: z.string().optional(),
+    isActive: z.boolean().default(true),
+  }),
+});
+
+const updateSpecializationSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+  body: z.object({
+    name: z.string().min(1).optional(),
+    slug: z.string().min(1).optional(),
+    icon: z.string().optional(),
+    isActive: z.boolean().optional(),
+  }),
+});
+
+const getSpecializationParamsSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+});
+
+const updateSettingsSchema = z.object({
+  body: z.record(z.any()), // key-value pairs of settings
+});
+
+const getLogsSchema = z.object({
+  query: z
+    .object({
+      page: z.string().regex(/^\d+$/).optional(),
+      limit: z.string().regex(/^\d+$/).optional(),
+      actor: objectIdSchema.optional(),
+      entityType: z.string().optional(),
+      action: z.string().optional(),
+      status: z.string().optional(),
+    })
+    .optional(),
+});
+
 module.exports = {
   onboardDoctorSchema,
   updateDoctorStatusSchema,
@@ -296,4 +340,9 @@ module.exports = {
   getPaymentsSchema,
   paymentActionParamsSchema,
   manualRefundSchema,
+  createSpecializationSchema,
+  updateSpecializationSchema,
+  getSpecializationParamsSchema,
+  updateSettingsSchema,
+  getLogsSchema,
 };

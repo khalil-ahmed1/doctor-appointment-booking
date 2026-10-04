@@ -120,4 +120,49 @@ export const adminApi = {
     const response = await axios.post(`/admin/payments/${id}/refund`, { reason });
     return response.data;
   },
+
+  getDashboardKPIs: async () => {
+    const response = await axios.get('/admin/dashboard');
+    return response.data;
+  },
+
+  getSpecializations: async () => {
+    const response = await axios.get('/admin/specializations');
+    return response.data;
+  },
+
+  createSpecialization: async (data) => {
+    const response = await axios.post('/admin/specializations', data);
+    return response.data;
+  },
+
+  updateSpecialization: async (id, data) => {
+    const response = await axios.put(`/admin/specializations/${id}`, data);
+    return response.data;
+  },
+
+  deleteSpecialization: async (id) => {
+    const response = await axios.delete(`/admin/specializations/${id}`);
+    return response.data;
+  },
+
+  getSettings: async () => {
+    const response = await axios.get('/admin/settings');
+    return response.data;
+  },
+
+  updateSettings: async (data) => {
+    const response = await axios.put('/admin/settings', data);
+    return response.data;
+  },
+
+  getAuditLogs: async (params = {}) => {
+    const response = await axios.get('/admin/audit-logs', { params });
+    return response.data;
+  },
+
+  getEmailLogs: async (params = {}) => {
+    const response = await axios.get('/admin/email-logs', { params });
+    return response.data;
+  },
 };

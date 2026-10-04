@@ -216,6 +216,88 @@ const manualRefund = asyncHandler(async (req, res) => {
   });
 });
 
+const getDashboardKPIs = asyncHandler(async (req, res) => {
+  const kpis = await adminService.getDashboardKPIs();
+  res.status(200).json({
+    success: true,
+    data: kpis,
+  });
+});
+
+const createSpecialization = asyncHandler(async (req, res) => {
+  const specialization = await adminService.createSpecialization(req.body);
+  res.status(201).json({
+    success: true,
+    data: specialization,
+  });
+});
+
+const getSpecializations = asyncHandler(async (req, res) => {
+  const specializations = await adminService.getSpecializations();
+  res.status(200).json({
+    success: true,
+    data: specializations,
+  });
+});
+
+const getSpecializationById = asyncHandler(async (req, res) => {
+  const specialization = await adminService.getSpecializationById(req.params.id);
+  res.status(200).json({
+    success: true,
+    data: specialization,
+  });
+});
+
+const updateSpecialization = asyncHandler(async (req, res) => {
+  const specialization = await adminService.updateSpecialization(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    data: specialization,
+  });
+});
+
+const deleteSpecialization = asyncHandler(async (req, res) => {
+  await adminService.deleteSpecialization(req.params.id);
+  res.status(200).json({
+    success: true,
+    message: 'Specialization deleted',
+  });
+});
+
+const getSettings = asyncHandler(async (req, res) => {
+  const settings = await adminService.getSettings();
+  res.status(200).json({
+    success: true,
+    data: settings,
+  });
+});
+
+const updateSettings = asyncHandler(async (req, res) => {
+  const settings = await adminService.updateSettings(req.body);
+  res.status(200).json({
+    success: true,
+    data: settings,
+  });
+});
+
+const getAuditLogs = asyncHandler(async (req, res) => {
+  const result = await adminService.getAuditLogs(req.query);
+  res.status(200).json({
+    success: true,
+    data: result.logs,
+    meta: result.meta,
+  });
+});
+
+const getEmailLogs = asyncHandler(async (req, res) => {
+  const result = await adminService.getEmailLogs(req.query);
+  res.status(200).json({
+    success: true,
+    data: result.logs,
+    meta: result.meta,
+  });
+});
+
 module.exports = {
   onboardDoctor,
   getDoctors,
@@ -241,4 +323,14 @@ module.exports = {
   getPayments,
   retryTransfer,
   manualRefund,
+  getDashboardKPIs,
+  createSpecialization,
+  getSpecializations,
+  getSpecializationById,
+  updateSpecialization,
+  deleteSpecialization,
+  getSettings,
+  updateSettings,
+  getAuditLogs,
+  getEmailLogs,
 };

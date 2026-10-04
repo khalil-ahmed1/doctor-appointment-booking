@@ -12,7 +12,10 @@ import {
   Wallet, 
   CreditCard, 
   Bell, 
-  Settings 
+  Settings,
+  ShieldAlert,
+  Mail,
+  Tags
 } from 'lucide-react';
 import { NotificationBell } from '@/components/NotificationBell';
 
@@ -69,6 +72,10 @@ export const DashboardLayout = () => {
         { name: 'Payments', to: '/admin/payments', icon: Wallet },
         { name: 'Plans', to: '/admin/plans', icon: CreditCard },
         { name: 'Subscriptions', to: '/admin/subscriptions', icon: ListOrdered },
+        { name: 'Specializations', to: '/admin/specializations', icon: Tags },
+        { name: 'Settings', to: '/admin/settings', icon: Settings },
+        { name: 'Audit Logs', to: '/admin/audit-logs', icon: ShieldAlert },
+        { name: 'Email Logs', to: '/admin/email-logs', icon: Mail },
       ];
       return adminLinks.map((link) => {
         const isActive = location.pathname.startsWith(link.to);

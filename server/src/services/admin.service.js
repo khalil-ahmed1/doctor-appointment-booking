@@ -4,6 +4,9 @@ const Subscription = require('../models/Subscription');
 const Setting = require('../models/Setting');
 const Appointment = require('../models/Appointment');
 const Payment = require('../models/Payment');
+const Specialization = require('../models/Specialization');
+const AuditLog = require('../models/AuditLog');
+const EmailLog = require('../models/EmailLog');
 const ApiError = require('../utils/ApiError');
 const { generateRandomToken, hashToken } = require('../utils/token');
 const emailService = require('./email.service');
@@ -453,6 +456,155 @@ const getPayments = async (query = {}) => {
   };
 };
 
+const getDashboardKPIs = async () => {
+  const totalDoctors = await DoctorProfile.countDocuments({ status: { $ne: 'DELETED' } });
+  const totalPatients = await User.countDocuments({ role: 'PATIENT', isDeleted: false });
+  const totalAppointments = await Appointment.countDocuments();
+  
+  const completedPayments = await Payment.find({ status: 'CAPTURED', purpose: 'APPOINTMENT' });
+  const gmv = completedPayments.reduce((acc, curr) => acc + curr.amount, 0);
+
+  const subscriptionPayments = await Payment.find({ status: 'CAPTURED', purpose: 'SUBSCRIPTION' });
+  const subscriptionRevenue = subscriptionPayments.reduce((acc, curr) => acc + curr.amount, 0);
+
+  const activeSubscriptions = await Subscription.countDocuments({ status: 'ACTIVE' });
+  
+  return {
+    totalDoctors,
+    totalPatients,
+    totalAppointments,
+    gmv,
+    subscriptionRevenue,
+    activeSubscriptions,
+  };
+};
+
+const createSpecialization = async (data) => {
+  const existing = await Specialization.findOne({ slug: data.slug });
+  if (existing) {
+    throw new ApiError(409, 'CONFLICT', 'Specialization with this slug already exists');
+  }
+  const specialization = new Specialization(data);
+  await specialization.save();
+  return specialization;
+};
+
+const getSpecializations = async () => {
+  return Specialization.find().sort({ name: 1 });
+};
+
+const getSpecializationById = async (id) => {
+  const specialization = await Specialization.findById(id);
+  if (!specialization) {
+    throw new ApiError(404, 'NOT_FOUND', 'Specialization not found');
+  }
+  return specialization;
+};
+
+const updateSpecialization = async (id, data) => {
+  const specialization = await Specialization.findById(id);
+  if (!specialization) {
+    throw new ApiError(404, 'NOT_FOUND', 'Specialization not found');
+  }
+  
+  if (data.slug && data.slug !== specialization.slug) {
+    const existing = await Specialization.findOne({ slug: data.slug });
+    if (existing) {
+      throw new ApiError(409, 'CONFLICT', 'Specialization with this slug already exists');
+    }
+  }
+
+  specialization.set(data);
+  await specialization.save();
+  return specialization;
+};
+
+const deleteSpecialization = async (id) => {
+  const specialization = await Specialization.findByIdAndDelete(id);
+  if (!specialization) {
+    throw new ApiError(404, 'NOT_FOUND', 'Specialization not found');
+  }
+  return true;
+};
+
+const getSettings = async () => {
+  const settings = await Setting.find();
+  const settingsObj = {};
+  settings.forEach(setting => {
+    settingsObj[setting.key] = setting.value;
+  });
+  return settingsObj;
+};
+
+const updateSettings = async (data) => {
+  const operations = Object.keys(data).map(key => ({
+    updateOne: {
+      filter: { key },
+      update: { $set: { value: data[key] } },
+      upsert: true,
+    }
+  }));
+  
+  if (operations.length > 0) {
+    await Setting.bulkWrite(operations);
+  }
+  
+  return getSettings();
+};
+
+const getAuditLogs = async (query = {}) => {
+  const { page = 1, limit = 20, actor, entityType, action } = query;
+  
+  const filter = {};
+  if (actor) filter.actor = actor;
+  if (entityType) filter.entityType = entityType;
+  if (action) filter.action = action;
+
+  const skip = (page - 1) * limit;
+
+  const logs = await AuditLog.find(filter)
+    .populate('actor', 'name email role')
+    .skip(skip)
+    .limit(parseInt(limit, 10))
+    .sort({ createdAt: -1 });
+
+  const total = await AuditLog.countDocuments(filter);
+
+  return {
+    logs,
+    meta: {
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      total,
+    },
+  };
+};
+
+const getEmailLogs = async (query = {}) => {
+  const { page = 1, limit = 20, status } = query;
+  
+  const filter = {};
+  if (status) filter.status = status;
+
+  const skip = (page - 1) * limit;
+
+  const logs = await EmailLog.find(filter)
+    .skip(skip)
+    .limit(parseInt(limit, 10))
+    .sort({ createdAt: -1 });
+
+  const total = await EmailLog.countDocuments(filter);
+
+  return {
+    logs,
+    meta: {
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+      total,
+    },
+  };
+};
+
 module.exports = {
   onboardDoctor,
   getDoctors,
@@ -467,4 +619,14 @@ module.exports = {
   getAppointments,
   getAppointmentById,
   getPayments,
+  getDashboardKPIs,
+  createSpecialization,
+  getSpecializations,
+  getSpecializationById,
+  updateSpecialization,
+  deleteSpecialization,
+  getSettings,
+  updateSettings,
+  getAuditLogs,
+  getEmailLogs,
 };

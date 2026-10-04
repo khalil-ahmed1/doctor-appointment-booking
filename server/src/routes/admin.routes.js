@@ -109,4 +109,34 @@ router.post(
   adminController.manualRefund,
 );
 
+// Dashboard
+router.route('/dashboard').get(adminController.getDashboardKPIs);
+
+// Specializations
+router
+  .route('/specializations')
+  .post(validate(adminValidation.createSpecializationSchema), adminController.createSpecialization)
+  .get(adminController.getSpecializations);
+
+router
+  .route('/specializations/:id')
+  .get(validate(adminValidation.getSpecializationParamsSchema), adminController.getSpecializationById)
+  .put(validate(adminValidation.updateSpecializationSchema), adminController.updateSpecialization)
+  .delete(validate(adminValidation.getSpecializationParamsSchema), adminController.deleteSpecialization);
+
+// Settings
+router
+  .route('/settings')
+  .get(adminController.getSettings)
+  .put(validate(adminValidation.updateSettingsSchema), adminController.updateSettings);
+
+// Logs
+router
+  .route('/audit-logs')
+  .get(validate(adminValidation.getLogsSchema), adminController.getAuditLogs);
+
+router
+  .route('/email-logs')
+  .get(validate(adminValidation.getLogsSchema), adminController.getEmailLogs);
+
 module.exports = router;

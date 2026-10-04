@@ -26,6 +26,11 @@ import PlansPage from './features/admin/pages/PlansPage';
 import SubscriptionsListPage from './features/admin/pages/SubscriptionsListPage';
 import AdminAppointmentsPage from './features/admin/pages/AdminAppointmentsPage';
 import AdminPaymentsPage from './features/admin/pages/AdminPaymentsPage';
+import AdminDashboardPage from './features/admin/pages/AdminDashboardPage';
+import SpecializationsPage from './features/admin/pages/SpecializationsPage';
+import SettingsPage from './features/admin/pages/SettingsPage';
+import AuditLogsPage from './features/admin/pages/AuditLogsPage';
+import EmailLogsPage from './features/admin/pages/EmailLogsPage';
 import DoctorProfilePage from './features/doctor/pages/DoctorProfilePage';
 import DoctorFeesPage from './features/doctor/pages/DoctorFeesPage';
 import DoctorSchedulePage from './features/doctor/pages/DoctorSchedulePage';
@@ -73,7 +78,7 @@ function App() {
                   <Route path="/patient/notifications" element={<NotificationsPage />} />
                   <Route path="/doctor/dashboard" element={<DoctorDashboardPage />} />
                   <Route path="/doctor/notifications" element={<NotificationsPage />} />
-                  <Route path="/admin/dashboard" element={<div>Admin Dashboard Placeholder</div>} />
+                  <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                   
                   {/* Booking Flow */}
                   <Route path="/doctors/:slug/book" element={<BookingPage />} />
@@ -97,6 +102,10 @@ function App() {
                   <Route path="/admin/subscriptions" element={<SubscriptionsListPage />} />
                   <Route path="/admin/appointments" element={<AdminAppointmentsPage />} />
                   <Route path="/admin/payments" element={<AdminPaymentsPage />} />
+                  <Route path="/admin/specializations" element={<SpecializationsPage />} />
+                  <Route path="/admin/settings" element={<SettingsPage />} />
+                  <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
+                  <Route path="/admin/email-logs" element={<EmailLogsPage />} />
                 </Route>
               </Route>
             </Routes>
