@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { adminApi } from '../api/admin.api';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
+import ManualSubscriptionModal from '../components/ManualSubscriptionModal';
 
 export default function DoctorsListPage() {
   const queryClient = useQueryClient();
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [isSubModalOpen, setIsSubModalOpen] = useState(false);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['adminDoctors'],
@@ -118,6 +122,15 @@ export default function DoctorsListPage() {
                     >
                       {doc.status === 'ACTIVE' ? 'Suspend' : 'Reactivate'}
                     </button>
+                    <button 
+                      onClick={() => {
+                        setSelectedDoctor(doc);
+                        setIsSubModalOpen(true);
+                      }}
+                      className="text-purple-600 hover:text-purple-900"
+                    >
+                      Manage Sub
+                    </button>
                   </td>
                 </tr>
               ))
@@ -125,6 +138,15 @@ export default function DoctorsListPage() {
           </tbody>
         </table>
       </div>
+
+      <ManualSubscriptionModal 
+        isOpen={isSubModalOpen}
+        onClose={() => {
+          setIsSubModalOpen(false);
+          setSelectedDoctor(null);
+        }}
+        doctor={selectedDoctor}
+      />
     </div>
   );
 }

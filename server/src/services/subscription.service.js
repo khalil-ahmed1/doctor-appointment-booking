@@ -9,6 +9,8 @@ const pdfService = require('./pdf.service');
 const uploadService = require('./upload.service');
 const ApiError = require('../utils/ApiError');
 const dayjs = require('dayjs');
+const AuditLog = require('../models/AuditLog');
+const notificationService = require('./notification.service');
 
 const getGraceDays = async () => {
   const setting = await Setting.findOne({ key: 'graceDays' });
@@ -223,10 +225,122 @@ const verifySubscriptionPayment = async (doctorId, body) => {
   return await finalizeSubscriptionPayment(razorpay_order_id, razorpay_payment_id);
 };
 
+const manualSubscriptionUpdate = async (body, adminId) => {
+  const { action, doctorId, days, endDate, planId, reason } = body;
+
+  const doctor = await DoctorProfile.findById(doctorId).populate('user');
+  if (!doctor) throw new ApiError(404, 'NOT_FOUND', 'Doctor not found');
+
+  const latestSub = await Subscription.findOne({ doctor: doctorId }).sort({
+    endsAt: -1,
+    createdAt: -1,
+  });
+
+  let newSubscription = null;
+
+  if (action === 'SUSPEND') {
+    doctor.subscription.status = 'SUSPENDED';
+    await doctor.save();
+    
+    await AuditLog.create({
+      actor: adminId,
+      action: 'SUBSCRIPTION_SUSPENDED',
+      entityId: doctorId,
+      entityType: 'DoctorProfile',
+      note: reason,
+    });
+
+    await notificationService.sendAdminManualSubscriptionUpdate(doctor.user, {
+      action: 'SUSPENDED',
+      reason,
+    });
+
+    return { status: 'SUSPENDED' };
+  }
+
+  if (action === 'REACTIVATE') {
+    doctor.subscription.status = 'ACTIVE'; 
+    await doctor.save();
+    
+    await AuditLog.create({
+      actor: adminId,
+      action: 'SUBSCRIPTION_REACTIVATED',
+      entityId: doctorId,
+      entityType: 'DoctorProfile',
+      note: reason,
+    });
+    
+    await computeAndUpdateSubscriptionState(doctorId);
+
+    await notificationService.sendAdminManualSubscriptionUpdate(doctor.user, {
+      action: 'REACTIVATED',
+      reason,
+    });
+
+    return await DoctorProfile.findById(doctorId);
+  }
+
+  let startsAt = dayjs();
+  if (latestSub && dayjs(latestSub.endsAt).isAfter(startsAt)) {
+    startsAt = dayjs(latestSub.endsAt);
+  }
+
+  let finalEndsAt = startsAt;
+  let assignedPlan = null;
+  let type = 'ADMIN_GRANT';
+
+  if (action === 'GRANT_DAYS') {
+    finalEndsAt = startsAt.add(days, 'day');
+  } else if (action === 'SET_END_DATE') {
+    finalEndsAt = dayjs(endDate);
+    if (finalEndsAt.isBefore(dayjs())) {
+      throw new ApiError(400, 'VALIDATION_ERROR', 'End date cannot be in the past');
+    }
+  } else if (action === 'CHANGE_PLAN') {
+    const plan = await Plan.findById(planId);
+    if (!plan) throw new ApiError(404, 'NOT_FOUND', 'Plan not found');
+    finalEndsAt = startsAt.add(plan.durationDays, 'day');
+    assignedPlan = plan._id;
+  }
+
+  newSubscription = await Subscription.create({
+    doctor: doctorId,
+    plan: assignedPlan,
+    type,
+    source: 'ADMIN',
+    startsAt: startsAt.toDate(),
+    endsAt: finalEndsAt.toDate(),
+    amount: 0,
+    gst: 0,
+    total: 0,
+    notes: reason,
+  });
+
+  await AuditLog.create({
+    actor: adminId,
+    action: 'SUBSCRIPTION_MANUAL_UPDATE',
+    entityId: newSubscription._id,
+    entityType: 'Subscription',
+    note: reason,
+    after: { action, days, endDate, planId },
+  });
+
+  await computeAndUpdateSubscriptionState(doctorId);
+
+  await notificationService.sendAdminManualSubscriptionUpdate(doctor.user, {
+    action,
+    reason,
+    endsAt: finalEndsAt.toDate(),
+  });
+
+  return newSubscription;
+};
+
 module.exports = {
   computeAndUpdateSubscriptionState,
   getSubscriptions,
   createSubscriptionOrder,
   verifySubscriptionPayment,
   finalizeSubscriptionPayment,
+  manualSubscriptionUpdate,
 };

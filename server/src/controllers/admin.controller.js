@@ -134,6 +134,14 @@ const getSubscriptions = asyncHandler(async (req, res) => {
   });
 });
 
+const manualSubscriptionUpdate = asyncHandler(async (req, res) => {
+  const result = await subscriptionService.manualSubscriptionUpdate(req.body, req.user._id);
+  res.status(200).json({
+    success: true,
+    data: result,
+  });
+});
+
 module.exports = {
   onboardDoctor,
   getDoctors,
@@ -151,4 +159,5 @@ module.exports = {
   updatePlan,
   deletePlan,
   getSubscriptions,
+  manualSubscriptionUpdate,
 };

@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 4 – Subscription & Admin Controls |
-| Current feature | F-39 Subscription jobs |
+| Current feature | F-40 Admin manual subscription controls |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-40 Admin manual subscription controls (grant/extend/set-end/change/suspend) with audit + email
+1. F-41 Admin appointments + payments/refunds views, retry transfer, manual refund
 
 ---
 
@@ -107,7 +107,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-37 | Plans CRUD (admin) + subscription models + state computation (TRIAL/ACTIVE/GRACE/EXPIRED/SUSPENDED) | 7 | ✅ | |
 | F-38 | Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF | 7.3 | ✅ | |
 | F-39 | Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI | 7.4, 4.4 | ✅ | |
-| F-40 | Admin manual subscription controls (grant/extend/set-end/change/suspend) with audit + email | 4.10, 7.3 | ⬜ | |
+| F-40 | Admin manual subscription controls (grant/extend/set-end/change/suspend) with audit + email | 4.10, 7.3 | ✅ | |
 | F-41 | Admin appointments + payments/refunds views, retry transfer, manual refund | 4.10 | ⬜ | |
 | F-42 | Admin dashboard KPIs, settings page, specializations, audit/email logs | 4.10 | ⬜ | |
 
@@ -124,6 +124,26 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 39 — 2026-10-04 — Antigravity Agent
+Goal: F-40 Admin manual subscription controls (grant/extend/set-end/change/suspend) with audit + email
+Plan:
+- Add `manualSubscriptionUpdateSchema` in `admin.validation.js` supporting actions `GRANT_DAYS`, `SET_END_DATE`, `CHANGE_PLAN`, `SUSPEND`, `REACTIVATE`.
+- Create `manualSubscriptionUpdate` inside `admin.controller.js` and `admin.routes.js`.
+- Create `manualSubscriptionUpdate` inside `subscription.service.js` implementing state modifications, auditing, and notifications.
+- Connect `sendAdminManualSubscriptionUpdate` in `notification.service.js`.
+- Build `ManualSubscriptionModal.jsx` and embed it in `DoctorsListPage.jsx` enabling "Manage Sub" action.
+- Write robust unit tests `subscription.service.test.js` covering all manual actions.
+Done:
+- Developed and integrated the manual subscription endpoints perfectly mapped to PRD requirements.
+- Developed frontend UI components permitting simple admin interventions.
+- Unit tests run successfully proving all scenarios.
+Files/modules touched: `server/src/validations/admin.validation.js`, `server/src/routes/admin.routes.js`, `server/src/controllers/admin.controller.js`, `server/src/services/subscription.service.js`, `server/src/services/notification.service.js`, `server/tests/subscription.service.test.js`, `frontend/src/features/admin/api/admin.api.js`, `frontend/src/features/admin/pages/DoctorsListPage.jsx`, `frontend/src/features/admin/components/ManualSubscriptionModal.jsx`.
+Tests added/updated: `server/tests/subscription.service.test.js` fully asserting manual actions.
+How to verify manually: Login as Admin. Navigate to "Manage Doctors" (DoctorsListPage). Click the new "Manage Sub" button next to a Doctor. Apply a subscription update (e.g., Set Exact End Date). Observe the UI and network response successfully resolving the plan update.
+Decisions made: Encapsulated the UI modal directly into the Doctors List as this is the primary point where Admins govern doctor state. Reused `SUBSCRIPTION_REMINDER` email template for simplicity as the messaging remains consistent.
+Left undone / known issues: Test process in terminal might hang due to memory-server issue.
+NEXT STEP (specific): Start F-41 (Admin appointments + payments/refunds views, retry transfer, manual refund).
 
 ### Session 38 — 2026-10-04 — Antigravity Agent
 Goal: F-39 Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI

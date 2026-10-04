@@ -65,4 +65,10 @@ router
   .route('/subscriptions')
   .get(validate(adminValidation.getSubscriptionsSchema), adminController.getSubscriptions);
 
+router.post(
+  '/subscriptions/manual',
+  validate(adminValidation.manualSubscriptionUpdateSchema),
+  adminController.manualSubscriptionUpdate,
+);
+
 module.exports = router;

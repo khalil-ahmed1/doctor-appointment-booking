@@ -80,4 +80,9 @@ export const adminApi = {
     const response = await axios.get('/admin/subscriptions', { params });
     return response.data;
   },
+
+  manualSubscriptionUpdate: async (data) => {
+    const response = await axios.post('/admin/subscriptions/manual', data);
+    return response.data;
+  },
 };

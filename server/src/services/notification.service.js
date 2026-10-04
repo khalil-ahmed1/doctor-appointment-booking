@@ -263,10 +263,45 @@ const sendSubscriptionReminder = async (doctorProfileId, message) => {
   }
 };
 
+const sendAdminManualSubscriptionUpdate = async (doctorUser, details) => {
+  try {
+    if (!doctorUser || !doctorUser.email) return;
+
+    const doctorName = doctorUser.doctorProfile?.fullName || 'Doctor';
+    const message = `Your subscription has been manually updated by the admin. Action: ${details.action}. Reason: ${details.reason}.`;
+
+    const emailData = {
+      doctorName,
+      message,
+      dashboardUrl: `${env.CLIENT_URL}/doctor/dashboard`,
+    };
+
+    // Reusing the SUBSCRIPTION_REMINDER template for simplicity
+    await sendEmail(
+      doctorUser.email,
+      `Subscription Update: Dr. ${doctorName}`,
+      'SUBSCRIPTION_REMINDER',
+      emailData,
+    );
+
+    await Notification.create({
+      user: doctorUser._id,
+      type: 'SYSTEM',
+      title: 'Admin Subscription Update',
+      message: message,
+      link: '/doctor/dashboard',
+      relatedId: doctorUser.doctorProfile?._id || doctorUser._id,
+    });
+  } catch (error) {
+    logger.error(`Error in sendAdminManualSubscriptionUpdate: ${error.message}`);
+  }
+};
+
 module.exports = {
   sendBookingConfirmation,
   sendAppointmentCancellation,
   sendAppointmentReschedule,
   sendAppointmentReminder,
   sendSubscriptionReminder,
+  sendAdminManualSubscriptionUpdate,
 };
