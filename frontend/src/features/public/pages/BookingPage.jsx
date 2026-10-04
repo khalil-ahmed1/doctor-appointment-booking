@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getDoctorBySlug, getDoctorSlots } from '../api/public.api';
 import { holdSlot, createOrder, verifyPayment } from '../api/booking.api';
 import { useAuth } from '../../../contexts/AuthContext';
 import { format, addDays, isBefore, startOfToday } from 'date-fns';
-import { Calendar as CalendarIcon, Clock, ChevronRight, Check, AlertCircle, MapPin, Hash, Loader2 } from 'lucide-react';
+import { Clock, ChevronRight, MapPin, Hash, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -68,9 +68,11 @@ const BookingPage = () => {
     if (countdown > 0) {
       timerRef.current = setTimeout(() => setCountdown(countdown - 1), 1000);
     } else if (countdown === 0 && heldAppointment && step === 3) {
-      toast.error("Hold expired. Please select a slot again.");
-      setStep(1);
-      setHeldAppointment(null);
+      timerRef.current = setTimeout(() => {
+        toast.error("Hold expired. Please select a slot again.");
+        setStep(1);
+        setHeldAppointment(null);
+      }, 0);
     }
     return () => clearTimeout(timerRef.current);
   }, [countdown, heldAppointment, step]);
@@ -132,7 +134,7 @@ const BookingPage = () => {
             navigate(`/doctors/${slug}/book/success`, {
                state: { appointment: heldAppointment, doctor }
             });
-          } catch (err) {
+          } catch {
             toast.error("Payment verification failed");
           }
         },

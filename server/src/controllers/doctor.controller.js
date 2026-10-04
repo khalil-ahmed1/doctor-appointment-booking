@@ -145,6 +145,34 @@ const exportEarningsCSV = asyncHandler(async (req, res) => {
   res.send(csv);
 });
 
+const createSubscriptionOrder = asyncHandler(async (req, res) => {
+  const subscriptionService = require('../services/subscription.service');
+  const doctor = await doctorService.getDoctorProfileByUser(req.user._id);
+  const data = await subscriptionService.createSubscriptionOrder(doctor._id, req.body.planId);
+  res.status(200).json({ success: true, data });
+});
+
+const verifySubscriptionPayment = asyncHandler(async (req, res) => {
+  const subscriptionService = require('../services/subscription.service');
+  const doctor = await doctorService.getDoctorProfileByUser(req.user._id);
+  const subscription = await subscriptionService.verifySubscriptionPayment(doctor._id, req.body);
+  res.status(200).json({ success: true, data: subscription });
+});
+
+const getSubscriptions = asyncHandler(async (req, res) => {
+  const subscriptionService = require('../services/subscription.service');
+  const doctor = await doctorService.getDoctorProfileByUser(req.user._id);
+  const result = await subscriptionService.getSubscriptions({ 
+    ...req.query, 
+    doctorId: doctor._id 
+  });
+  res.status(200).json({ 
+    success: true, 
+    data: result.subscriptions,
+    meta: result.meta 
+  });
+});
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -164,4 +192,7 @@ module.exports = {
   rescheduleAppointment,
   getEarnings,
   exportEarningsCSV,
+  createSubscriptionOrder,
+  verifySubscriptionPayment,
+  getSubscriptions,
 };

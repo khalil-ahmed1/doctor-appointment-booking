@@ -1,6 +1,12 @@
 const Subscription = require('../models/Subscription');
 const DoctorProfile = require('../models/DoctorProfile');
 const Setting = require('../models/Setting');
+const Plan = require('../models/Plan');
+const Payment = require('../models/Payment');
+const Counter = require('../models/Counter');
+const razorpayService = require('./razorpay.service');
+const pdfService = require('./pdf.service');
+const uploadService = require('./upload.service');
 const ApiError = require('../utils/ApiError');
 const dayjs = require('dayjs');
 
@@ -96,7 +102,131 @@ const getSubscriptions = async (query) => {
   };
 };
 
+const createSubscriptionOrder = async (doctorId, planId) => {
+  const plan = await Plan.findById(planId);
+  if (!plan || !plan.isActive) {
+    throw new ApiError(404, 'NOT_FOUND', 'Plan not found or inactive');
+  }
+
+  const amount = plan.price;
+  const gst = Math.round(amount * (plan.gstPercent / 100));
+  const total = amount + gst;
+
+  const order = await razorpayService.createOrder(total, `sub_${doctorId}_${Date.now()}`);
+
+  const payment = await Payment.create({
+    type: 'SUBSCRIPTION',
+    razorpayOrderId: order.id,
+    amount: total,
+    currency: 'INR',
+    status: 'CREATED',
+    doctor: doctorId,
+    plan: planId,
+    breakdown: {
+      total: total,
+    },
+  });
+
+  return {
+    orderId: order.id,
+    amount: total,
+    currency: 'INR',
+    paymentId: payment._id,
+    plan,
+  };
+};
+
+const getNextInvoiceNo = async () => {
+  const counter = await Counter.findOneAndUpdate(
+    { key: 'invoiceNo' },
+    { $inc: { value: 1 } },
+    { new: true, upsert: true },
+  );
+  return `INV-${new Date().getFullYear()}-${String(counter.value).padStart(6, '0')}`;
+};
+
+const finalizeSubscriptionPayment = async (razorpayOrderId, razorpayPaymentId) => {
+  const payment = await Payment.findOne({ razorpayOrderId });
+  if (!payment) throw new ApiError(404, 'NOT_FOUND', 'Payment not found');
+
+  if (payment.status === 'CAPTURED') {
+    return { success: true, message: 'Already verified' };
+  }
+
+  const planId = payment.plan;
+  const doctorId = payment.doctor;
+
+  const plan = await Plan.findById(planId);
+  if (!plan) throw new ApiError(404, 'NOT_FOUND', 'Plan not found');
+
+  const latestSub = await Subscription.findOne({ doctor: doctorId }).sort({
+    endsAt: -1,
+    createdAt: -1,
+  });
+
+  const now = dayjs();
+  let startsAt = now;
+  if (latestSub && dayjs(latestSub.endsAt).isAfter(now)) {
+    startsAt = dayjs(latestSub.endsAt);
+  }
+
+  const endsAt = startsAt.add(plan.durationDays, 'day');
+
+  const amount = plan.price;
+  const gst = Math.round(amount * (plan.gstPercent / 100));
+  const total = amount + gst;
+  const invoiceNo = await getNextInvoiceNo();
+
+  const subscription = new Subscription({
+    doctor: doctorId,
+    plan: planId,
+    type: 'PAID',
+    source: 'RAZORPAY',
+    startsAt: startsAt.toDate(),
+    endsAt: endsAt.toDate(),
+    amount,
+    gst,
+    total,
+    payment: payment._id,
+    invoiceNo,
+  });
+
+  const doctor = await DoctorProfile.findById(doctorId);
+  const pdfBuffer = await pdfService.generateInvoicePDF(subscription, doctor);
+  const pdfUrl = await uploadService.uploadPDF(pdfBuffer, `INV_${invoiceNo}`);
+  subscription.invoiceUrl = pdfUrl;
+
+  await subscription.save();
+
+  payment.status = 'CAPTURED';
+  payment.razorpayPaymentId = razorpayPaymentId;
+  payment.subscription = subscription._id;
+  await payment.save();
+
+  await computeAndUpdateSubscriptionState(doctorId);
+
+  return subscription;
+};
+
+const verifySubscriptionPayment = async (doctorId, body) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
+
+  const isValid = razorpayService.verifySignature(
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  );
+  if (!isValid) {
+    throw new ApiError(400, 'PAYMENT_FAILED', 'Invalid signature');
+  }
+
+  return await finalizeSubscriptionPayment(razorpay_order_id, razorpay_payment_id);
+};
+
 module.exports = {
   computeAndUpdateSubscriptionState,
   getSubscriptions,
-};
+  createSubscriptionOrder,
+  verifySubscriptionPayment,
+  finalizeSubscriptionPayment,
+}

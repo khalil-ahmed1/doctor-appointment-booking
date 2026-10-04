@@ -20,6 +20,18 @@ router.get(
   }),
 );
 
+router.get(
+  '/plans',
+  asyncHandler(async (req, res) => {
+    const Plan = require('../models/Plan');
+    const plans = await Plan.find({ isActive: true }).sort({ displayOrder: 1, price: 1 });
+    res.status(200).json({
+      success: true,
+      data: plans,
+    });
+  }),
+);
+
 router.get('/doctors/:slug/slots', slotController.getSlotsForDate);
 router.get('/doctors/:slug/availability', slotController.getAvailability);
 

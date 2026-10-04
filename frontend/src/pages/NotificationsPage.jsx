@@ -13,14 +13,10 @@ export default function NotificationsPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    fetchNotifications(page);
-  }, [page]);
-
   async function fetchNotifications(pageToFetch) {
     try {
       setLoading(true);
-      const res = await axios.get(`/notifications?page=${pageToFetch}&limit=20`);
+      const res = await api.get(`/notifications?page=${pageToFetch}&limit=20`);
       if (res.data?.success) {
         setNotifications(res.data.data.notifications);
         setTotalPages(res.data.data.pages);
@@ -30,11 +26,15 @@ export default function NotificationsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    fetchNotifications(page);
+  }, [page]);
 
   const handleMarkAsRead = async (id) => {
     try {
-      await axios.patch(`/notifications/${id}/read`);
+      await api.patch(`/notifications/${id}/read`);
       setNotifications(prev =>
         prev.map(n => n._id === id ? { ...n, isRead: true } : n)
       );
@@ -45,7 +45,7 @@ export default function NotificationsPage() {
 
   const handleMarkAllRead = async () => {
     try {
-      await axios.patch('/notifications/read-all');
+      await api.patch('/notifications/read-all');
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
     } catch (error) {
       console.error('Failed to mark all read', error);

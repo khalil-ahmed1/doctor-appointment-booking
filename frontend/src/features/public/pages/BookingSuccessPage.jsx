@@ -1,12 +1,10 @@
-import React from 'react';
-import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { CheckCircle, Calendar, MapPin, Hash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 
 const BookingSuccessPage = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { appointment, doctor } = location.state || {};
 
   if (!appointment) {
@@ -98,7 +96,7 @@ const BookingSuccessPage = () => {
                   document.body.appendChild(link);
                   link.click();
                   link.remove();
-                } catch (e) {
+                } catch {
                   alert('Failed to download receipt');
                 }
              }}

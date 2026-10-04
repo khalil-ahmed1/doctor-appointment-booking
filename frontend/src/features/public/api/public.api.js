@@ -26,3 +26,8 @@ export const getDoctorSlots = async (slug, type, date) => {
   });
   return data.data;
 };
+
+export const getPlans = async () => {
+  const { data } = await api.get('/plans');
+  return data.data;
+};

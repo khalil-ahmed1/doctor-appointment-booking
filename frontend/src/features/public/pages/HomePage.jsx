@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../contexts/AuthContext';
-import { Search, HeartPulse, Home as HomeIcon, Clock, ArrowRight } from 'lucide-react';
+import { HeartPulse, Home as HomeIcon, Clock } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { searchDoctors, getSpecializations } from '../api/public.api';
+import { searchDoctors } from '../api/public.api';
 import DoctorCard from '../components/DoctorCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,11 +25,7 @@ const HomePage = () => {
     queryFn: () => searchDoctors({ limit: 3, sort: 'RELEVANCE' }),
   });
 
-  const { data: specializations } = useQuery({
-    queryKey: ['specializations'],
-    queryFn: getSpecializations,
-    staleTime: 24 * 60 * 60 * 1000,
-  });
+
 
   return (
     <div className="w-full">

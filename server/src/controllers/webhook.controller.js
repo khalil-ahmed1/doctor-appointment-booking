@@ -15,7 +15,18 @@ const processWebhookEvent = async (eventDoc) => {
       const paymentId = paymentEntity.id;
 
       if (orderId && paymentId) {
-        await paymentService.finalizePayment(orderId, paymentId);
+        // Check payment type
+        const Payment = require('../models/Payment');
+        const paymentRecord = await Payment.findOne({ razorpayOrderId: orderId });
+        
+        if (paymentRecord) {
+          if (paymentRecord.type === 'SUBSCRIPTION') {
+            const subscriptionService = require('../services/subscription.service');
+            await subscriptionService.finalizeSubscriptionPayment(orderId, paymentId);
+          } else {
+            await paymentService.finalizePayment(orderId, paymentId);
+          }
+        }
       }
     } else if (eventType.startsWith('account.')) {
       const accountEntity = payload.payload.account.entity;

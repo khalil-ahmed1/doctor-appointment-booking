@@ -31,6 +31,7 @@ import DoctorDashboardPage from './features/doctor/pages/DoctorDashboardPage';
 import DoctorAppointmentsPage from './features/doctor/pages/DoctorAppointmentsPage';
 import NormalQueuePage from './features/doctor/pages/NormalQueuePage';
 import DoctorEarningsPage from './features/doctor/pages/DoctorEarningsPage';
+import DoctorSubscriptionPage from './features/doctor/pages/DoctorSubscriptionPage';
 import BookingPage from './features/public/pages/BookingPage';
 import BookingSuccessPage from './features/public/pages/BookingSuccessPage';
 
@@ -83,6 +84,7 @@ function App() {
                   <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
                   <Route path="/doctor/queue" element={<NormalQueuePage />} />
                   <Route path="/doctor/earnings" element={<DoctorEarningsPage />} />
+                  <Route path="/doctor/subscription" element={<DoctorSubscriptionPage />} />
                   
                   {/* Admin Features */}
                   <Route path="/admin/doctors" element={<DoctorsListPage />} />

@@ -114,4 +114,22 @@ router.get(
   doctorController.exportEarningsCSV,
 );
 
+// Subscription
+router.get(
+  '/subscriptions',
+  doctorController.getSubscriptions,
+);
+
+router.post(
+  '/subscription/orders',
+  validate(doctorValidation.createSubscriptionOrderSchema),
+  doctorController.createSubscriptionOrder,
+);
+
+router.post(
+  '/subscription/verify',
+  validate(doctorValidation.verifySubscriptionPaymentSchema),
+  doctorController.verifySubscriptionPayment,
+);
+
 module.exports = router;

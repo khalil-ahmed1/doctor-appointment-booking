@@ -5,6 +5,8 @@ const paymentSchema = new mongoose.Schema(
     type: { type: String, enum: ['CONSULTATION', 'SUBSCRIPTION'], required: true },
     appointment: { type: mongoose.Schema.Types.ObjectId, ref: 'Appointment' },
     subscription: { type: mongoose.Schema.Types.ObjectId, ref: 'Subscription' },
+    doctor: { type: mongoose.Schema.Types.ObjectId, ref: 'DoctorProfile' }, // added for sub
+    plan: { type: mongoose.Schema.Types.ObjectId, ref: 'Plan' }, // added for sub
 
     razorpayOrderId: { type: String, unique: true, sparse: true },
     razorpayPaymentId: { type: String, unique: true, sparse: true },

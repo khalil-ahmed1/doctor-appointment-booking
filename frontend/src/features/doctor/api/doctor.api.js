@@ -133,4 +133,19 @@ export const doctorApi = {
     });
     return response.data;
   },
+
+  createSubscriptionOrder: async (data) => {
+    const response = await api.post('/doctor/subscription/orders', data);
+    return response.data.data;
+  },
+
+  verifySubscriptionPayment: async (data) => {
+    const response = await api.post('/doctor/subscription/verify', data);
+    return response.data.data;
+  },
+
+  getSubscriptions: async (params) => {
+    const response = await api.get('/doctor/subscriptions', { params });
+    return response.data;
+  },
 };

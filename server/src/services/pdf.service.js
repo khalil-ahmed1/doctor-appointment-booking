@@ -84,6 +84,60 @@ const generateReceiptPDF = (appointment, payment) => {
   });
 };
 
+const generateInvoicePDF = (subscription, doctor) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ margin: 50 });
+      const buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', reject);
+
+      // Header
+      doc.fontSize(20).font('Helvetica-Bold').text('TAX INVOICE', { align: 'center' }).moveDown();
+
+      // Platform Details
+      doc.fontSize(12).font('Helvetica-Bold').text('DocBook Platform Ltd.');
+      doc.font('Helvetica').text('GSTIN: 27AABCU9603R1ZX');
+      doc.moveDown();
+
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke().moveDown();
+
+      // Invoice Info
+      doc.font('Helvetica-Bold').text('Invoice Details:');
+      doc.font('Helvetica').text(`Invoice No: ${subscription.invoiceNo}`);
+      doc.text(`Date: ${new Date(subscription.createdAt).toLocaleDateString()}`);
+      doc.text(`Plan: ${subscription.plan?.name || 'Subscription'}`);
+      doc.moveDown();
+
+      // Bill To
+      doc.font('Helvetica-Bold').text('Billed To:');
+      doc.font('Helvetica').text(`Dr. ${doctor.fullName}`);
+      if (doctor.clinic && doctor.clinic.name) {
+        doc.text(doctor.clinic.name);
+      }
+      doc.moveDown();
+
+      // Amount details
+      doc.moveTo(50, doc.y).lineTo(550, doc.y).stroke().moveDown();
+      doc.font('Helvetica-Bold').text('Amount Details:');
+      doc.font('Helvetica').text(`Base Amount: INR ${(subscription.amount / 100).toFixed(2)}`);
+      doc.text(`GST (18%): INR ${(subscription.gst / 100).toFixed(2)}`);
+      doc.moveDown(0.5);
+      doc.font('Helvetica-Bold').text(`Total Paid: INR ${(subscription.total / 100).toFixed(2)}`);
+      
+      doc.moveDown(2);
+      doc.font('Helvetica-Oblique').fontSize(10).text('This is a computer generated invoice and does not require a signature.', { align: 'center' });
+
+      doc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 module.exports = {
   generateReceiptPDF,
+  generateInvoicePDF,
 };
+

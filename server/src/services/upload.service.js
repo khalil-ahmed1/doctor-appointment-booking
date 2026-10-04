@@ -94,7 +94,21 @@ const deleteImage = async (url) => {
   }
 };
 
+const uploadPDF = async (buffer, prefix = 'invoice') => {
+  const hash = crypto.randomBytes(8).toString('hex');
+  const filename = `${prefix}_${Date.now()}_${hash}.pdf`;
+  const filepath = path.join(uploadDir, filename);
+
+  fs.writeFileSync(filepath, buffer);
+
+  const baseUrl = process.env.API_URL || 'http://localhost:5000/api/v1';
+  const hostUrl = baseUrl.replace('/api/v1', '');
+  return `${hostUrl}/uploads/${filename}`;
+};
+
 module.exports = {
   uploadImage,
   deleteImage,
+  uploadPDF,
 };
+

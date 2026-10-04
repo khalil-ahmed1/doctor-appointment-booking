@@ -185,6 +185,21 @@ const getEarningsSchema = z.object({
   }),
 });
 
+const createSubscriptionOrderSchema = z.object({
+  body: z.object({
+    planId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid plan ID'),
+  }),
+});
+
+const verifySubscriptionPaymentSchema = z.object({
+  body: z.object({
+    razorpay_order_id: z.string().min(1, 'Order ID is required'),
+    razorpay_payment_id: z.string().min(1, 'Payment ID is required'),
+    razorpay_signature: z.string().min(1, 'Signature is required'),
+    planId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid plan ID'),
+  }),
+});
+
 module.exports = {
   updateProfileSchema,
   addGalleryItemSchema,
@@ -198,4 +213,6 @@ module.exports = {
   updateAppointmentNoteSchema,
   rescheduleAppointmentSchema,
   getEarningsSchema,
+  createSubscriptionOrderSchema,
+  verifySubscriptionPaymentSchema,
 };
