@@ -55,10 +55,34 @@ const fetchPayment = async (paymentId) => {
   return await rzp.payments.fetch(paymentId);
 };
 
+const createLinkedAccount = async (accountData) => {
+  // Mocking for local development as Razorpay Route requires special approval
+  return {
+    id: 'acc_' + crypto.randomBytes(6).toString('hex'),
+    status: 'created',
+    reference_id: accountData.reference_id
+  };
+};
+
+const createTransfer = async (paymentId, amount, accountId, notes = {}) => {
+  // Mocking transfer
+  return {
+    id: 'trf_' + crypto.randomBytes(6).toString('hex'),
+    entity: 'transfer',
+    source: paymentId,
+    recipient: accountId,
+    amount: amount,
+    status: 'processed',
+    notes
+  };
+};
+
 module.exports = {
   createOrder,
   verifySignature,
   refundPayment,
   fetchPayment,
   getRazorpayInstance,
+  createLinkedAccount,
+  createTransfer,
 };

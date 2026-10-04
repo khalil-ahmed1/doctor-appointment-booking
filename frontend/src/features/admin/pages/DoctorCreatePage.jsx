@@ -34,6 +34,13 @@ const doctorSchema = z.object({
     pincode: z.string().min(1, 'Required'),
     location: z.object({ lat: z.number().default(0), lng: z.number().default(0) })
   }),
+  payout: z.object({
+    legalName: z.string().min(1, 'Required for payouts'),
+    businessType: z.enum(['individual', 'proprietorship', 'partnership', 'private_limited']).default('individual'),
+    bankLast4: z.string().regex(/^\d{4}$/, 'Must be 4 digits'),
+    ifsc: z.string().min(1, 'Required'),
+    panLast4: z.string().regex(/^[A-Z0-9]{4}$/i, 'Must be 4 characters'),
+  }).optional(),
 });
 
 export default function DoctorCreatePage() {
@@ -58,7 +65,8 @@ export default function DoctorCreatePage() {
       specializations: [],
       qualifications: [{ degree: '', institute: '', year: new Date().getFullYear() }],
       registration: { number: '', council: '', year: new Date().getFullYear() },
-      clinic: { name: '', line1: '', city: '', state: '', pincode: '', location: { lat: 20.5937, lng: 78.9629 } }
+      clinic: { name: '', line1: '', city: '', state: '', pincode: '', location: { lat: 20.5937, lng: 78.9629 } },
+      payout: { legalName: '', businessType: 'individual', bankLast4: '', ifsc: '', panLast4: '' }
     }
   });
 
@@ -218,6 +226,42 @@ export default function DoctorCreatePage() {
               <label className="block text-sm font-medium text-slate-700">Pincode</label>
               <input type="text" {...register('clinic.pincode')} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm p-2 border" />
               {errors.clinic?.pincode && <p className="text-red-500 text-sm">{errors.clinic.pincode.message}</p>}
+            </div>
+          </div>
+        </div>
+
+        {/* Payout Details */}
+        <div>
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">Payout & KYC (Razorpay Route)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="col-span-1 md:col-span-2 lg:col-span-1">
+              <label className="block text-sm font-medium text-slate-700">Legal Name</label>
+              <input type="text" {...register('payout.legalName')} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm p-2 border" />
+              {errors.payout?.legalName && <p className="text-red-500 text-sm">{errors.payout.legalName.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Business Type</label>
+              <select {...register('payout.businessType')} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm p-2 border bg-white">
+                <option value="individual">Individual</option>
+                <option value="proprietorship">Proprietorship</option>
+                <option value="partnership">Partnership</option>
+                <option value="private_limited">Private Limited</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">Bank Last 4 Digits</label>
+              <input type="text" maxLength={4} {...register('payout.bankLast4')} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm p-2 border" placeholder="1234" />
+              {errors.payout?.bankLast4 && <p className="text-red-500 text-sm">{errors.payout.bankLast4.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">IFSC Code</label>
+              <input type="text" {...register('payout.ifsc')} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm p-2 border" />
+              {errors.payout?.ifsc && <p className="text-red-500 text-sm">{errors.payout.ifsc.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700">PAN Last 4</label>
+              <input type="text" maxLength={4} {...register('payout.panLast4')} className="mt-1 block w-full rounded-md border-slate-300 shadow-sm p-2 border uppercase" placeholder="123F" />
+              {errors.payout?.panLast4 && <p className="text-red-500 text-sm">{errors.payout.panLast4.message}</p>}
             </div>
           </div>
         </div>

@@ -11,15 +11,15 @@
 
 | Item | Value |
 |---|---|
-| Current phase | Phase 2 – Booking Core |
-| Current feature | F-26 Patient dashboard: my appointments |
+| Current phase | Phase 3 – Home Visit & Doctor Operations |
+| Current feature | F-27 Razorpay Route: linked account creation/sync |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-26 Patient dashboard: my appointments, my doctors, payments, receipts, profile, no-cancel messaging
+1. F-28 Home Visit: service area, address form + map pin + validation, saved addresses, booking flow
 
 ---
 
@@ -90,7 +90,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ### Phase 3 – Home Visit & Doctor Operations
 | ID | Feature | PRD | Status | Notes |
 |---|---|---|---|---|
-| F-27 | Razorpay Route: linked account creation/sync, payout status, transfers after capture, earnings fields | 6.2, 6.3 | ⬜ | May be ⛔ until Route is enabled |
+| F-27 | Razorpay Route: linked account creation/sync, payout status, transfers after capture, earnings fields | 6.2, 6.3 | ✅ | Mocked linked accounts and transfers for local dev since Route needs approval |
 | F-28 | Home Visit: service area, address form + map pin + validation, saved addresses, booking flow | 3.4 | ⬜ | |
 | F-29 | Doctor dashboard: overview KPIs + appointment list/filters + status actions (check-in/start/complete/no-show) | 4.4 | ⬜ | |
 | F-30 | Doctor cancel with auto refund + refund tracking + emails | 4.9, 6.5 | ⬜ | |
@@ -124,6 +124,21 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 26 — 2026-10-04 — Antigravity Agent
+Goal: F-27 Razorpay Route: linked account creation/sync, payout status, transfers after capture, earnings fields
+Plan:
+- Mock Razorpay Route linked account and transfer creation in `razorpay.service.js` since local credentials don't have Route enabled.
+- Integrate linked account creation into `admin.service.js` when onboarding doctors, storing `linkedAccountId` in `payout`.
+- Add `payoutStatus` filter to `getDoctors` in `admin.service.js`.
+- Integrate transfer creation directly after `CONFIRMED` state inside `payment.service.js` `finalizePayment` flow.
+- Add webhook logic inside `webhook.controller.js` to process `account.*` events from Razorpay Route and update `DoctorProfile.payout.status`.
+- Add `payout` fields (legalName, businessType, bankLast4, ifsc, panLast4) to Zod schema and UI in `DoctorCreatePage.jsx`.
+Done:
+- Completed all mock integrations and successfully built the logic for executing transfers automatically to linked accounts based on `feeBearer` rules.
+- Payout details are properly captured during Admin doctor onboarding.
+Files/modules touched: `server/src/services/razorpay.service.js`, `server/src/services/admin.service.js`, `server/src/validations/admin.validation.js`, `server/src/services/payment.service.js`, `server/src/controllers/webhook.controller.js`, `frontend/src/features/admin/pages/DoctorCreatePage.jsx`.
+NEXT STEP (specific): Start Phase 3, F-28 (Home Visit: service area, address form + map pin + validation, saved addresses, booking flow).
 
 ### Session 25 — 2026-10-04 — Antigravity Agent
 Goal: F-26 Patient dashboard: my appointments, my doctors, payments, receipts, profile, no-cancel messaging

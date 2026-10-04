@@ -5,6 +5,7 @@ const Setting = require('../models/Setting');
 const ApiError = require('../utils/ApiError');
 const { generateRandomToken, hashToken } = require('../utils/token');
 const emailService = require('./email.service');
+const razorpayService = require('./razorpay.service');
 const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const slugify = require('slugify');
@@ -97,6 +98,27 @@ const onboardDoctor = async (doctorData, adminId) => {
       };
     }
 
+    // 4.1 Setup Payout / Linked Account
+    let finalPayout = payout || {};
+    if (finalPayout.legalName) {
+      try {
+        const linkedAcc = await razorpayService.createLinkedAccount({
+          name: finalPayout.legalName,
+          email,
+          business_type: finalPayout.businessType || 'individual',
+          reference_id: user._id.toString(),
+        });
+        finalPayout = {
+          ...finalPayout,
+          linkedAccountId: linkedAcc.id,
+          status: 'ACTIVE', // Mocking as active immediately for local dev
+          lastSyncedAt: new Date(),
+        };
+      } catch (err) {
+        console.error('Failed to create linked account:', err);
+      }
+    }
+
     const doctorProfile = new DoctorProfile({
       user: user._id,
       fullName,
@@ -111,7 +133,7 @@ const onboardDoctor = async (doctorData, adminId) => {
       clinic,
       fees,
       types,
-      payout,
+      payout: finalPayout,
       status: sendInvite ? 'INVITED' : 'ACTIVE',
       onboardedAt: new Date(),
       onboardedBy: adminId,
@@ -168,11 +190,12 @@ const onboardDoctor = async (doctorData, adminId) => {
 };
 
 const getDoctors = async (query = {}) => {
-  const { page = 1, limit = 12, status, isPublished, search } = query;
+  const { page = 1, limit = 12, status, isPublished, search, payoutStatus } = query;
 
   const filter = {};
   if (status) filter.status = status;
   if (isPublished !== undefined) filter.isPublished = isPublished === 'true';
+  if (payoutStatus) filter['payout.status'] = payoutStatus;
 
   if (search) {
     filter.$text = { $search: search };

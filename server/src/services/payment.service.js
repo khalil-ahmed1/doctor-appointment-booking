@@ -246,7 +246,7 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
     );
   }
 
-  // Trigger notifications
+  // Trigger notifications and transfer
   if (finalStatus === 'CONFIRMED' || finalStatus === 'CONFIRMED_LATE') {
     const notificationService = require('./notification.service');
     // Run asynchronously without waiting
@@ -254,9 +254,72 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
        const logger = require('../utils/logger');
        logger.error(`Notification trigger failed: ${err.message}`);
     });
+
+    processTransfer(payment._id, appointment._id, razorpayPaymentId).catch(err => {
+      const logger = require('../utils/logger');
+      logger.error(`Transfer process trigger failed: ${err.message}`);
+    });
   }
 
   return { status: finalStatus, appointmentId: appointment._id };
+};
+
+const processTransfer = async (paymentId, appointmentId, razorpayPaymentId) => {
+  const payment = await Payment.findById(paymentId);
+  const appointment = await Appointment.findById(appointmentId);
+  if (!payment || !appointment) return;
+
+  try {
+    const doctor = await DoctorProfile.findById(appointment.doctor);
+    if (!doctor || !doctor.payout || !doctor.payout.linkedAccountId) {
+      return; // Route not set up, skip transfer
+    }
+
+    let transferAmount = 0;
+    const breakdown = payment.breakdown;
+
+    if (breakdown.feeBearer === 'DOCTOR') {
+      const rzpPayment = await razorpayService.fetchPayment(razorpayPaymentId);
+      const actualFee = rzpPayment.fee || 0;
+      const actualTax = rzpPayment.tax || 0;
+      
+      payment.breakdown.actualGatewayFee = actualFee;
+      payment.breakdown.actualGatewayGst = actualTax;
+
+      transferAmount = breakdown.total - actualFee - actualTax - breakdown.platformCommission;
+    } else {
+      // For PATIENT fee bearer, the platform commission is already factored in fee calculation.
+      transferAmount = breakdown.consultationFee - breakdown.platformCommission;
+    }
+
+    transferAmount = Math.max(0, transferAmount);
+
+    if (transferAmount > 0) {
+      const transfer = await razorpayService.createTransfer(razorpayPaymentId, transferAmount, doctor.payout.linkedAccountId, {
+        appointmentId: appointment._id.toString()
+      });
+
+      payment.transfers.push({
+        razorpayTransferId: transfer.id,
+        amount: transferAmount,
+        status: transfer.status || 'processed',
+        processedAt: new Date()
+      });
+    }
+
+    await payment.save();
+  } catch (err) {
+    const logger = require('../utils/logger');
+    logger.error(`Transfer failed for payment ${paymentId}:`, err);
+    payment.transfers.push({
+      razorpayTransferId: null,
+      amount: 0,
+      status: 'failed',
+      errorReason: err.message,
+      processedAt: new Date()
+    });
+    await payment.save();
+  }
 };
 
 const refundPaymentProcess = async (payment, rzpPaymentId, reason) => {
