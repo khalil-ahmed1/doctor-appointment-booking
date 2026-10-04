@@ -18,9 +18,11 @@ const startReminderJobs = () => {
       const now = dayjs().tz('Asia/Kolkata');
 
       // 1. Premium & Home Visit Reminders
+      // Fetch only appointments starting within the next 25 hours to optimize DB query
       const upcomingAppointments = await Appointment.find({
         status: 'CONFIRMED',
         type: { $in: ['PREMIUM', 'HOME_VISIT'] },
+        startAt: { $lte: new Date(Date.now() + 25 * 60 * 60 * 1000) },
         $or: [{ 'remindersSent.r24h': false }, { 'remindersSent.r2h': false }],
       }).populate('patient doctor');
 
