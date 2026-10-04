@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 3 – Home Visit & Doctor Operations |
-| Current feature | F-27 Razorpay Route: linked account creation/sync |
+| Current feature | F-32 Normal queue board |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-29 Doctor dashboard: overview KPIs + appointment list/filters + status actions (check-in/start/complete/no-show)
+1. F-33 Reminders (Premium/Home/Normal) via scheduled jobs with sent-flags
 
 ---
 
@@ -92,10 +92,10 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 |---|---|---|---|---|
 | F-27 | Razorpay Route: linked account creation/sync, payout status, transfers after capture, earnings fields | 6.2, 6.3 | ✅ | Mocked linked accounts and transfers for local dev since Route needs approval |
 | F-28 | Home Visit: service area, address form + map pin + validation, saved addresses, booking flow | 3.4 | ✅ | |
-| F-29 | Doctor dashboard: overview KPIs + appointment list/filters + status actions (check-in/start/complete/no-show) | 4.4 | ⬜ | |
-| F-30 | Doctor cancel with auto refund + refund tracking + emails | 4.9, 6.5 | ⬜ | |
-| F-31 | Doctor reschedule (Premium/Home) + Normal extend validity + leave auto-extend | 4.9, 3.2 | ⬜ | |
-| F-32 | Normal queue board (ordered by `tokenSeq`) | 4.4 | ⬜ | |
+| F-29 | Doctor dashboard: overview KPIs + appointment list/filters + status actions (check-in/start/complete/no-show) | 4.4 | ✅ | |
+| F-30 | Doctor cancel with auto refund + refund tracking + emails | 4.9, 6.5 | ✅ | |
+| F-31 | Doctor reschedule (Premium/Home) + Normal extend validity + leave auto-extend | 4.9, 3.2 | ✅ | |
+| F-32 | Normal queue board (ordered by `tokenSeq`) | 4.4 | ✅ | |
 | F-33 | Reminders (Premium/Home/Normal) via scheduled jobs with sent-flags | 8 | ⬜ | |
 | F-34 | In-app notifications (bell + list) | 8 | ⬜ | |
 | F-35 | Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireNormalTokens | 13 | ⬜ | |
@@ -124,6 +124,64 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 31 — 2026-10-04 — Antigravity Agent
+Goal: F-32 Normal queue board (ordered by `tokenSeq`)
+Plan:
+- Add `getNormalQueue` to `doctor.service.js` to fetch active normal tokens sorted by `tokenSeq`.
+- Add `GET /api/v1/doctor/appointments/normal-queue` endpoint.
+- Create `NormalQueuePage.jsx` frontend component with live UI for walking the queue (Check-in, Start, Complete).
+- Add new route and sidebar link.
+Done:
+- Setup specific backend queries.
+- Created beautiful queue board card UI displaying token labels prominently.
+Files/modules touched: `server/src/services/doctor.service.js`, `server/src/controllers/doctor.controller.js`, `server/src/routes/doctor.routes.js`, `frontend/src/features/doctor/api/doctor.api.js`, `frontend/src/features/doctor/pages/NormalQueuePage.jsx`, `frontend/src/App.jsx`.
+NEXT STEP (specific): Start F-33 (Reminders via scheduled jobs).
+
+### Session 30 — 2026-10-04 — Antigravity Agent
+Goal: F-31 Doctor reschedule (Premium/Home) + Normal extend validity + leave auto-extend
+Plan:
+- Add `rescheduleAppointment` to `appointment.service.js` using atomic locking.
+- Hook into `schedule.service.js` `addException` for auto-extending Normal queue validity on `LEAVE`.
+- Create new endpoint `PATCH /api/v1/doctor/appointments/:id/reschedule`.
+- Add `BOOKING_RESCHEDULED` email template and logic.
+- Update `DoctorAppointmentsPage.jsx` UI to trigger rescheduling via modal.
+Done:
+- Successfully implemented both auto-extension logic and the atomic rescheduling logic, releasing old slotLocks.
+- Added email triggers for rescheduling.
+- Successfully connected frontend rescheduling modal.
+Files/modules touched: `server/src/services/appointment.service.js`, `server/src/services/schedule.service.js`, `server/src/validations/doctor.validation.js`, `server/src/routes/doctor.routes.js`, `server/src/controllers/doctor.controller.js`, `server/src/templates/emailTemplates.js`, `server/src/services/notification.service.js`, `frontend/src/features/doctor/api/doctor.api.js`, `frontend/src/features/doctor/pages/DoctorAppointmentsPage.jsx`.
+NEXT STEP (specific): Start F-32 (Normal queue board).
+
+### Session 29 — 2026-10-04 — Antigravity Agent
+Goal: F-30 Doctor cancel with auto refund + refund tracking + emails
+Plan:
+- Add `processRefundForAppointment` to `payment.service.js` to handle refunds and DB updates for cancelled appointments.
+- Update `appointment.service.js`'s `transition` function to automatically trigger the refund process and cancellation emails asynchronously when an appointment is transitioned to `CANCELLED_BY_DOCTOR` or `CANCELLED_BY_ADMIN`.
+- Add `sendAppointmentCancellation` to `notification.service.js`.
+- Add `BOOKING_CANCELLED` email template to `emailTemplates.js`.
+Done:
+- Successfully implemented the automatic refund trigger on appointment cancellation.
+- Configured Razorpay `refundPayment` to use `reverse_all: 1` to automatically reverse any related Route transfers to the doctor's linked account.
+- Designed and integrated the cancellation email template including refund instructions.
+Files/modules touched: `server/src/services/payment.service.js`, `server/src/services/appointment.service.js`, `server/src/services/notification.service.js`, `server/src/templates/emailTemplates.js`.
+NEXT STEP (specific): Start F-31 (Doctor reschedule Premium/Home + Normal extend validity + leave auto-extend).
+
+### Session 28 — 2026-10-04 — Antigravity Agent
+Goal: F-29 Doctor dashboard: overview KPIs + appointment list/filters + status actions (check-in/start/complete/no-show)
+Plan:
+- Add endpoints `GET /api/v1/doctor/dashboard` for KPIs and `GET /api/v1/doctor/appointments` for filtering and listing appointments to `doctor.routes.js`.
+- Add `PATCH /api/v1/doctor/appointments/:id/status` endpoint to handle state transitions leveraging the `appointment.service.js` state machine.
+- Implement Zod validations for the dashboard query params and status transitions.
+- Build frontend `DoctorDashboardPage.jsx` showing the Overview KPI cards, including subscription and payout account statuses.
+- Build frontend `DoctorAppointmentsPage.jsx` featuring dynamic filtering by type, status, and patient search text.
+- Connect dropdown menu actions mapping to allowed state machine actions for the doctor (Mark check-in, En-route, Start Consultation, Complete, No-Show, Cancel & Refund).
+- Ensure routing points to the completed components in `App.jsx`.
+Done:
+- Successfully implemented both dashboard pages with responsive, real-time fetching using React Query.
+- Connected the `updateAppointmentStatus` logic safely behind validations.
+Files/modules touched: `server/src/validations/doctor.validation.js`, `server/src/routes/doctor.routes.js`, `server/src/controllers/doctor.controller.js`, `server/src/services/doctor.service.js`, `frontend/src/features/doctor/api/doctor.api.js`, `frontend/src/features/doctor/pages/DoctorDashboardPage.jsx`, `frontend/src/features/doctor/pages/DoctorAppointmentsPage.jsx`, `frontend/src/App.jsx`.
+NEXT STEP (specific): Start F-30 (Doctor cancel with auto refund + refund tracking + emails).
 
 ### Session 27 — 2026-10-04 — Antigravity Agent
 Goal: F-28 Home Visit: service area, address form + map pin + validation, saved addresses, booking flow

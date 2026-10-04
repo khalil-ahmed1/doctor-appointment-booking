@@ -11,7 +11,7 @@ const holdSlot = asyncHandler(async (req, res) => {
     idempotencyKey,
     patientDetails,
     addressSnapshot,
-    saveAddress
+    saveAddress,
   } = req.body;
 
   const appointment = await bookingService.holdSlot(
@@ -29,7 +29,7 @@ const holdSlot = asyncHandler(async (req, res) => {
   if (saveAddress && addressSnapshot && type === 'HOME_VISIT') {
     const User = require('../models/User');
     await User.findByIdAndUpdate(req.user.id, {
-      $push: { savedAddresses: addressSnapshot }
+      $push: { savedAddresses: addressSnapshot },
     });
   }
 

@@ -343,6 +343,8 @@ const refundPaymentProcess = async (payment, rzpPaymentId, reason) => {
       createdAt: new Date(),
     });
     payment.status = 'REFUNDED';
+
+    // Transfers are automatically reversed since reverse_all: 1 is set in Razorpay service
   } catch (e) {
     payment.refunds.push({
       razorpayRefundId: null,
@@ -353,6 +355,21 @@ const refundPaymentProcess = async (payment, rzpPaymentId, reason) => {
     });
   }
   await payment.save();
+};
+
+const processRefundForAppointment = async (appointmentId, reason) => {
+  const payment = await Payment.findOne({ appointment: appointmentId, status: 'CAPTURED' });
+  if (!payment || !payment.razorpayPaymentId) return; // Nothing to refund
+
+  try {
+    await refundPaymentProcess(payment, payment.razorpayPaymentId, reason);
+
+    const Appointment = require('../models/Appointment');
+    await Appointment.updateOne({ _id: appointmentId }, { $set: { paymentStatus: 'REFUNDED' } });
+  } catch (err) {
+    const logger = require('../utils/logger');
+    logger.error(`Failed to process refund for appointment ${appointmentId}: ${err.message}`);
+  }
 };
 
 const verifyPaymentAndFinalize = async (razorpayOrderId, razorpayPaymentId, signature) => {
@@ -367,4 +384,5 @@ module.exports = {
   createAppointmentOrder,
   finalizePayment,
   verifyPaymentAndFinalize,
+  processRefundForAppointment,
 };

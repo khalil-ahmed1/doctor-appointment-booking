@@ -98,6 +98,47 @@ const templates = {
       </div>
     `;
   },
+
+  BOOKING_CANCELLED: (data) => {
+    const { patientName, doctorName, bookingCode, dateStr, startTime, tokenLabel, amount, reason } =
+      data;
+
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Booking Cancelled</h2>
+        <p>Hi ${patientName},</p>
+        <p>Your appointment with <strong>Dr. ${doctorName}</strong> on ${dateStr} ${startTime ? `at ${startTime}` : ''} ${tokenLabel ? `(Token: ${tokenLabel})` : ''} has been cancelled.</p>
+        <p><strong>Booking ID:</strong> ${bookingCode}</p>
+        <p><strong>Reason:</strong> ${reason}</p>
+        <p>Your refund of INR ${amount} has been initiated and will reflect in your original payment method in 5-7 working days.</p>
+        <p>We apologize for the inconvenience.</p>
+      </div>
+    `;
+  },
+
+  BOOKING_RESCHEDULED: (data) => {
+    const {
+      patientName,
+      doctorName,
+      bookingCode,
+      oldDateStr,
+      oldStartTime,
+      newDateStr,
+      newStartTime,
+    } = data;
+
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Booking Rescheduled</h2>
+        <p>Hi ${patientName},</p>
+        <p>Your appointment with <strong>Dr. ${doctorName}</strong> has been rescheduled by the clinic.</p>
+        <p><strong>Booking ID:</strong> ${bookingCode}</p>
+        <p><strong>Old Slot:</strong> ${oldDateStr} at ${oldStartTime}</p>
+        <p><strong>New Slot:</strong> ${newDateStr} at ${newStartTime}</p>
+        <p>No further action is required from your side. We apologize for the change in schedule.</p>
+      </div>
+    `;
+  },
 };
 
 const getTemplate = (templateName, data) => {

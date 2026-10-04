@@ -195,6 +195,141 @@ const updateTypes = async (userId, typesData) => {
   return profile.types;
 };
 
+const getDashboardKPIs = async (userId) => {
+  const profile = await getDoctorProfileByUser(userId);
+  const Appointment = require('../models/Appointment');
+  const Payment = require('../models/Payment');
+  const dayjs = require('dayjs');
+
+  const todayDateStr = dayjs().format('YYYY-MM-DD');
+  const startOfMonth = dayjs().startOf('month').toDate();
+
+  // 1. Today's counts
+  const todayAppointments = await Appointment.find({ doctor: profile._id, dateStr: todayDateStr });
+
+  let todayConfirmed = 0;
+  let todayCompleted = 0;
+  let todayPending = 0;
+
+  todayAppointments.forEach((app) => {
+    if (['CONFIRMED', 'CHECKED_IN', 'EN_ROUTE', 'IN_PROGRESS'].includes(app.status))
+      todayConfirmed++;
+    if (app.status === 'COMPLETED') todayCompleted++;
+    if (app.status === 'PENDING_PAYMENT') todayPending++;
+  });
+
+  // 2. Upcoming appointments (next 7 days)
+  const upcomingAppointmentsCount = await Appointment.countDocuments({
+    doctor: profile._id,
+    status: { $in: ['CONFIRMED', 'CHECKED_IN', 'EN_ROUTE', 'IN_PROGRESS'] },
+    dateStr: { $gte: todayDateStr, $lte: dayjs().add(7, 'day').format('YYYY-MM-DD') },
+  });
+
+  // 3. Normal queue size
+  const normalQueueSize = await Appointment.countDocuments({
+    doctor: profile._id,
+    type: 'NORMAL',
+    status: 'CONFIRMED', // Tokens in queue
+    validUntil: { $gte: new Date() },
+  });
+
+  // 4. This month's earnings (net to doctor)
+  const thisMonthPayments = await Payment.find({
+    doctor: profile._id,
+    createdAt: { $gte: startOfMonth },
+    status: 'CAPTURED', // Simplified, assumes captured = earned for now
+  });
+
+  let thisMonthEarnings = 0;
+  thisMonthPayments.forEach((p) => {
+    if (p.breakdown && p.breakdown.transferToDoctor) {
+      thisMonthEarnings += p.breakdown.transferToDoctor;
+    }
+  });
+
+  return {
+    today: {
+      confirmed: todayConfirmed,
+      completed: todayCompleted,
+      pending: todayPending,
+    },
+    upcomingAppointmentsCount,
+    normalQueueSize,
+    thisMonthEarnings,
+    payoutStatus: profile.payout?.linkedAccountStatus || 'PENDING',
+    subscriptionStatus: {
+      status: profile.subscriptionSummary?.status || 'TRIAL',
+      endsAt: profile.subscriptionSummary?.endsAt,
+      planName: profile.subscriptionSummary?.planName,
+    },
+  };
+};
+
+const getDoctorAppointments = async (userId, queryParams) => {
+  const profile = await getDoctorProfileByUser(userId);
+  const Appointment = require('../models/Appointment');
+
+  const { type, status, startDate, endDate, search, page = 1, limit = 10 } = queryParams;
+
+  const filter = { doctor: profile._id };
+
+  if (type) filter.type = type;
+  if (status) filter.status = status;
+
+  if (startDate || endDate) {
+    filter.dateStr = {};
+    if (startDate) filter.dateStr.$gte = startDate;
+    if (endDate) filter.dateStr.$lte = endDate;
+  }
+
+  if (search) {
+    const searchRegex = new RegExp(search, 'i');
+    filter.$or = [
+      { bookingCode: searchRegex },
+      { 'patientDetails.name': searchRegex },
+      { 'patientDetails.phone': searchRegex },
+    ];
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [appointments, total] = await Promise.all([
+    Appointment.find(filter)
+      .populate('patient', 'name email avatarUrl')
+      .sort({ dateStr: 1, startTime: 1, tokenSeq: 1 })
+      .skip(skip)
+      .limit(limit),
+    Appointment.countDocuments(filter),
+  ]);
+
+  return {
+    appointments,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+};
+
+const getNormalQueue = async (userId) => {
+  const profile = await getDoctorProfileByUser(userId);
+  const Appointment = require('../models/Appointment');
+
+  // Fetch active normal queue tokens
+  const queue = await Appointment.find({
+    doctor: profile._id,
+    type: 'NORMAL',
+    status: { $in: ['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS'] },
+    validUntil: { $gte: new Date() },
+  })
+    .populate('patient', 'name email avatarUrl')
+    .sort({ tokenSeq: 1 });
+
+  return queue;
+};
+
 module.exports = {
   getDoctorProfileByUser,
   updateProfile,
@@ -206,4 +341,7 @@ module.exports = {
   updateClinic,
   updateFees,
   updateTypes,
+  getDashboardKPIs,
+  getDoctorAppointments,
+  getNormalQueue,
 };

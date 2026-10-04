@@ -74,6 +74,65 @@ const updateTypes = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: types });
 });
 
+const getDashboardKPIs = asyncHandler(async (req, res) => {
+  const kpis = await doctorService.getDashboardKPIs(req.user._id);
+  res.status(200).json({ success: true, data: kpis });
+});
+
+const getAppointments = asyncHandler(async (req, res) => {
+  const appointments = await doctorService.getDoctorAppointments(req.user._id, req.query);
+  res.status(200).json({ success: true, data: appointments });
+});
+
+const getNormalQueue = asyncHandler(async (req, res) => {
+  const queue = await doctorService.getNormalQueue(req.user._id);
+  res.status(200).json({ success: true, data: queue });
+});
+
+const updateAppointmentStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status, reason } = req.body;
+  const appointmentService = require('../services/appointment.service');
+
+  const appointment = await appointmentService.transition(id, status, req.user, reason);
+  res.status(200).json({ success: true, data: appointment });
+});
+
+const updateAppointmentNote = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { note } = req.body;
+
+  const Appointment = require('../models/Appointment');
+  const DoctorProfile = require('../models/DoctorProfile');
+
+  const doctor = await DoctorProfile.findOne({ user: req.user._id });
+  if (!doctor) throw new ApiError(404, 'NOT_FOUND', 'Doctor profile not found');
+
+  const appointment = await Appointment.findOneAndUpdate(
+    { _id: id, doctor: doctor._id },
+    { doctorNotes: note },
+    { new: true },
+  );
+
+  if (!appointment) throw new ApiError(404, 'NOT_FOUND', 'Appointment not found');
+
+  res.status(200).json({ success: true, data: appointment });
+});
+
+const rescheduleAppointment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { dateStr, startTime } = req.body;
+  const appointmentService = require('../services/appointment.service');
+
+  const appointment = await appointmentService.rescheduleAppointment(
+    id,
+    req.user,
+    dateStr,
+    startTime,
+  );
+  res.status(200).json({ success: true, data: appointment });
+});
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -85,4 +144,10 @@ module.exports = {
   updateClinic,
   updateFees,
   updateTypes,
+  getDashboardKPIs,
+  getAppointments,
+  getNormalQueue,
+  updateAppointmentStatus,
+  updateAppointmentNote,
+  rescheduleAppointment,
 };

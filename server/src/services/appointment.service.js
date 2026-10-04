@@ -79,11 +79,11 @@ const transition = async (appointmentId, toStatus, user, reason = '') => {
   }
 
   // Type specific restrictions
-  if (toStatus === 'CHECKED_IN' && appointment.type !== 'PREMIUM') {
+  if (toStatus === 'CHECKED_IN' && !['PREMIUM', 'NORMAL'].includes(appointment.type)) {
     throw new ApiError(
       400,
       'VALIDATION_ERROR',
-      'CHECKED_IN status is only for PREMIUM appointments',
+      'CHECKED_IN status is only for PREMIUM and NORMAL appointments',
     );
   }
   if (toStatus === 'EN_ROUTE' && appointment.type !== 'HOME_VISIT') {
@@ -146,11 +146,135 @@ const transition = async (appointmentId, toStatus, user, reason = '') => {
 
   await appointment.save();
 
-  // TODO: Trigger events like emitting Socket.io updates, Email/SMS notifications, or Razorpay refund jobs.
+  // Side-effect: Process refund and notification asynchronously
+  if (toStatus === 'CANCELLED_BY_DOCTOR' || toStatus === 'CANCELLED_BY_ADMIN') {
+    const paymentService = require('./payment.service');
+    const notificationService = require('./notification.service');
+
+    // Process refund for the appointment if there was a payment
+    paymentService.processRefundForAppointment(appointment._id, reason).catch((err) => {
+      const logger = require('../utils/logger');
+      logger.error(`Failed to trigger refund for appointment ${appointment._id}: ${err.message}`);
+    });
+
+    // Send cancellation notification
+    notificationService.sendAppointmentCancellation(appointment._id).catch((err) => {
+      const logger = require('../utils/logger');
+      logger.error(
+        `Failed to send cancellation notification for appointment ${appointment._id}: ${err.message}`,
+      );
+    });
+  }
+
+  // TODO: Trigger events like emitting Socket.io updates
+
+  return appointment;
+};
+
+const rescheduleAppointment = async (appointmentId, user, dateStr, startTime) => {
+  const appointment = await Appointment.findById(appointmentId).populate('doctor');
+
+  if (!appointment) {
+    throw new ApiError(404, 'NOT_FOUND', 'Appointment not found');
+  }
+
+  if (appointment.type === 'NORMAL') {
+    throw new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      'Normal appointments cannot be rescheduled this way.',
+    );
+  }
+
+  if (appointment.status !== 'CONFIRMED') {
+    throw new ApiError(
+      400,
+      'VALIDATION_ERROR',
+      `Only CONFIRMED appointments can be rescheduled. Current status: ${appointment.status}`,
+    );
+  }
+
+  const doctor = appointment.doctor;
+  if (!doctor) {
+    throw new ApiError(404, 'NOT_FOUND', 'Doctor profile not found');
+  }
+
+  if (user.role !== 'ADMIN' && user.id !== doctor.user.toString()) {
+    throw new ApiError(403, 'FORBIDDEN', 'You are not authorized to reschedule this appointment');
+  }
+
+  const slotService = require('./slot.service');
+  const slots = await slotService.getSlotsForDate(doctor.slug, appointment.type, dateStr);
+  const targetSlot = slots.find((s) => s.startTime === startTime);
+
+  if (!targetSlot) {
+    throw new ApiError(400, 'VALIDATION_ERROR', 'Invalid slot time or outside working hours');
+  }
+  if (targetSlot.status !== 'AVAILABLE') {
+    throw new ApiError(409, 'SLOT_TAKEN', `This slot is currently ${targetSlot.status}`);
+  }
+
+  const newSlotLock = `${doctor._id}|${dateStr}|${startTime}`;
+  const oldDateStr = appointment.dateStr;
+  const oldStartTime = appointment.startTime;
+
+  // Use transaction for swapping the slot lock safely
+  const mongoose = require('mongoose');
+  const session = await mongoose.startSession();
+
+  try {
+    await session.withTransaction(async () => {
+      // Check if new lock is already taken
+      const existingAppt = await Appointment.findOne({ slotLock: newSlotLock }).session(session);
+      if (existingAppt) {
+        throw new ApiError(409, 'SLOT_TAKEN', 'This slot was just taken');
+      }
+
+      appointment.rescheduledFrom = {
+        dateStr: oldDateStr,
+        startTime: oldStartTime,
+      };
+
+      appointment.dateStr = dateStr;
+      appointment.startTime = targetSlot.startTime;
+      appointment.endTime = targetSlot.endTime;
+      appointment.startAt = targetSlot.startAt;
+      appointment.endAt = targetSlot.endAt;
+      appointment.slotLock = newSlotLock;
+
+      appointment.statusHistory.push({
+        from: 'CONFIRMED',
+        to: 'CONFIRMED',
+        by: user.id,
+        byRole: user.role,
+        at: new Date(),
+        reason: `Rescheduled from ${oldDateStr} ${oldStartTime} to ${dateStr} ${startTime}`,
+      });
+
+      await appointment.save({ session });
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      throw new ApiError(409, 'SLOT_TAKEN', 'This slot was just taken by another user');
+    }
+    throw error;
+  } finally {
+    await session.endSession();
+  }
+
+  // Side-effect: Send reschedule notification
+  const notificationService = require('./notification.service');
+  if (notificationService.sendAppointmentReschedule) {
+    notificationService.sendAppointmentReschedule(appointment._id).catch((err) => {
+      const logger = require('../utils/logger');
+      logger.error(`Failed to send reschedule notification for ${appointment._id}: ${err.message}`);
+    });
+  }
 
   return appointment;
 };
 
 module.exports = {
   transition,
+  rescheduleAppointment,
 };

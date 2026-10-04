@@ -116,6 +116,60 @@ const updateTypesSchema = z.object({
   }),
 });
 
+const getAppointmentsSchema = z.object({
+  query: z.object({
+    type: z.enum(['NORMAL', 'PREMIUM', 'HOME_VISIT']).optional(),
+    status: z.string().optional(),
+    startDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format')
+      .optional(),
+    endDate: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format')
+      .optional(),
+    search: z.string().optional(),
+    page: z.coerce.number().int().min(1).optional(),
+    limit: z.coerce.number().int().min(1).max(100).optional(),
+  }),
+});
+
+const updateAppointmentStatusSchema = z.object({
+  params: z.object({
+    id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid appointment ID'),
+  }),
+  body: z.object({
+    status: z.enum([
+      'CHECKED_IN',
+      'EN_ROUTE',
+      'IN_PROGRESS',
+      'COMPLETED',
+      'NO_SHOW',
+      'CANCELLED_BY_DOCTOR',
+    ]),
+    reason: z.string().optional(), // Required for cancel
+  }),
+});
+
+const updateAppointmentNoteSchema = z.object({
+  params: z.object({
+    id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid appointment ID'),
+  }),
+  body: z.object({
+    note: z.string().max(1000),
+  }),
+});
+
+const rescheduleAppointmentSchema = z.object({
+  params: z.object({
+    id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid appointment ID'),
+  }),
+  body: z.object({
+    dateStr: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Invalid date format'),
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Invalid time format'),
+  }),
+});
+
 module.exports = {
   updateProfileSchema,
   addGalleryItemSchema,
@@ -124,4 +178,8 @@ module.exports = {
   updateClinicSchema,
   updateFeesSchema,
   updateTypesSchema,
+  getAppointmentsSchema,
+  updateAppointmentStatusSchema,
+  updateAppointmentNoteSchema,
+  rescheduleAppointmentSchema,
 };

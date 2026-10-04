@@ -90,4 +90,34 @@ export const doctorApi = {
     const response = await api.delete(`/doctor/exceptions/${id}`);
     return response.data.data;
   },
+
+  getDashboardKPIs: async () => {
+    const response = await api.get('/doctor/dashboard');
+    return response.data.data;
+  },
+
+  getAppointments: async (params) => {
+    const response = await api.get('/doctor/appointments', { params });
+    return response.data.data;
+  },
+
+  getNormalQueue: async () => {
+    const response = await api.get('/doctor/appointments/normal-queue');
+    return response.data.data;
+  },
+
+  updateAppointmentStatus: async ({ id, status, reason }) => {
+    const response = await api.patch(`/doctor/appointments/${id}/status`, { status, reason });
+    return response.data.data;
+  },
+
+  updateAppointmentNote: async ({ id, note }) => {
+    const response = await api.patch(`/doctor/appointments/${id}/note`, { note });
+    return response.data.data;
+  },
+
+  rescheduleAppointment: async ({ id, dateStr, startTime }) => {
+    const response = await api.patch(`/doctor/appointments/${id}/reschedule`, { dateStr, startTime });
+    return response.data.data;
+  },
 };

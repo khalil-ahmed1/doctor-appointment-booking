@@ -115,7 +115,7 @@ const holdSlot = async (
       if (!doctor.types?.homeVisit?.enabled) {
         throw new ApiError(400, 'TYPE_DISABLED', 'Home visits are not enabled for this doctor');
       }
-      
+
       if (!addressSnapshot) {
         throw new ApiError(400, 'VALIDATION_ERROR', 'Address is required for home visit');
       }
@@ -129,18 +129,35 @@ const holdSlot = async (
         // RADIUS mode
         const { getDistanceFromLatLonInKm } = require('../utils/geo');
         if (!doctor.clinic?.location?.coordinates || !addressSnapshot.location) {
-           throw new ApiError(400, 'VALIDATION_ERROR', 'Invalid location coordinates for service area check');
+          throw new ApiError(
+            400,
+            'VALIDATION_ERROR',
+            'Invalid location coordinates for service area check',
+          );
         }
         const [docLng, docLat] = doctor.clinic.location.coordinates;
-        const dist = getDistanceFromLatLonInKm(docLat, docLng, addressSnapshot.location.lat, addressSnapshot.location.lng);
+        const dist = getDistanceFromLatLonInKm(
+          docLat,
+          docLng,
+          addressSnapshot.location.lat,
+          addressSnapshot.location.lng,
+        );
         const radius = sa.radiusKm || 10;
         if (dist > radius) {
-           throw new ApiError(400, 'SERVICE_AREA_ERROR', `Doctor does not serve this area (Distance: ${dist.toFixed(1)}km, Max: ${radius}km)`);
+          throw new ApiError(
+            400,
+            'SERVICE_AREA_ERROR',
+            `Doctor does not serve this area (Distance: ${dist.toFixed(1)}km, Max: ${radius}km)`,
+          );
         }
       }
     } else if (type === 'PREMIUM') {
       if (!doctor.types?.premium?.enabled) {
-        throw new ApiError(400, 'TYPE_DISABLED', 'Premium appointments are not enabled for this doctor');
+        throw new ApiError(
+          400,
+          'TYPE_DISABLED',
+          'Premium appointments are not enabled for this doctor',
+        );
       }
     }
 

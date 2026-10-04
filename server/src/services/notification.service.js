@@ -88,6 +88,73 @@ const sendBookingConfirmation = async (appointmentId) => {
   }
 };
 
+const sendAppointmentCancellation = async (appointmentId) => {
+  try {
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('doctor')
+      .populate('patient');
+    if (!appointment || !appointment.patient?.email) return;
+
+    const patientName = appointment.patientDetails?.name || appointment.patient?.name || 'Patient';
+    const doctorName = appointment.doctor?.fullName;
+    const amount = appointment.fee?.total ? (appointment.fee.total / 100).toFixed(2) : '0.00';
+    const reason = appointment.cancellation?.reason || 'Doctor cancelled the appointment';
+
+    const patientEmailData = {
+      patientName,
+      doctorName,
+      bookingCode: appointment.bookingCode,
+      dateStr: appointment.dateStr,
+      startTime: appointment.startTime,
+      tokenLabel: appointment.tokenLabel,
+      amount,
+      reason,
+    };
+
+    await sendEmail(
+      appointment.patient.email,
+      `Appointment Cancelled: Dr. ${doctorName}`,
+      'BOOKING_CANCELLED',
+      patientEmailData,
+    );
+  } catch (error) {
+    logger.error(`Error in sendAppointmentCancellation: ${error.message}`);
+  }
+};
+
+const sendAppointmentReschedule = async (appointmentId) => {
+  try {
+    const appointment = await Appointment.findById(appointmentId)
+      .populate('doctor')
+      .populate('patient');
+    if (!appointment || !appointment.patient?.email) return;
+
+    const patientName = appointment.patientDetails?.name || appointment.patient?.name || 'Patient';
+    const doctorName = appointment.doctor?.fullName;
+
+    const patientEmailData = {
+      patientName,
+      doctorName,
+      bookingCode: appointment.bookingCode,
+      oldDateStr: appointment.rescheduledFrom?.dateStr,
+      oldStartTime: appointment.rescheduledFrom?.startTime,
+      newDateStr: appointment.dateStr,
+      newStartTime: appointment.startTime,
+    };
+
+    await sendEmail(
+      appointment.patient.email,
+      `Appointment Rescheduled: Dr. ${doctorName}`,
+      'BOOKING_RESCHEDULED',
+      patientEmailData,
+    );
+  } catch (error) {
+    logger.error(`Error in sendAppointmentReschedule: ${error.message}`);
+  }
+};
+
 module.exports = {
   sendBookingConfirmation,
+  sendAppointmentCancellation,
+  sendAppointmentReschedule,
 };

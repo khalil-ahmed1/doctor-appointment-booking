@@ -275,6 +275,24 @@ const addException = async (userId, data) => {
     { new: true, upsert: true },
   );
 
+  // Auto-extend Normal queue validity if doctor takes a leave
+  if (data.kind === 'LEAVE' && data.appliesTo.includes('NORMAL')) {
+    const leaveDate = new Date(data.dateStr);
+
+    const activeNormalTokens = await Appointment.find({
+      doctor: profile._id,
+      type: 'NORMAL',
+      status: 'CONFIRMED',
+      validUntil: { $gte: leaveDate },
+    });
+
+    for (const token of activeNormalTokens) {
+      token.validUntil = new Date(token.validUntil.getTime() + 24 * 60 * 60 * 1000);
+      token.extendedByDays = (token.extendedByDays || 0) + 1;
+      await token.save();
+    }
+  }
+
   return exception;
 };
 

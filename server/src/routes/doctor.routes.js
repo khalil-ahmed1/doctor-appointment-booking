@@ -78,4 +78,31 @@ router
   .route('/exceptions/:id')
   .delete(validate(scheduleValidation.deleteExceptionSchema), scheduleController.deleteException);
 
+// Dashboard & Appointments
+router.get('/dashboard', doctorController.getDashboardKPIs);
+
+router
+  .route('/appointments')
+  .get(validate(doctorValidation.getAppointmentsSchema), doctorController.getAppointments);
+
+router.get('/appointments/normal-queue', doctorController.getNormalQueue);
+
+router.patch(
+  '/appointments/:id/status',
+  validate(doctorValidation.updateAppointmentStatusSchema),
+  doctorController.updateAppointmentStatus,
+);
+
+router.patch(
+  '/appointments/:id/note',
+  validate(doctorValidation.updateAppointmentNoteSchema),
+  doctorController.updateAppointmentNote,
+);
+
+router.patch(
+  '/appointments/:id/reschedule',
+  validate(doctorValidation.rescheduleAppointmentSchema),
+  doctorController.rescheduleAppointment,
+);
+
 module.exports = router;
