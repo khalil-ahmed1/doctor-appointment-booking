@@ -3,6 +3,7 @@ const { generateReceiptPDF } = require('./pdf.service');
 const Appointment = require('../models/Appointment');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const env = require('../config/env');
 const logger = require('../utils/logger');
 
@@ -62,6 +63,15 @@ const sendBookingConfirmation = async (appointmentId) => {
         patientEmailData,
         attachments,
       );
+
+      await Notification.create({
+        user: appointment.patient._id,
+        type: 'BOOKING',
+        title: 'Booking Confirmed',
+        message: `Your appointment with Dr. ${doctorName} on ${appointment.dateStr || ''} is confirmed. Booking ID: ${appointment.bookingCode}`,
+        link: '/patient/dashboard',
+        relatedId: appointment._id,
+      });
     }
 
     // 3. Send to Doctor
@@ -82,6 +92,15 @@ const sendBookingConfirmation = async (appointmentId) => {
           dashboardUrl: `${env.CLIENT_URL}/doctor/dashboard`,
         },
       );
+
+      await Notification.create({
+        user: doctorUser._id,
+        type: 'BOOKING',
+        title: 'New Appointment Booking',
+        message: `New booking from ${patientName} on ${appointment.dateStr || ''}. Booking ID: ${appointment.bookingCode}`,
+        link: '/doctor/dashboard',
+        relatedId: appointment._id,
+      });
     }
   } catch (error) {
     logger.error(`Error in sendBookingConfirmation: ${error.message}`);
@@ -117,6 +136,15 @@ const sendAppointmentCancellation = async (appointmentId) => {
       'BOOKING_CANCELLED',
       patientEmailData,
     );
+
+    await Notification.create({
+      user: appointment.patient._id,
+      type: 'BOOKING',
+      title: 'Appointment Cancelled',
+      message: `Your appointment with Dr. ${doctorName} on ${appointment.dateStr || ''} was cancelled. Reason: ${reason}`,
+      link: '/patient/dashboard',
+      relatedId: appointment._id,
+    });
   } catch (error) {
     logger.error(`Error in sendAppointmentCancellation: ${error.message}`);
   }
@@ -148,8 +176,55 @@ const sendAppointmentReschedule = async (appointmentId) => {
       'BOOKING_RESCHEDULED',
       patientEmailData,
     );
+
+    await Notification.create({
+      user: appointment.patient._id,
+      type: 'BOOKING',
+      title: 'Appointment Rescheduled',
+      message: `Your appointment with Dr. ${doctorName} has been rescheduled to ${appointment.dateStr || ''} at ${appointment.startTime || ''}.`,
+      link: '/patient/dashboard',
+      relatedId: appointment._id,
+    });
   } catch (error) {
     logger.error(`Error in sendAppointmentReschedule: ${error.message}`);
+  }
+};
+
+const sendAppointmentReminder = async (appointment, customNote = '') => {
+  try {
+    if (!appointment || !appointment.patient?.email) return;
+
+    const patientName = appointment.patientDetails?.name || appointment.patient?.name || 'Patient';
+    const doctorName = appointment.doctor?.fullName;
+
+    const patientEmailData = {
+      patientName,
+      doctorName,
+      bookingCode: appointment.bookingCode,
+      type: appointment.type,
+      dateStr: appointment.dateStr,
+      startTime: appointment.startTime,
+      tokenLabel: appointment.tokenLabel,
+      customNote,
+    };
+
+    await sendEmail(
+      appointment.patient.email,
+      `Reminder: Appointment with Dr. ${doctorName}`,
+      'APPOINTMENT_REMINDER',
+      patientEmailData,
+    );
+
+    await Notification.create({
+      user: appointment.patient._id,
+      type: 'BOOKING',
+      title: 'Appointment Reminder',
+      message: `Reminder for your upcoming appointment with Dr. ${doctorName} on ${appointment.dateStr || ''}.`,
+      link: '/patient/dashboard',
+      relatedId: appointment._id,
+    });
+  } catch (error) {
+    logger.error(`Error in sendAppointmentReminder: ${error.message}`);
   }
 };
 
@@ -157,4 +232,5 @@ module.exports = {
   sendBookingConfirmation,
   sendAppointmentCancellation,
   sendAppointmentReschedule,
+  sendAppointmentReminder,
 };

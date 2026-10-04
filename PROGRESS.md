@@ -19,7 +19,7 @@
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-33 Reminders (Premium/Home/Normal) via scheduled jobs with sent-flags
+1. F-35 Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireNormalTokens
 
 ---
 
@@ -96,8 +96,8 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 | F-30 | Doctor cancel with auto refund + refund tracking + emails | 4.9, 6.5 | ✅ | |
 | F-31 | Doctor reschedule (Premium/Home) + Normal extend validity + leave auto-extend | 4.9, 3.2 | ✅ | |
 | F-32 | Normal queue board (ordered by `tokenSeq`) | 4.4 | ✅ | |
-| F-33 | Reminders (Premium/Home/Normal) via scheduled jobs with sent-flags | 8 | ⬜ | |
-| F-34 | In-app notifications (bell + list) | 8 | ⬜ | |
+| F-33 | Reminders (Premium/Home/Normal) via scheduled jobs with sent-flags | 8 | ✅ | |
+| F-34 | In-app notifications (bell + list) | 8 | ✅ | |
 | F-35 | Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireNormalTokens | 13 | ⬜ | |
 | F-36 | Doctor earnings ledger + CSV export | 4.4, 6.4 | ⬜ | |
 
@@ -124,6 +124,48 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 33 — 2026-10-04 — Antigravity Agent
+Goal: F-34 In-app notifications (bell + list)
+Plan:
+- Create `Notification` Mongoose model.
+- Add notification routes and controller (fetch, mark as read, mark all read).
+- Update `notification.service.js` to create Notification documents whenever emails are sent.
+- Create `NotificationBell` UI component with dropdown and unread count badge.
+- Add `NotificationsPage` UI component to list all notifications with pagination.
+- Add components to layout (`DashboardLayout`, `RootLayout`) and React Router (`App.jsx`).
+Done:
+- Model and backend APIs successfully created and hooked into the app.
+- Booking confirmation, cancellation, rescheduling, and reminder logic correctly populates the in-app notifications.
+- The UI bell shows unread counts, has a drop-down menu that polls every 60s, and clicking "View all" leads to the full list page.
+Files/modules touched: `server/src/models/Notification.js`, `server/src/controllers/notification.controller.js`, `server/src/routes/notification.routes.js`, `server/src/app.js`, `server/src/services/notification.service.js`, `frontend/src/components/NotificationBell.jsx`, `frontend/src/pages/NotificationsPage.jsx`, `frontend/src/layouts/DashboardLayout.jsx`, `frontend/src/layouts/RootLayout.jsx`, `frontend/src/App.jsx`.
+Tests added/updated: None specifically for background jobs. 
+How to verify manually: Start `npm run dev` in both server and frontend. Login as patient or doctor. Perform a booking or cancellation. Notice the bell icon on the top right increment. Click it to read. Click "View all notifications" to see the paginated list.
+Decisions made: Used existing `dayjs` relativeTime plugin to show "2 hours ago" formatting. Let the dropdown poll every 60 seconds.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-35 (Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireNormalTokens).
+
+### Session 32 — 2026-10-04 — Antigravity Agent
+Goal: F-33 Reminders (Premium/Home/Normal) via scheduled jobs with sent-flags
+Plan:
+- Install `node-cron` package.
+- Add `APPOINTMENT_REMINDER` email template in `emailTemplates.js`.
+- Add `sendAppointmentReminder` in `notification.service.js`.
+- Create `reminder.job.js` utilizing `node-cron` running every 5 minutes.
+- Filter `CONFIRMED` appointments querying the `remindersSent` nested booleans preventing duplicate sends.
+- Calculate diff hours accurately for Premium/Home Visit (24h and 2h markers) using `dayjs` tz plugin.
+- For Normal appointments, trigger evening-of-booking and last-day-morning reminders.
+- Wire `startReminderJobs` into `server.js` startup lifecycle.
+Done:
+- Created and configured the background cron jobs ensuring idempotency via `Appointment.remindersSent`.
+- Handled edge cases (missing dates, past appointments).
+- Email templates safely integrated with custom notes mapping to "Home Visit" instructions.
+Files/modules touched: `server/package.json`, `server/src/models/Appointment.js`, `server/src/templates/emailTemplates.js`, `server/src/services/notification.service.js`, `server/src/jobs/reminder.job.js`, `server/src/server.js`.
+Tests added/updated: None specifically for background jobs yet (relies on notification mocks).
+How to verify manually: When running `npm run dev`, watch the console for "Reminder cron jobs scheduled". Mock an appointment with a `startAt` time in 23.5 hours, wait 5 minutes, and check Mailtrap to see the 24h reminder.
+Decisions made: Went with `node-cron` sweep approach instead of delayed queues per `PROGRESS.md` D-001 restriction to keep stack simple. Evaluated flags accurately in the database before sending.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-34 (In-app notifications).
 
 ### Session 31 — 2026-10-04 — Antigravity Agent
 Goal: F-32 Normal queue board (ordered by `tokenSeq`)

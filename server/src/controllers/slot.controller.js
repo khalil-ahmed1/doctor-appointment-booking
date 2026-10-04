@@ -1,8 +1,8 @@
 const slotService = require('../services/slot.service');
-const catchAsync = require('../utils/asyncHandler');
+const asyncHandler = require('../utils/asyncHandler');
 const ApiError = require('../utils/ApiError');
 
-const getSlotsForDate = catchAsync(async (req, res) => {
+const getSlotsForDate = asyncHandler(async (req, res) => {
   const { slug } = req.params;
   const { type, date } = req.query;
 
@@ -14,7 +14,7 @@ const getSlotsForDate = catchAsync(async (req, res) => {
   res.status(200).json({ success: true, data: slots });
 });
 
-const getAvailability = catchAsync(async (req, res) => {
+const getAvailability = asyncHandler(async (req, res) => {
   const { slug } = req.params;
   const { type, from, to } = req.query;
 

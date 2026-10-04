@@ -76,6 +76,7 @@ const doctorRoutes = require('./routes/doctor.routes');
 const appointmentRoutes = require('./routes/appointment.routes');
 const paymentRoutes = require('./routes/payment.routes');
 const patientRoutes = require('./routes/patient.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 // Health route
 app.get('/api/v1/healthz', (req, res) => {
@@ -88,6 +89,7 @@ app.use('/api/v1/doctor', doctorRoutes);
 app.use('/api/v1/appointments', appointmentRoutes);
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/patients', patientRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1', publicRoutes);
 
 // Global Error Handler

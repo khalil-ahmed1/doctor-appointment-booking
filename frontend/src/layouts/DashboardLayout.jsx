@@ -14,6 +14,7 @@ import {
   Bell, 
   Settings 
 } from 'lucide-react';
+import { NotificationBell } from '@/components/NotificationBell';
 
 const doctorLinks = [
   { name: 'Overview', to: '/doctor/dashboard', icon: LayoutDashboard },
@@ -112,6 +113,7 @@ export const DashboardLayout = () => {
         <div className="container flex h-16 items-center px-4 justify-between">
           <Link to="/" className="font-bold text-xl text-primary">DocBook Dashboard</Link>
           <div className="flex items-center space-x-4">
+            <NotificationBell />
             <span className="text-sm font-medium">{user.name}</span>
             <Button variant="outline" size="sm" onClick={logout}>
               Logout

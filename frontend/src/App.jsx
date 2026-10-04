@@ -32,6 +32,7 @@ import BookingPage from './features/public/pages/BookingPage';
 import BookingSuccessPage from './features/public/pages/BookingSuccessPage';
 
 import PatientDashboardPage from './features/patient/pages/PatientDashboardPage';
+import NotificationsPage from './pages/NotificationsPage';
 
 const queryClient = new QueryClient();
 
@@ -63,7 +64,9 @@ function App() {
                 <Route element={<DashboardLayout />}>
                   {/* Dashboards */}
                   <Route path="/patient/dashboard" element={<PatientDashboardPage />} />
+                  <Route path="/patient/notifications" element={<NotificationsPage />} />
                   <Route path="/doctor/dashboard" element={<DoctorDashboardPage />} />
+                  <Route path="/doctor/notifications" element={<NotificationsPage />} />
                   <Route path="/admin/dashboard" element={<div>Admin Dashboard Placeholder</div>} />
                   
                   {/* Booking Flow */}

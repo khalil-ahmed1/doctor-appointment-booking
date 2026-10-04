@@ -139,6 +139,31 @@ const templates = {
       </div>
     `;
   },
+
+  APPOINTMENT_REMINDER: (data) => {
+    const {
+      patientName,
+      doctorName,
+      bookingCode,
+      type,
+      dateStr,
+      startTime,
+      tokenLabel,
+      customNote,
+    } = data;
+    return `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2>Appointment Reminder</h2>
+        <p>Hi ${patientName},</p>
+        <p>This is a reminder for your upcoming ${type} appointment with <strong>Dr. ${doctorName}</strong>.</p>
+        <p><strong>Booking ID:</strong> ${bookingCode}</p>
+        <p><strong>Date:</strong> ${dateStr} ${startTime ? `at ${startTime}` : ''}</p>
+        ${tokenLabel ? `<p><strong>Token:</strong> ${tokenLabel}</p>` : ''}
+        ${customNote ? `<p><em>${customNote}</em></p>` : ''}
+        <p>Thank you!</p>
+      </div>
+    `;
+  },
 };
 
 const getTemplate = (templateName, data) => {

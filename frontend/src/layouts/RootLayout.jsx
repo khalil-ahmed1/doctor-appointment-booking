@@ -1,6 +1,7 @@
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { LogOut, LayoutDashboard } from 'lucide-react';
+import { NotificationBell } from '@/components/NotificationBell';
 
 export const RootLayout = () => {
   const { user, logout } = useAuth();
@@ -24,6 +25,7 @@ export const RootLayout = () => {
           <div className="flex items-center space-x-4">
             {user ? (
               <div className="flex items-center gap-4">
+                <NotificationBell />
                 <Link
                   to={user.role === 'PATIENT' ? '/patient/dashboard' : `/${user.role.toLowerCase()}/dashboard`}
                   className="hidden sm:flex items-center gap-2 text-sm font-medium text-slate-700 hover:text-blue-600"
