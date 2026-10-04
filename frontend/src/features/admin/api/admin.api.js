@@ -50,4 +50,34 @@ export const adminApi = {
     const response = await axios.patch(`/admin/patients/${id}/block`, { status });
     return response.data;
   },
+
+  getPlans: async (params = {}) => {
+    const response = await axios.get('/admin/plans', { params });
+    return response.data;
+  },
+
+  getPlanById: async (id) => {
+    const response = await axios.get(`/admin/plans/${id}`);
+    return response.data;
+  },
+
+  createPlan: async (data) => {
+    const response = await axios.post('/admin/plans', data);
+    return response.data;
+  },
+
+  updatePlan: async (id, data) => {
+    const response = await axios.put(`/admin/plans/${id}`, data);
+    return response.data;
+  },
+
+  deletePlan: async (id) => {
+    const response = await axios.delete(`/admin/plans/${id}`);
+    return response.data;
+  },
+
+  getSubscriptions: async (params = {}) => {
+    const response = await axios.get('/admin/subscriptions', { params });
+    return response.data;
+  },
 };

@@ -22,6 +22,8 @@ import DoctorsListPage from './features/admin/pages/DoctorsListPage';
 import DoctorCreatePage from './features/admin/pages/DoctorCreatePage';
 import PatientsListPage from './features/admin/pages/PatientsListPage';
 import PatientViewPage from './features/admin/pages/PatientViewPage';
+import PlansPage from './features/admin/pages/PlansPage';
+import SubscriptionsListPage from './features/admin/pages/SubscriptionsListPage';
 import DoctorProfilePage from './features/doctor/pages/DoctorProfilePage';
 import DoctorFeesPage from './features/doctor/pages/DoctorFeesPage';
 import DoctorSchedulePage from './features/doctor/pages/DoctorSchedulePage';
@@ -87,6 +89,8 @@ function App() {
                   <Route path="/admin/doctors/new" element={<DoctorCreatePage />} />
                   <Route path="/admin/patients" element={<PatientsListPage />} />
                   <Route path="/admin/patients/:id" element={<PatientViewPage />} />
+                  <Route path="/admin/plans" element={<PlansPage />} />
+                  <Route path="/admin/subscriptions" element={<SubscriptionsListPage />} />
                 </Route>
               </Route>
             </Routes>

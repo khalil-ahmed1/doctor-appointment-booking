@@ -106,11 +106,7 @@ router.patch(
 );
 
 // Earnings Ledger
-router.get(
-  '/earnings',
-  validate(doctorValidation.getEarningsSchema),
-  doctorController.getEarnings,
-);
+router.get('/earnings', validate(doctorValidation.getEarningsSchema), doctorController.getEarnings);
 
 router.get(
   '/earnings/export',

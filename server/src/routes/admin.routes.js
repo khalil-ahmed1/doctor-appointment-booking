@@ -48,4 +48,21 @@ router.patch(
   adminController.updatePatientBlockStatus,
 );
 
+// Plans Management
+router
+  .route('/plans')
+  .post(validate(adminValidation.createPlanSchema), adminController.createPlan)
+  .get(adminController.getPlans);
+
+router
+  .route('/plans/:id')
+  .get(validate(adminValidation.getPlanParamsSchema), adminController.getPlanById)
+  .put(validate(adminValidation.updatePlanSchema), adminController.updatePlan)
+  .delete(validate(adminValidation.getPlanParamsSchema), adminController.deletePlan);
+
+// Subscriptions
+router
+  .route('/subscriptions')
+  .get(validate(adminValidation.getSubscriptionsSchema), adminController.getSubscriptions);
+
 module.exports = router;

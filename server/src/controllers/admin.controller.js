@@ -1,5 +1,7 @@
 const asyncHandler = require('../utils/asyncHandler');
 const adminService = require('../services/admin.service');
+const planService = require('../services/plan.service');
+const subscriptionService = require('../services/subscription.service');
 
 const onboardDoctor = asyncHandler(async (req, res) => {
   const doctorProfile = await adminService.onboardDoctor(req.body, req.user._id);
@@ -83,6 +85,55 @@ const updatePatientBlockStatus = asyncHandler(async (req, res) => {
   });
 });
 
+const createPlan = asyncHandler(async (req, res) => {
+  const plan = await planService.createPlan(req.body);
+  res.status(201).json({
+    success: true,
+    data: plan,
+  });
+});
+
+const getPlans = asyncHandler(async (req, res) => {
+  const plans = await planService.getPlans(req.query);
+  res.status(200).json({
+    success: true,
+    data: plans,
+  });
+});
+
+const getPlanById = asyncHandler(async (req, res) => {
+  const plan = await planService.getPlanById(req.params.id);
+  res.status(200).json({
+    success: true,
+    data: plan,
+  });
+});
+
+const updatePlan = asyncHandler(async (req, res) => {
+  const plan = await planService.updatePlan(req.params.id, req.body);
+  res.status(200).json({
+    success: true,
+    data: plan,
+  });
+});
+
+const deletePlan = asyncHandler(async (req, res) => {
+  const plan = await planService.deletePlan(req.params.id);
+  res.status(200).json({
+    success: true,
+    data: plan,
+  });
+});
+
+const getSubscriptions = asyncHandler(async (req, res) => {
+  const result = await subscriptionService.getSubscriptions(req.query);
+  res.status(200).json({
+    success: true,
+    data: result.subscriptions,
+    meta: result.meta,
+  });
+});
+
 module.exports = {
   onboardDoctor,
   getDoctors,
@@ -94,4 +145,10 @@ module.exports = {
   getPatientById,
   updatePatient,
   updatePatientBlockStatus,
+  createPlan,
+  getPlans,
+  getPlanById,
+  updatePlan,
+  deletePlan,
+  getSubscriptions,
 };

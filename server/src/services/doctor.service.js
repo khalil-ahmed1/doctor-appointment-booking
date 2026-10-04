@@ -257,15 +257,16 @@ const getDashboardKPIs = async (userId) => {
         }
       });
     } else if (p.breakdown && p.breakdown.feeBearer === 'PATIENT') {
-       // Fallback if transfer hasn't processed yet but fee is PATIENT
-       const amount = p.breakdown.consultationFee - (p.breakdown.platformCommission || 0);
-       if (amount > 0) thisMonthEarnings += amount;
+      // Fallback if transfer hasn't processed yet but fee is PATIENT
+      const amount = p.breakdown.consultationFee - (p.breakdown.platformCommission || 0);
+      if (amount > 0) thisMonthEarnings += amount;
     } else if (p.breakdown && p.breakdown.feeBearer === 'DOCTOR') {
-       // Fallback for DOCTOR estimation
-       const actualFee = p.breakdown.actualGatewayFee || 0;
-       const actualTax = p.breakdown.actualGatewayGst || 0;
-       const amount = p.breakdown.total - actualFee - actualTax - (p.breakdown.platformCommission || 0);
-       if (amount > 0) thisMonthEarnings += amount;
+      // Fallback for DOCTOR estimation
+      const actualFee = p.breakdown.actualGatewayFee || 0;
+      const actualTax = p.breakdown.actualGatewayGst || 0;
+      const amount =
+        p.breakdown.total - actualFee - actualTax - (p.breakdown.platformCommission || 0);
+      if (amount > 0) thisMonthEarnings += amount;
     }
   });
 
@@ -366,7 +367,9 @@ const getEarnings = async (userId, queryParams) => {
     if (endDate) apptFilter.dateStr.$lte = endDate;
   }
 
-  const appointments = await Appointment.find(apptFilter).select('_id bookingCode type dateStr startTime patientDetails');
+  const appointments = await Appointment.find(apptFilter).select(
+    '_id bookingCode type dateStr startTime patientDetails',
+  );
   const appointmentMap = {};
   const appointmentIds = appointments.map((a) => {
     appointmentMap[a._id.toString()] = a;
@@ -381,16 +384,13 @@ const getEarnings = async (userId, queryParams) => {
   const skip = (page - 1) * limit;
 
   const [payments, total] = await Promise.all([
-    Payment.find(paymentFilter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit),
+    Payment.find(paymentFilter).sort({ createdAt: -1 }).skip(skip).limit(limit),
     Payment.countDocuments(paymentFilter),
   ]);
 
   const transactions = payments.map((p) => {
     const appt = appointmentMap[p.appointment.toString()];
-    
+
     // Calculate net to doctor
     let netToDoctor = 0;
     let transferStatus = 'PENDING';
@@ -433,7 +433,7 @@ const getEarnings = async (userId, queryParams) => {
       netToDoctor,
       transferStatus,
       settlementId,
-      isRefunded
+      isRefunded,
     };
   });
 
@@ -451,28 +451,45 @@ const getEarnings = async (userId, queryParams) => {
 const exportEarningsCSV = async (userId, queryParams) => {
   // Same logic as getEarnings but no pagination
   const { startDate, endDate } = queryParams;
-  const { transactions } = await getEarnings(userId, { startDate, endDate, page: 1, limit: 100000 });
+  const { transactions } = await getEarnings(userId, {
+    startDate,
+    endDate,
+    page: 1,
+    limit: 100000,
+  });
 
   const { Parser } = require('json2csv');
   const fields = [
-    'bookingCode', 'date', 'type', 'patientName', 'gross', 'totalPaidByPatient',
-    'gatewayFee', 'gstOnFee', 'platformCommission', 'netToDoctor', 'transferStatus', 'settlementId'
+    'bookingCode',
+    'date',
+    'type',
+    'patientName',
+    'gross',
+    'totalPaidByPatient',
+    'gatewayFee',
+    'gstOnFee',
+    'platformCommission',
+    'netToDoctor',
+    'transferStatus',
+    'settlementId',
   ];
-  
+
   const opts = { fields };
-  
+
   try {
     const parser = new Parser(opts);
-    const csv = parser.parse(transactions.map(t => ({
-      ...t,
-      date: t.date.toISOString(),
-      gross: (t.gross / 100).toFixed(2),
-      totalPaidByPatient: (t.totalPaidByPatient / 100).toFixed(2),
-      gatewayFee: (t.gatewayFee / 100).toFixed(2),
-      gstOnFee: (t.gstOnFee / 100).toFixed(2),
-      platformCommission: (t.platformCommission / 100).toFixed(2),
-      netToDoctor: (t.netToDoctor / 100).toFixed(2),
-    })));
+    const csv = parser.parse(
+      transactions.map((t) => ({
+        ...t,
+        date: t.date.toISOString(),
+        gross: (t.gross / 100).toFixed(2),
+        totalPaidByPatient: (t.totalPaidByPatient / 100).toFixed(2),
+        gatewayFee: (t.gatewayFee / 100).toFixed(2),
+        gstOnFee: (t.gstOnFee / 100).toFixed(2),
+        platformCommission: (t.platformCommission / 100).toFixed(2),
+        netToDoctor: (t.netToDoctor / 100).toFixed(2),
+      })),
+    );
     return csv;
   } catch (err) {
     throw new ApiError(500, 'SERVER_ERROR', 'Could not generate CSV');

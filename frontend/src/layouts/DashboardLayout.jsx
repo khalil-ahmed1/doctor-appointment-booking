@@ -65,6 +65,8 @@ export const DashboardLayout = () => {
         { name: 'Overview', to: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Doctors', to: '/admin/doctors', icon: Stethoscope },
         { name: 'Patients', to: '/admin/patients', icon: UserCircle },
+        { name: 'Plans', to: '/admin/plans', icon: CreditCard },
+        { name: 'Subscriptions', to: '/admin/subscriptions', icon: ListOrdered },
       ];
       return adminLinks.map((link) => {
         const isActive = location.pathname.startsWith(link.to);

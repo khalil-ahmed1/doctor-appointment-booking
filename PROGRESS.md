@@ -12,14 +12,14 @@
 | Item | Value |
 |---|---|
 | Current phase | Phase 3 – Home Visit & Doctor Operations |
-| Current feature | F-37 Plans CRUD (admin) + subscription models + state computation |
+| Current feature | F-38 Doctor subscription purchase |
 | Last updated | 2026-10-04 |
 | Last session by | Antigravity Agent |
 | App runs locally? | Yes |
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-37 Plans CRUD (admin) + subscription models + state computation
+1. F-38 Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF
 
 ---
 
@@ -104,7 +104,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ### Phase 4 – Subscription & Admin Controls
 | ID | Feature | PRD | Status | Notes |
 |---|---|---|---|---|
-| F-37 | Plans CRUD (admin) + subscription models + state computation (TRIAL/ACTIVE/GRACE/EXPIRED/SUSPENDED) | 7 | ⬜ | |
+| F-37 | Plans CRUD (admin) + subscription models + state computation (TRIAL/ACTIVE/GRACE/EXPIRED/SUSPENDED) | 7 | ✅ | |
 | F-38 | Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF | 7.3 | ⬜ | |
 | F-39 | Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI | 7.4, 4.4 | ⬜ | |
 | F-40 | Admin manual subscription controls (grant/extend/set-end/change/suspend) with audit + email | 4.10, 7.3 | ⬜ | |
@@ -124,6 +124,26 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 36 — 2026-10-04 — Antigravity Agent
+Goal: F-37 Plans CRUD (admin) + subscription models + state computation
+Plan:
+- Verify existing `Plan` and `Subscription` models.
+- Create `plan.service.js` and `subscription.service.js` with CRUD operations and state computation functions.
+- Update `admin.controller.js` and `admin.routes.js` to serve these new endpoints.
+- Update `admin.validation.js` with correct Zod schemas.
+- Build frontend `PlansPage.jsx` and `SubscriptionsListPage.jsx` mapping to the new API.
+- Update `App.jsx` and `DashboardLayout.jsx` with sidebar links.
+Done:
+- Completed backend APIs for Plan management and Subscription listing.
+- Wrote `computeAndUpdateSubscriptionState` mapped perfectly to the PRD rules (TRIAL/ACTIVE/GRACE/EXPIRED).
+- Developed frontend Admin panel tables and forms for seamless creation/editing.
+Files/modules touched: `server/src/services/plan.service.js`, `server/src/services/subscription.service.js`, `server/src/controllers/admin.controller.js`, `server/src/routes/admin.routes.js`, `server/src/validations/admin.validation.js`, `frontend/src/features/admin/api/admin.api.js`, `frontend/src/features/admin/pages/PlansPage.jsx`, `frontend/src/features/admin/pages/SubscriptionsListPage.jsx`, `frontend/src/layouts/DashboardLayout.jsx`, `frontend/src/App.jsx`.
+Tests added/updated: Linter fixes applied.
+How to verify manually: Login as an Admin and navigate to "Plans" to create and edit plans. Go to "Subscriptions" to view all active doctor subscriptions.
+Decisions made: Encapsulated subscription and plan services cleanly separated from the bulky `admin.service.js`. Integrated exact Grace/Trial timeline mapping.
+Left undone / known issues: None.
+NEXT STEP (specific): Start F-38 (Doctor subscription purchase via Razorpay).
 
 ### Session 35 — 2026-10-04 — Antigravity Agent
 Goal: F-36 Doctor earnings ledger + CSV export

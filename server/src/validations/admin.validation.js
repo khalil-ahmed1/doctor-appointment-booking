@@ -152,6 +152,51 @@ const getPatientParamsSchema = z.object({
   }),
 });
 
+const createPlanSchema = z.object({
+  body: z.object({
+    name: z.string().min(1, 'Name is required'),
+    code: z.string().min(1, 'Code is required'),
+    durationDays: z.number().int().min(1, 'Duration must be at least 1 day'),
+    price: z.number().int().min(0, 'Price must be non-negative'),
+    gstPercent: z.number().int().min(0).max(100).default(18),
+    isActive: z.boolean().default(true),
+    displayOrder: z.number().int().default(0),
+    features: z.array(z.string()).default([]),
+  }),
+});
+
+const updatePlanSchema = z.object({
+  body: z.object({
+    name: z.string().min(1).optional(),
+    code: z.string().min(1).optional(),
+    durationDays: z.number().int().min(1).optional(),
+    price: z.number().int().min(0).optional(),
+    gstPercent: z.number().int().min(0).max(100).optional(),
+    isActive: z.boolean().optional(),
+    displayOrder: z.number().int().optional(),
+    features: z.array(z.string()).optional(),
+  }),
+  params: z.object({
+    id: objectIdSchema,
+  }),
+});
+
+const getPlanParamsSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+});
+
+const getSubscriptionsSchema = z.object({
+  query: z
+    .object({
+      doctorId: objectIdSchema.optional(),
+      page: z.string().regex(/^\d+$/).optional(),
+      limit: z.string().regex(/^\d+$/).optional(),
+    })
+    .optional(),
+});
+
 module.exports = {
   onboardDoctorSchema,
   updateDoctorStatusSchema,
@@ -160,4 +205,8 @@ module.exports = {
   updatePatientBlockStatusSchema,
   updatePatientSchema,
   getPatientParamsSchema,
+  createPlanSchema,
+  updatePlanSchema,
+  getPlanParamsSchema,
+  getSubscriptionsSchema,
 };
