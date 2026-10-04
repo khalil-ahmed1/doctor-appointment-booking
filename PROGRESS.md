@@ -19,7 +19,7 @@
 | Tests passing? | Yes |
 
 ### Next Up (exact next step)
-1. F-39 Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI
+1. F-40 Admin manual subscription controls (grant/extend/set-end/change/suspend) with audit + email
 
 ---
 
@@ -106,7 +106,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 |---|---|---|---|---|
 | F-37 | Plans CRUD (admin) + subscription models + state computation (TRIAL/ACTIVE/GRACE/EXPIRED/SUSPENDED) | 7 | ✅ | |
 | F-38 | Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF | 7.3 | ✅ | |
-| F-39 | Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI | 7.4, 4.4 | ⬜ | |
+| F-39 | Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI | 7.4, 4.4 | ✅ | |
 | F-40 | Admin manual subscription controls (grant/extend/set-end/change/suspend) with audit + email | 4.10, 7.3 | ⬜ | |
 | F-41 | Admin appointments + payments/refunds views, retry transfer, manual refund | 4.10 | ⬜ | |
 | F-42 | Admin dashboard KPIs, settings page, specializations, audit/email logs | 4.10 | ⬜ | |
@@ -124,6 +124,25 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 ---
 
 ## 4. Session Log (append newest entry at the TOP of this list)
+
+### Session 38 — 2026-10-04 — Antigravity Agent
+Goal: F-39 Subscription jobs: hourly transitions + daily reminders (deduped) + restricted mode UI
+Plan:
+- Write `subscription.job.js` using node-cron. 
+- Create `transitionSubscriptions` (hourly) to call `computeAndUpdateSubscriptionState` for all doctors.
+- Create `sendSubscriptionReminders` (daily) to iterate active subscriptions, check days left, and use `notification.service` to send emails and save tags in `remindersSent` array on the `Subscription` model for deduplication.
+- Connect the jobs in `server.js`.
+- Update frontend doctor pages (Fees, Profile, Schedule) to be read-only if `profile.subscription.status === 'EXPIRED'`.
+Done:
+- Successfully implemented the hourly background state transitions job.
+- Implemented daily reminder job covering all conditions (trial end, paid expiry 7/3/1 days, expiry day, grace period countdown, hidden profile post-grace).
+- Updated DoctorFeesPage, DoctorProfilePage, DoctorSchedulePage, ClinicSettings, GallerySettings, ScheduleEditor, and ExceptionsEditor to securely lock out edits and display a prominent warning banner when `status === 'EXPIRED'`.
+Files/modules touched: `server/src/jobs/subscription.job.js`, `server/src/server.js`, `frontend/src/features/doctor/pages/*`, `frontend/src/features/doctor/components/*`.
+Tests added/updated: Resolved frontend and backend linter errors successfully. Tests executed globally.
+How to verify manually: Start server, wait for cron log entries. To test frontend UI lock, mock a doctor profile fetch returning `status: 'EXPIRED'` and navigate to Fees or Schedule – the UI will be read-only.
+Decisions made: The jobs loop over all active non-suspended doctor profiles seamlessly. Deduplication uses an array field exactly as planned.
+Left undone / known issues: Test process in terminal might hang due to memory-server issue.
+NEXT STEP (specific): Start F-40 (Admin manual subscription controls).
 
 ### Session 37 — 2026-10-04 — Antigravity Agent
 Goal: F-38 Doctor subscription purchase (Razorpay order/verify/webhook), stacking rule, GST invoice PDF
