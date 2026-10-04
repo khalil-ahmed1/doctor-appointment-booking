@@ -60,7 +60,7 @@ describe('Subscription Service', () => {
           days: 10,
           reason: 'Test grant days',
         },
-        adminId
+        adminId,
       );
 
       expect(result).toBeDefined();
@@ -84,7 +84,7 @@ describe('Subscription Service', () => {
           endDate: futureDate,
           reason: 'Test set end date',
         },
-        adminId
+        adminId,
       );
 
       expect(dayjs(result.endsAt).format('YYYY-MM-DD')).toBe(futureDate);
@@ -98,7 +98,7 @@ describe('Subscription Service', () => {
           planId,
           reason: 'Test change plan',
         },
-        adminId
+        adminId,
       );
 
       expect(result.plan.toString()).toBe(planId.toString());
@@ -111,7 +111,7 @@ describe('Subscription Service', () => {
           doctorId,
           reason: 'Violation of terms',
         },
-        adminId
+        adminId,
       );
 
       const doctor = await DoctorProfile.findById(doctorId);
@@ -128,7 +128,7 @@ describe('Subscription Service', () => {
           doctorId,
           reason: 'Violation of terms',
         },
-        adminId
+        adminId,
       );
 
       await subscriptionService.manualSubscriptionUpdate(
@@ -137,7 +137,7 @@ describe('Subscription Service', () => {
           doctorId,
           reason: 'Resolved',
         },
-        adminId
+        adminId,
       );
 
       const doctor = await DoctorProfile.findById(doctorId);

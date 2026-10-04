@@ -4,7 +4,6 @@ const planService = require('../services/plan.service');
 const subscriptionService = require('../services/subscription.service');
 const appointmentService = require('../services/appointment.service');
 const paymentService = require('../services/payment.service');
-const ApiError = require('../utils/ApiError');
 
 const onboardDoctor = asyncHandler(async (req, res) => {
   const doctorProfile = await adminService.onboardDoctor(req.body, req.user._id);
@@ -167,7 +166,7 @@ const cancelAppointment = asyncHandler(async (req, res) => {
     req.params.id,
     'CANCELLED_BY_ADMIN',
     req.user,
-    req.body.reason
+    req.body.reason,
   );
   res.status(200).json({
     success: true,
@@ -181,7 +180,7 @@ const rescheduleAppointment = asyncHandler(async (req, res) => {
     req.params.id,
     req.user,
     dateStr,
-    startTime
+    startTime,
   );
   res.status(200).json({
     success: true,

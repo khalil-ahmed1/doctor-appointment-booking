@@ -8,7 +8,6 @@ const {
 } = require('../utils/token');
 const ApiError = require('../utils/ApiError');
 const emailService = require('./email.service');
-const logger = require('../utils/logger');
 
 const registerUser = async (userData) => {
   const { name, email, phone, password, dob, gender } = userData;

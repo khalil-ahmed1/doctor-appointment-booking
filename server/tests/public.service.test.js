@@ -91,7 +91,11 @@ describe('Public Service - searchDoctors', () => {
     expect(resultCity.doctors.length).toBe(1);
     expect(resultCity.doctors[0].fullName).toBe('Doc 1');
 
-    const resultSpec = await searchDoctors({ specializations: spec2._id.toString(), page: 1, limit: 10 });
+    const resultSpec = await searchDoctors({
+      specializations: spec2._id.toString(),
+      page: 1,
+      limit: 10,
+    });
     expect(resultSpec.doctors.length).toBe(1);
     expect(resultSpec.doctors[0].fullName).toBe('Doc 2');
   });

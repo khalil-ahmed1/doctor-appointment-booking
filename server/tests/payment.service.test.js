@@ -9,7 +9,7 @@ const razorpayService = require('../src/services/razorpay.service');
 jest.mock('../src/services/razorpay.service', () => ({
   createOrder: jest.fn(),
   verifySignature: jest.fn(),
-  refundPayment: jest.fn()
+  refundPayment: jest.fn(),
 }));
 
 let mongoServer;
@@ -45,7 +45,7 @@ describe('Payment Service - finalizePayment', () => {
       endTime: '10:30',
       slotLock: `${docId}|2026-10-10|10:00`,
       holdExpiresAt: new Date(Date.now() + 600000), // Active hold
-      fee: { total: 50000 }
+      fee: { total: 50000 },
     });
 
     payment = await Payment.create({
@@ -69,7 +69,7 @@ describe('Payment Service - finalizePayment', () => {
     const result = await paymentService.finalizePayment(payment.razorpayOrderId, 'pay_123');
 
     expect(result.status).toBe('CONFIRMED');
-    
+
     const updatedAppt = await Appointment.findById(appointment._id);
     expect(updatedAppt.status).toBe('CONFIRMED');
     expect(updatedAppt.paymentStatus).toBe('PAID');
@@ -88,7 +88,7 @@ describe('Payment Service - finalizePayment', () => {
     const result = await paymentService.finalizePayment(payment.razorpayOrderId, 'pay_123');
 
     expect(result.status).toBe('CONFIRMED_LATE');
-    
+
     const updatedAppt = await Appointment.findById(appointment._id);
     expect(updatedAppt.status).toBe('CONFIRMED');
     expect(updatedAppt.slotLock).toBe(`${docId}|2026-10-10|10:00`); // Lock re-acquired
@@ -119,7 +119,7 @@ describe('Payment Service - finalizePayment', () => {
     const result = await paymentService.finalizePayment(payment.razorpayOrderId, 'pay_123');
 
     expect(result.status).toBe('SLOT_LOST_REFUNDING');
-    
+
     const updatedAppt = await Appointment.findById(appointment._id);
     expect(updatedAppt.status).toBe('PAYMENT_FAILED');
     expect(updatedAppt.slotLock).toBeNull(); // Did NOT acquire lock
@@ -159,19 +159,21 @@ describe('Payment Service - finalizePayment', () => {
     it('retryTransfer should fail if payment is not CAPTURED', async () => {
       payment.status = 'CREATED';
       await payment.save();
-      await expect(paymentService.retryTransfer(payment._id)).rejects.toThrow('Payment is not in CAPTURED state');
+      await expect(paymentService.retryTransfer(payment._id)).rejects.toThrow(
+        'Payment is not in CAPTURED state',
+      );
     });
 
     it('manualRefund should successfully refund payment', async () => {
       payment.status = 'CAPTURED';
       payment.razorpayPaymentId = 'pay_123';
       await payment.save();
-      
+
       razorpayService.refundPayment.mockResolvedValue({ id: 'rfnd_manual' });
-      
+
       const result = await paymentService.manualRefund(payment._id, 'Customer requested refund');
       expect(result.status).toBe('REFUNDED');
-      
+
       const updatedAppt = await Appointment.findById(appointment._id);
       expect(updatedAppt.paymentStatus).toBe('REFUNDED');
     });

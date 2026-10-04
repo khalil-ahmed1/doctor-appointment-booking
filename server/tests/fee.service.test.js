@@ -6,12 +6,12 @@ describe('Fee Service - calculateFeeBreakdown', () => {
     it('calculates gross-up correctly when Patient pays gateway fees', () => {
       // 500 INR = 50000 paise
       const consultationFee = 50000;
-      
+
       const settings = {
         feeBearer: 'PATIENT',
         gatewayFeePercent: 2,
         gstOnFeePercent: 18,
-        platformCommissionPercent: 0
+        platformCommissionPercent: 0,
       };
 
       const result = calculateFeeBreakdown(consultationFee, settings);
@@ -19,7 +19,7 @@ describe('Fee Service - calculateFeeBreakdown', () => {
       // Denominator = 1 - (0.02 * 1.18) = 1 - 0.0236 = 0.9764
       // Total = 50000 / 0.9764 = 51208.52... = 51209 (ceil)
       // Convenience Fee = 51209 - 50000 = 1209 paise (₹12.09)
-      
+
       expect(result.consultationFee).toBe(50000);
       expect(result.feeBearer).toBe('PATIENT');
       expect(result.total).toBe(51209);
@@ -31,12 +31,12 @@ describe('Fee Service - calculateFeeBreakdown', () => {
     it('deducts platform commission from doctor payout if configured', () => {
       // 1000 INR = 100000 paise
       const consultationFee = 100000;
-      
+
       const settings = {
         feeBearer: 'PATIENT',
         gatewayFeePercent: 2,
         gstOnFeePercent: 18,
-        platformCommissionPercent: 10 // 10%
+        platformCommissionPercent: 10, // 10%
       };
 
       const result = calculateFeeBreakdown(consultationFee, settings);
@@ -51,12 +51,12 @@ describe('Fee Service - calculateFeeBreakdown', () => {
     it('sets total exactly to consultation fee and estimates deductions for Doctor', () => {
       // 500 INR = 50000 paise
       const consultationFee = 50000;
-      
+
       const settings = {
         feeBearer: 'DOCTOR',
         gatewayFeePercent: 2,
         gstOnFeePercent: 18,
-        platformCommissionPercent: 0
+        platformCommissionPercent: 0,
       };
 
       const result = calculateFeeBreakdown(consultationFee, settings);
@@ -76,12 +76,12 @@ describe('Fee Service - calculateFeeBreakdown', () => {
 
     it('deducts platform commission correctly for DOCTOR fee bearer', () => {
       const consultationFee = 50000;
-      
+
       const settings = {
         feeBearer: 'DOCTOR',
         gatewayFeePercent: 2,
         gstOnFeePercent: 18,
-        platformCommissionPercent: 10
+        platformCommissionPercent: 10,
       };
 
       const result = calculateFeeBreakdown(consultationFee, settings);
@@ -98,7 +98,7 @@ describe('Fee Service - calculateFeeBreakdown', () => {
       expect(() => {
         calculateFeeBreakdown(-1000);
       }).toThrow(ApiError);
-      
+
       expect(() => {
         calculateFeeBreakdown(-1000);
       }).toThrow('Consultation fee cannot be negative');
@@ -109,7 +109,7 @@ describe('Fee Service - calculateFeeBreakdown', () => {
       expect(result.feeBearer).toBe('PATIENT');
       expect(result.total).toBeGreaterThan(10000);
     });
-    
+
     it('handles 0 fee correctly', () => {
       const result = calculateFeeBreakdown(0);
       expect(result.total).toBe(0);

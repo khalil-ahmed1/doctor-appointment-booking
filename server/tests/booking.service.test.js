@@ -36,8 +36,8 @@ describe('Booking Service - Slot Holds', () => {
       status: 'ACTIVE',
       isPublished: true,
       types: {
-        premium: { enabled: true }
-      }
+        premium: { enabled: true },
+      },
     });
     docId = doc._id;
 
@@ -55,8 +55,8 @@ describe('Booking Service - Slot Holds', () => {
       weeklyRules: Array.from({ length: 7 }, (_, i) => ({
         dayOfWeek: i,
         isWorking: i === dayOfWeek,
-        windows: [{ start: '09:00', end: '10:00' }]
-      }))
+        windows: [{ start: '09:00', end: '10:00' }],
+      })),
     });
   });
 
@@ -69,7 +69,13 @@ describe('Booking Service - Slot Holds', () => {
   it('allows holding an available slot', async () => {
     const tomorrowStr = dayjs().tz('Asia/Kolkata').add(1, 'day').format('YYYY-MM-DD');
     const appt = await bookingService.holdSlot(
-      user1, docId, 'PREMIUM', tomorrowStr, '09:00', '09:30', 'idem-1'
+      user1,
+      docId,
+      'PREMIUM',
+      tomorrowStr,
+      '09:00',
+      '09:30',
+      'idem-1',
     );
     expect(appt).toBeDefined();
     expect(appt.status).toBe('PENDING_PAYMENT');
@@ -79,16 +85,34 @@ describe('Booking Service - Slot Holds', () => {
 
   it('prevents a user from holding more than 3 slots', async () => {
     const tomorrowStr = dayjs().tz('Asia/Kolkata').add(1, 'day').format('YYYY-MM-DD');
-    
+
     // Cheat: Insert 3 holds manually
     await Appointment.create([
-      { bookingCode: 'A1', patient: user1, doctor: docId, type: 'PREMIUM', status: 'PENDING_PAYMENT' },
-      { bookingCode: 'A2', patient: user1, doctor: docId, type: 'PREMIUM', status: 'PENDING_PAYMENT' },
-      { bookingCode: 'A3', patient: user1, doctor: docId, type: 'PREMIUM', status: 'PENDING_PAYMENT' },
+      {
+        bookingCode: 'A1',
+        patient: user1,
+        doctor: docId,
+        type: 'PREMIUM',
+        status: 'PENDING_PAYMENT',
+      },
+      {
+        bookingCode: 'A2',
+        patient: user1,
+        doctor: docId,
+        type: 'PREMIUM',
+        status: 'PENDING_PAYMENT',
+      },
+      {
+        bookingCode: 'A3',
+        patient: user1,
+        doctor: docId,
+        type: 'PREMIUM',
+        status: 'PENDING_PAYMENT',
+      },
     ]);
 
     await expect(
-      bookingService.holdSlot(user1, docId, 'PREMIUM', tomorrowStr, '09:00', '09:30', 'idem-limit')
+      bookingService.holdSlot(user1, docId, 'PREMIUM', tomorrowStr, '09:00', '09:30', 'idem-limit'),
     ).rejects.toThrow('You cannot hold more than 3 slots simultaneously');
   });
 
@@ -101,7 +125,7 @@ describe('Booking Service - Slot Holds', () => {
       type: 'PREMIUM',
       status: 'PENDING_PAYMENT',
       slotLock: 'stale-lock',
-      holdExpiresAt: new Date(Date.now() - 1000) // 1 second ago
+      holdExpiresAt: new Date(Date.now() - 1000), // 1 second ago
     });
 
     await bookingService.cleanupStaleHolds();
@@ -119,7 +143,13 @@ describe('Booking Service - Slot Holds', () => {
       const uId = new mongoose.Types.ObjectId();
       try {
         await bookingService.holdSlot(
-          uId, docId, 'PREMIUM', tomorrowStr, '09:00', '09:30', `idem-batch-${i}`
+          uId,
+          docId,
+          'PREMIUM',
+          tomorrowStr,
+          '09:00',
+          '09:30',
+          `idem-batch-${i}`,
         );
         return 'SUCCESS';
       } catch (error) {
@@ -131,10 +161,10 @@ describe('Booking Service - Slot Holds', () => {
     });
 
     const results = await Promise.all(promises);
-    
-    const successes = results.filter(r => r === 'SUCCESS');
-    const takenFails = results.filter(r => r === 'FAIL_TAKEN');
-    const otherFails = results.filter(r => !['SUCCESS', 'FAIL_TAKEN'].includes(r));
+
+    const successes = results.filter((r) => r === 'SUCCESS');
+    const takenFails = results.filter((r) => r === 'FAIL_TAKEN');
+    const otherFails = results.filter((r) => !['SUCCESS', 'FAIL_TAKEN'].includes(r));
 
     expect(otherFails).toHaveLength(0); // Ensure no random API errors
     expect(successes).toHaveLength(1); // EXACTLY ONE wins
@@ -142,7 +172,7 @@ describe('Booking Service - Slot Holds', () => {
 
     // Verify exactly 1 lock exists in DB
     const count = await Appointment.countDocuments({
-      slotLock: `${docId}|${tomorrowStr}|09:00`
+      slotLock: `${docId}|${tomorrowStr}|09:00`,
     });
     expect(count).toBe(1);
   });

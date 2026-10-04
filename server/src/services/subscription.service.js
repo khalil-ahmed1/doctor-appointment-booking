@@ -241,7 +241,7 @@ const manualSubscriptionUpdate = async (body, adminId) => {
   if (action === 'SUSPEND') {
     doctor.subscription.status = 'SUSPENDED';
     await doctor.save();
-    
+
     await AuditLog.create({
       actor: adminId,
       action: 'SUBSCRIPTION_SUSPENDED',
@@ -259,9 +259,9 @@ const manualSubscriptionUpdate = async (body, adminId) => {
   }
 
   if (action === 'REACTIVATE') {
-    doctor.subscription.status = 'ACTIVE'; 
+    doctor.subscription.status = 'ACTIVE';
     await doctor.save();
-    
+
     await AuditLog.create({
       actor: adminId,
       action: 'SUBSCRIPTION_REACTIVATED',
@@ -269,7 +269,7 @@ const manualSubscriptionUpdate = async (body, adminId) => {
       entityType: 'DoctorProfile',
       note: reason,
     });
-    
+
     await computeAndUpdateSubscriptionState(doctorId);
 
     await notificationService.sendAdminManualSubscriptionUpdate(doctor.user, {

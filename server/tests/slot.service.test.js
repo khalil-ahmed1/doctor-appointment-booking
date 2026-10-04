@@ -38,8 +38,8 @@ describe('Slot Service', () => {
       isPublished: true,
       types: {
         premium: { enabled: true },
-        homeVisit: { enabled: true }
-      }
+        homeVisit: { enabled: true },
+      },
     });
     docId = doc._id;
 
@@ -50,7 +50,7 @@ describe('Slot Service', () => {
     const weeklyRules = Array.from({ length: 7 }, (_, i) => ({
       dayOfWeek: i,
       isWorking: i === dayOfWeek, // Only working tomorrow
-      windows: [{ start: '10:00', end: '12:00' }] // 120 mins
+      windows: [{ start: '10:00', end: '12:00' }], // 120 mins
     }));
 
     await Schedule.create({
@@ -60,7 +60,7 @@ describe('Slot Service', () => {
       bufferMin: 0,
       advanceBookingDays: 30,
       minNoticeMinutes: 60,
-      weeklyRules
+      weeklyRules,
     });
   });
 
@@ -92,7 +92,7 @@ describe('Slot Service', () => {
       dateStr: tomorrowStr,
       startTime: '10:30',
       endTime: '11:00',
-      holdExpiresAt: new Date(Date.now() + 10 * 60000) // valid for 10 mins
+      holdExpiresAt: new Date(Date.now() + 10 * 60000), // valid for 10 mins
     });
 
     // Create a CONFIRMED appointment (BOOKED)
@@ -104,14 +104,14 @@ describe('Slot Service', () => {
       status: 'CONFIRMED',
       dateStr: tomorrowStr,
       startTime: '11:30',
-      endTime: '12:00'
+      endTime: '12:00',
     });
 
     const slots = await slotService.getSlotsForDate('dr-test-slots', 'PREMIUM', tomorrowStr);
 
     expect(slots[0].status).toBe('AVAILABLE'); // 10:00
-    expect(slots[1].status).toBe('HELD');      // 10:30
+    expect(slots[1].status).toBe('HELD'); // 10:30
     expect(slots[2].status).toBe('AVAILABLE'); // 11:00
-    expect(slots[3].status).toBe('BOOKED');    // 11:30
+    expect(slots[3].status).toBe('BOOKED'); // 11:30
   });
 });

@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 
 jest.setTimeout(600000); // 10 minutes to allow initial mongodb binary download
 
-
 let replSet;
 
 beforeAll(async () => {

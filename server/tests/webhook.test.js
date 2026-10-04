@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const { MongoMemoryReplSet } = require('mongodb-memory-server');
 
 jest.mock('../src/services/payment.service', () => ({
-  finalizePayment: jest.fn()
+  finalizePayment: jest.fn(),
 }));
 
 let mongoServer;
@@ -24,12 +24,12 @@ afterAll(async () => {
 
 describe('Webhook Controller', () => {
   let req, res;
-  
+
   beforeEach(() => {
     jest.clearAllMocks();
     res = {
       status: jest.fn().mockReturnThis(),
-      send: jest.fn()
+      send: jest.fn(),
     };
   });
 
@@ -41,9 +41,9 @@ describe('Webhook Controller', () => {
     const payload = JSON.stringify({ event: 'payment.captured', custom_event_id: 'ev_123' });
     req = {
       headers: {
-        'x-razorpay-signature': 'invalid_signature'
+        'x-razorpay-signature': 'invalid_signature',
       },
-      body: Buffer.from(payload)
+      body: Buffer.from(payload),
     };
 
     await razorpayWebhook(req, res);
@@ -53,17 +53,17 @@ describe('Webhook Controller', () => {
   });
 
   it('accepts valid signature, ensures idempotency and fires processing async', async () => {
-    const payload = JSON.stringify({ 
-      event: 'payment.captured', 
+    const payload = JSON.stringify({
+      event: 'payment.captured',
       custom_event_id: 'ev_123',
       payload: {
         payment: {
           entity: {
             order_id: 'order_123',
-            id: 'pay_123'
-          }
-        }
-      }
+            id: 'pay_123',
+          },
+        },
+      },
     });
 
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET || 'test_webhook_secret';
@@ -74,9 +74,9 @@ describe('Webhook Controller', () => {
 
     req = {
       headers: {
-        'x-razorpay-signature': validSignature
+        'x-razorpay-signature': validSignature,
       },
-      body: Buffer.from(payload)
+      body: Buffer.from(payload),
     };
 
     // First call (Should Succeed)
@@ -85,7 +85,7 @@ describe('Webhook Controller', () => {
     expect(res.send).toHaveBeenCalledWith('OK');
 
     // Wait for the async process to settle (since it is fire-and-forget in controller)
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
 
     expect(paymentService.finalizePayment).toHaveBeenCalledWith('order_123', 'pay_123');
 
@@ -97,9 +97,9 @@ describe('Webhook Controller', () => {
     await razorpayWebhook(req, res);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.send).toHaveBeenCalledWith('OK');
-    
+
     // ensure paymentService is NOT called again
-    await new Promise(resolve => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(paymentService.finalizePayment).not.toHaveBeenCalled();
   });
 });

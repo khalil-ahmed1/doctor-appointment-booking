@@ -120,9 +120,15 @@ router
 
 router
   .route('/specializations/:id')
-  .get(validate(adminValidation.getSpecializationParamsSchema), adminController.getSpecializationById)
+  .get(
+    validate(adminValidation.getSpecializationParamsSchema),
+    adminController.getSpecializationById,
+  )
   .put(validate(adminValidation.updateSpecializationSchema), adminController.updateSpecialization)
-  .delete(validate(adminValidation.getSpecializationParamsSchema), adminController.deleteSpecialization);
+  .delete(
+    validate(adminValidation.getSpecializationParamsSchema),
+    adminController.deleteSpecialization,
+  );
 
 // Settings
 router

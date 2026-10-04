@@ -33,7 +33,7 @@ const updateProfile = async (userId, data) => {
 };
 
 const updateProfilePicture = async (userId, imageBuffer, originalName) => {
-  const profile = await getDoctorProfileByUser(userId);
+  // const profile = await getDoctorProfileByUser(userId);
 
   const imageUrl = await uploadImage(imageBuffer, originalName, 'profile');
 

@@ -42,7 +42,7 @@ describe('Appointment Service - State Machine', () => {
       doctor: doctorId,
       type: type,
       status: 'PENDING_PAYMENT',
-      slotLock: 'test-lock'
+      slotLock: 'test-lock',
     });
   };
 
@@ -79,7 +79,7 @@ describe('Appointment Service - State Machine', () => {
     await expect(transition(app._id, 'IN_PROGRESS', doctorUser)).rejects.toThrow(ApiError);
     await expect(transition(app._id, 'IN_PROGRESS', doctorUser)).rejects.toMatchObject({
       statusCode: 400,
-      message: 'Cannot transition from PENDING_PAYMENT to IN_PROGRESS'
+      message: 'Cannot transition from PENDING_PAYMENT to IN_PROGRESS',
     });
   });
 
@@ -88,8 +88,10 @@ describe('Appointment Service - State Machine', () => {
     app = await transition(app._id, 'CONFIRMED', patientUser); // Allowed
 
     // Patient cannot cancel as doctor or admin
-    await expect(transition(app._id, 'CANCELLED_BY_DOCTOR', patientUser, 'Changed mind')).rejects.toThrow(ApiError);
-    
+    await expect(
+      transition(app._id, 'CANCELLED_BY_DOCTOR', patientUser, 'Changed mind'),
+    ).rejects.toThrow(ApiError);
+
     // Patient cannot check in
     await expect(transition(app._id, 'CHECKED_IN', patientUser)).rejects.toThrow(ApiError);
   });
@@ -97,14 +99,18 @@ describe('Appointment Service - State Machine', () => {
   it('enforces type restrictions for specific statuses', async () => {
     const homeApp = await createInitialAppointment('HOME_VISIT');
     await transition(homeApp._id, 'CONFIRMED', patientUser);
-    
+
     // Home visit cannot be CHECKED_IN
-    await expect(transition(homeApp._id, 'CHECKED_IN', doctorUser)).rejects.toThrow('CHECKED_IN status is only for PREMIUM appointments');
-    
+    await expect(transition(homeApp._id, 'CHECKED_IN', doctorUser)).rejects.toThrow(
+      'CHECKED_IN status is only for PREMIUM appointments',
+    );
+
     // Premium cannot be EN_ROUTE
     const premiumApp = await createInitialAppointment('PREMIUM');
     await transition(premiumApp._id, 'CONFIRMED', patientUser);
-    await expect(transition(premiumApp._id, 'EN_ROUTE', doctorUser)).rejects.toThrow('EN_ROUTE status is only for HOME_VISIT appointments');
+    await expect(transition(premiumApp._id, 'EN_ROUTE', doctorUser)).rejects.toThrow(
+      'EN_ROUTE status is only for HOME_VISIT appointments',
+    );
   });
 
   it('frees slotLock and requires reason on cancellation', async () => {
@@ -112,11 +118,13 @@ describe('Appointment Service - State Machine', () => {
     await transition(app._id, 'CONFIRMED', patientUser);
 
     // Missing reason
-    await expect(transition(app._id, 'CANCELLED_BY_DOCTOR', doctorUser)).rejects.toThrow('Cancellation reason is required');
+    await expect(transition(app._id, 'CANCELLED_BY_DOCTOR', doctorUser)).rejects.toThrow(
+      'Cancellation reason is required',
+    );
 
     // Valid cancellation
     const cancelledApp = await transition(app._id, 'CANCELLED_BY_DOCTOR', doctorUser, 'Emergency');
-    
+
     expect(cancelledApp.status).toBe('CANCELLED_BY_DOCTOR');
     expect(cancelledApp.slotLock).toBeNull(); // Slot must be freed
     expect(cancelledApp.cancellation.reason).toBe('Emergency');

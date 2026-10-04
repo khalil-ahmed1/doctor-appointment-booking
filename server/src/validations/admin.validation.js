@@ -198,21 +198,26 @@ const getSubscriptionsSchema = z.object({
 });
 
 const manualSubscriptionUpdateSchema = z.object({
-  body: z.object({
-    action: z.enum(['GRANT_DAYS', 'SET_END_DATE', 'CHANGE_PLAN', 'SUSPEND', 'REACTIVATE']),
-    doctorId: objectIdSchema,
-    days: z.number().int().min(1).optional(),
-    endDate: z.string().optional(), // YYYY-MM-DD
-    planId: objectIdSchema.optional(),
-    reason: z.string().min(5, 'Reason is required (min 5 chars)'),
-  }).refine((data) => {
-    if (data.action === 'GRANT_DAYS' && !data.days) return false;
-    if (data.action === 'SET_END_DATE' && !data.endDate) return false;
-    if (data.action === 'CHANGE_PLAN' && !data.planId) return false;
-    return true;
-  }, {
-    message: 'Missing required fields for the selected action',
-  }),
+  body: z
+    .object({
+      action: z.enum(['GRANT_DAYS', 'SET_END_DATE', 'CHANGE_PLAN', 'SUSPEND', 'REACTIVATE']),
+      doctorId: objectIdSchema,
+      days: z.number().int().min(1).optional(),
+      endDate: z.string().optional(), // YYYY-MM-DD
+      planId: objectIdSchema.optional(),
+      reason: z.string().min(5, 'Reason is required (min 5 chars)'),
+    })
+    .refine(
+      (data) => {
+        if (data.action === 'GRANT_DAYS' && !data.days) return false;
+        if (data.action === 'SET_END_DATE' && !data.endDate) return false;
+        if (data.action === 'CHANGE_PLAN' && !data.planId) return false;
+        return true;
+      },
+      {
+        message: 'Missing required fields for the selected action',
+      },
+    ),
 });
 
 const getAppointmentsSchema = z.object({

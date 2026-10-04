@@ -39,7 +39,7 @@ describe('Email Service', () => {
       expect.objectContaining({
         to,
         subject,
-      })
+      }),
     );
   });
 
@@ -48,7 +48,7 @@ describe('Email Service', () => {
 
     const to = 'fail@example.com';
     const result = await sendEmail(to, 'Failed test', 'verifyEmail', { name: 'Fail', token: 'x' });
-    
+
     expect(result).toBe(false);
 
     const log = await EmailLog.findOne({ to });

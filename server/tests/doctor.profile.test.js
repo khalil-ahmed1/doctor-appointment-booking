@@ -46,8 +46,8 @@ describe('Doctor Profile APIs', () => {
       clinic: {
         name: 'Test Clinic',
         city: 'Delhi',
-        location: { type: 'Point', coordinates: [77.2090, 28.6139] },
-      }
+        location: { type: 'Point', coordinates: [77.209, 28.6139] },
+      },
     });
     doctorProfileId = profile._id;
     user.doctorProfile = profile._id;
@@ -66,7 +66,7 @@ describe('Doctor Profile APIs', () => {
     const res = await request(app)
       .get('/api/v1/doctor/profile')
       .set('Authorization', `Bearer ${doctorToken}`);
-    
+
     expect(res.status).toBe(200);
     expect(res.body.data.fullName).toBe('Dr. Test');
   });
@@ -95,8 +95,8 @@ describe('Doctor Profile APIs', () => {
         city: 'Mumbai',
         state: 'MH',
         pincode: '400001',
-        lat: 18.9750,
-        lng: 72.8258
+        lat: 18.975,
+        lng: 72.8258,
       });
 
     expect(res.status).toBe(200);
@@ -109,9 +109,9 @@ describe('Doctor Profile APIs', () => {
       .patch('/api/v1/doctor/types')
       .set('Authorization', `Bearer ${doctorToken}`)
       .send({
-        normal: { enabled: true }
+        normal: { enabled: true },
       });
-      
+
     expect(res.status).toBe(400);
     expect(res.body.message).toMatch(/fee must be set/i);
   });
@@ -122,9 +122,9 @@ describe('Doctor Profile APIs', () => {
       .set('Authorization', `Bearer ${doctorToken}`)
       .send({
         normal: 50000,
-        premium: 100000
+        premium: 100000,
       });
-      
+
     expect(feeRes.status).toBe(200);
     expect(feeRes.body.data.normal).toBe(50000);
 
@@ -133,7 +133,7 @@ describe('Doctor Profile APIs', () => {
       .set('Authorization', `Bearer ${doctorToken}`)
       .send({
         normal: { enabled: true, dailyTokenLimit: 20 },
-        premium: { enabled: true }
+        premium: { enabled: true },
       });
 
     expect(typeRes.status).toBe(200);
