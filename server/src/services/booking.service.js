@@ -182,8 +182,10 @@ const holdSlot = async (
     platformCommissionPercent: 0,
   };
 
-  // Get doctor's fee based on appointment type
-  const baseFee = type === 'PREMIUM' ? doctor.fees.premium || 0 : doctor.fees.homeVisit || 0;
+  let baseFee = 0;
+  if (type === 'PREMIUM') baseFee = doctor.fees.premium || 0;
+  else if (type === 'HOME_VISIT') baseFee = doctor.fees.homeVisit || 0;
+  else if (type === 'NORMAL') baseFee = doctor.fees.normal || 0;
   const feeSnapshot = require('./fee.service').calculateFeeBreakdown(baseFee, settings);
 
   // 6. Transaction for Atomic Insert
