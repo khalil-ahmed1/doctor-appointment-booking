@@ -11,7 +11,6 @@ const onboardDoctorSchema = z.object({
     email: z.string().email('Invalid email address'),
     phone: z.string().regex(/^\d{10}$/, 'Phone number must be exactly 10 digits'),
     password: z.string().min(8, 'Password must be at least 8 characters').optional(),
-    sendInvite: z.boolean().default(true),
 
     // Professional
     specializations: z.array(objectIdSchema).min(1, 'At least one specialization is required'),

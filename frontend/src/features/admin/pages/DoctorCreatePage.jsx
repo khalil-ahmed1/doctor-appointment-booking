@@ -12,7 +12,6 @@ const doctorSchema = z.object({
   fullName: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email'),
   phone: z.string().regex(/^\d{10}$/, '10 digits required'),
-  sendInvite: z.boolean().default(true),
   specializations: z.array(z.string()).min(1, 'Select at least one specialization'),
   experienceYears: z.number().min(0).default(0),
   gender: z.enum(['MALE', 'FEMALE', 'OTHER']),
@@ -73,7 +72,6 @@ export default function DoctorCreatePage() {
   } = useForm({
     resolver: zodResolver(doctorSchema),
     defaultValues: {
-      sendInvite: true,
       gender: 'MALE',
       experienceYears: 0,
       specializations: [],
@@ -144,16 +142,6 @@ export default function DoctorCreatePage() {
                 className="mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2 border"
               />
               {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
-            </div>
-            <div className="flex items-center pt-6">
-              <input
-                type="checkbox"
-                {...register('sendInvite')}
-                className="h-4 w-4 text-blue-600 border-slate-300 rounded"
-              />
-              <label className="ml-2 block text-sm text-slate-900">
-                Send Invite Email (with trial info)
-              </label>
             </div>
           </div>
         </div>

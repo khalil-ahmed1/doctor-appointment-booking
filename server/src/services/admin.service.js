@@ -35,7 +35,6 @@ const onboardDoctor = async (doctorData, adminId) => {
       email,
       phone,
       password,
-      sendInvite,
       specializations,
       qualifications,
       experienceYears,
@@ -63,14 +62,10 @@ const onboardDoctor = async (doctorData, adminId) => {
 
     if (password) {
       passwordHash = await bcrypt.hash(password, 12);
-    } else if (sendInvite) {
+    } else {
       resetToken = generateRandomToken();
       resetTokenHash = hashToken(resetToken);
       resetTokenExpires = Date.now() + 72 * 60 * 60 * 1000; // 72 hours
-    } else {
-      // Generate random password if neither provided
-      const randomPassword = generateRandomToken().substring(0, 12);
-      passwordHash = await bcrypt.hash(randomPassword, 12);
     }
 
     // 3. Create User
@@ -80,7 +75,7 @@ const onboardDoctor = async (doctorData, adminId) => {
       phone,
       passwordHash,
       role: 'DOCTOR',
-      status: sendInvite ? 'INVITED' : 'ACTIVE',
+      status: !password ? 'INVITED' : 'ACTIVE',
       gender,
       emailVerified: true, // Admin created
       resetTokenHash,
@@ -139,7 +134,7 @@ const onboardDoctor = async (doctorData, adminId) => {
       fees,
       types,
       payout: finalPayout,
-      status: sendInvite ? 'INVITED' : 'ACTIVE',
+      status: !password ? 'INVITED' : 'ACTIVE',
       onboardedAt: new Date(),
       onboardedBy: adminId,
     });
@@ -176,7 +171,7 @@ const onboardDoctor = async (doctorData, adminId) => {
     session.endSession();
 
     // 7. Send Invite Email (non-blocking)
-    if (sendInvite && resetToken) {
+    if (resetToken) {
       emailService
         .sendEmail(email, 'Welcome to the Platform - Set Your Password', 'doctorInvite', {
           name: fullName,
