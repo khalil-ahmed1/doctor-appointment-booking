@@ -70,8 +70,8 @@ const DoctorDetailPage = () => {
     : null;
 
   const profileImageUrl =
-    doctor.gallery?.find((g) => g.caption === 'Profile Picture')?.url ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.fullName)}&background=e0e7ff&color=4f46e5&size=256`;
+    doctor.gallery && doctor.gallery.length > 0 ? doctor.gallery[0].url :
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(doctor.fullName)}&background=e0e7ff&color=4f46e5&size=256`;
 
   return (
     <>
