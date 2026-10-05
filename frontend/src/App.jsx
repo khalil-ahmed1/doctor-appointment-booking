@@ -35,8 +35,9 @@ import DoctorProfilePage from './features/doctor/pages/DoctorProfilePage';
 import DoctorFeesPage from './features/doctor/pages/DoctorFeesPage';
 import DoctorSchedulePage from './features/doctor/pages/DoctorSchedulePage';
 import DoctorDashboardPage from './features/doctor/pages/DoctorDashboardPage';
-import DoctorAppointmentsPage from './features/doctor/pages/DoctorAppointmentsPage';
-import NormalQueuePage from './features/doctor/pages/NormalQueuePage';
+import NormalAppointmentsPage from './features/doctor/pages/NormalAppointmentsPage';
+import PremiumAppointmentsPage from './features/doctor/pages/PremiumAppointmentsPage';
+import HomeVisitAppointmentsPage from './features/doctor/pages/HomeVisitAppointmentsPage';
 import DoctorEarningsPage from './features/doctor/pages/DoctorEarningsPage';
 import DoctorSubscriptionPage from './features/doctor/pages/DoctorSubscriptionPage';
 import BookingPage from './features/public/pages/BookingPage';
@@ -92,8 +93,9 @@ function App() {
                   <Route path="/doctor/profile" element={<DoctorProfilePage />} />
                   <Route path="/doctor/fees" element={<DoctorFeesPage />} />
                   <Route path="/doctor/schedule" element={<DoctorSchedulePage />} />
-                  <Route path="/doctor/appointments" element={<DoctorAppointmentsPage />} />
-                  <Route path="/doctor/queue" element={<NormalQueuePage />} />
+                  <Route path="/doctor/normal-appointments" element={<NormalAppointmentsPage />} />
+                  <Route path="/doctor/premium-appointments" element={<PremiumAppointmentsPage />} />
+                  <Route path="/doctor/home-appointments" element={<HomeVisitAppointmentsPage />} />
                   <Route path="/doctor/earnings" element={<DoctorEarningsPage />} />
                   <Route path="/doctor/subscription" element={<DoctorSubscriptionPage />} />
 

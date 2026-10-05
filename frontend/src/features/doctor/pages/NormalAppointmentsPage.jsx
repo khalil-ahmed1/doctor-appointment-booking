@@ -1,0 +1,234 @@
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { doctorApi } from '../api/doctor.api';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Loader2, Search, MoreHorizontal } from 'lucide-react';
+import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+export default function NormalAppointmentsPage() {
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState('ACTIVE');
+  const [filters, setFilters] = useState({
+    page: 1,
+    limit: 10,
+    search: '',
+  });
+
+  const [searchInput, setSearchInput] = useState('');
+
+  const queryParams = {
+    ...filters,
+    type: 'NORMAL',
+  };
+
+  if (activeTab === 'ACTIVE') {
+    queryParams.excludeStatus = 'COMPLETED,NO_SHOW,CANCELLED_BY_DOCTOR,CANCELLED_BY_ADMIN,REFUNDED,PAYMENT_FAILED,EXPIRED,EXPIRED_TOKEN';
+  } else {
+    queryParams.status = 'COMPLETED,NO_SHOW,CANCELLED_BY_DOCTOR,CANCELLED_BY_ADMIN,REFUNDED,PAYMENT_FAILED,EXPIRED,EXPIRED_TOKEN';
+  }
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['doctor-normal-appointments', queryParams],
+    queryFn: () => doctorApi.getAppointments(queryParams),
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: doctorApi.updateAppointmentStatus,
+    onSuccess: () => {
+      toast.success('Status updated successfully');
+      queryClient.invalidateQueries(['doctor-normal-appointments']);
+      queryClient.invalidateQueries(['doctor-dashboard-kpis']);
+    },
+    onError: (error) => {
+      toast.error(error.response?.data?.message || 'Failed to update status');
+    },
+  });
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setFilters((prev) => ({ ...prev, search: searchInput, page: 1 }));
+  };
+
+  const handleStatusChange = (id, newStatus) => {
+    if (newStatus === 'CANCELLED_BY_DOCTOR') {
+      const reason = window.prompt('Please enter cancellation reason:');
+      if (!reason) return;
+      updateStatusMutation.mutate({ id, status: newStatus, reason });
+      return;
+    }
+    updateStatusMutation.mutate({ id, status: newStatus });
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'CONFIRMED':
+        return <Badge className="bg-blue-500">Confirmed</Badge>;
+      case 'CHECKED_IN':
+        return <Badge variant="secondary">Checked In</Badge>;
+      case 'IN_PROGRESS':
+        return <Badge className="bg-yellow-500">In Progress</Badge>;
+      case 'COMPLETED':
+        return <Badge className="bg-green-500">Completed</Badge>;
+      case 'NO_SHOW':
+        return <Badge variant="destructive">No Show</Badge>;
+      case 'CANCELLED_BY_DOCTOR':
+      case 'CANCELLED_BY_ADMIN':
+        return <Badge variant="destructive">Cancelled</Badge>;
+      case 'EXPIRED_TOKEN':
+      case 'EXPIRED':
+        return <Badge variant="secondary">Expired</Badge>;
+      case 'PAYMENT_FAILED':
+        return <Badge variant="destructive">Payment Failed</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">Normal Appointments</h1>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-3 space-y-4">
+          <Tabs value={activeTab} onValueChange={(val) => { setActiveTab(val); setFilters(prev => ({...prev, page: 1})) }}>
+            <TabsList>
+              <TabsTrigger value="ACTIVE">Active Records</TabsTrigger>
+              <TabsTrigger value="PAST">Past / Cancelled</TabsTrigger>
+            </TabsList>
+          </Tabs>
+
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+            <form onSubmit={handleSearch} className="flex gap-2 w-full md:max-w-sm">
+              <Input
+                placeholder="Search by name, phone or code"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+              />
+              <Button type="submit" size="icon" variant="secondary">
+                <Search className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : isError ? (
+            <div className="text-center py-8 text-destructive">Failed to load appointments</div>
+          ) : data?.appointments?.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
+              No appointments found
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <div className="relative w-full overflow-auto">
+                <table className="w-full caption-bottom text-sm">
+                  <thead className="[&_tr]:border-b bg-muted/50">
+                    <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Token</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Patient Name</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Age / Gender</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Phone</th>
+                      <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground">Status</th>
+                      <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="[&_tr:last-child]:border-0">
+                    {data?.appointments?.map((app) => (
+                      <tr key={app._id} className="border-b transition-colors hover:bg-muted/50">
+                        <td className="p-4 align-middle">
+                          <span className="font-bold text-lg text-primary">{app.tokenLabel}</span>
+                          <div className="text-xs text-muted-foreground mt-1">Code: {app.bookingCode}</div>
+                        </td>
+                        <td className="p-4 align-middle font-medium">
+                          {app.patientDetails?.name || app.patient?.name}
+                        </td>
+                        <td className="p-4 align-middle text-muted-foreground">
+                          {app.patientDetails?.age ? `${app.patientDetails.age} Y` : 'N/A'} / {app.patientDetails?.gender || 'N/A'}
+                        </td>
+                        <td className="p-4 align-middle text-muted-foreground">
+                          {app.patientDetails?.phone || 'N/A'}
+                        </td>
+                        <td className="p-4 align-middle">
+                          {getStatusBadge(app.status)}
+                        </td>
+                        <td className="p-4 align-middle text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
+                                <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'COMPLETED')}>
+                                  Mark Completed
+                                </DropdownMenuItem>
+                              )}
+                              {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
+                                <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'NO_SHOW')}>
+                                  Mark No-show
+                                </DropdownMenuItem>
+                              )}
+                              {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
+                                <DropdownMenuItem
+                                  className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                                  onClick={() => handleStatusChange(app._id, 'CANCELLED_BY_DOCTOR')}
+                                >
+                                  Cancel & Refund
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {data?.pagination?.totalPages > 1 && (
+            <div className="flex items-center justify-end space-x-2 py-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setFilters((prev) => ({ ...prev, page: prev.page - 1 }))}
+                disabled={filters.page === 1}
+              >
+                Previous
+              </Button>
+              <div className="text-sm font-medium">
+                Page {filters.page} of {data.pagination.totalPages}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setFilters((prev) => ({ ...prev, page: prev.page + 1 }))}
+                disabled={filters.page === data.pagination.totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

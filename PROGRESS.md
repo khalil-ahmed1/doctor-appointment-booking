@@ -125,7 +125,7 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 
 ## 4. Session Log (append newest entry at the TOP of this list)
 
-### Session 41 — 2026-10-04 — Antigravity Agent
+### Session 42 — 2026-10-05 — Antigravity Agent\nGoal: Simplified Doctor Appointments UI\nPlan:\n- Replace unified DoctorAppointmentsPage with three dedicated pages: NormalAppointmentsPage, PremiumAppointmentsPage, and HomeVisitAppointmentsPage.\n- Update doctor.service.js getDoctorAppointments to support excludeStatus and comma-separated status strings for filtering.\n- Use shadcn Tabs to separate Active vs Cancelled/Refunded records.\n- Add specific columns matching the needs of each type (e.g. Map link and address for Home Visits, tokenLabel for Normal).\n- Update App.jsx and DashboardLayout.jsx sidebars.\nDone:\n- Successfully separated the views.\n- The backend search now accurately maps name/phone along with the active/cancelled tabs.\nFiles/modules touched: server/src/services/doctor.service.js, rontend/src/features/doctor/pages/*, rontend/src/App.jsx, rontend/src/layouts/DashboardLayout.jsx.\nNEXT STEP (specific): Start Phase 5, F-43.\n\n### Session 41 — 2026-10-04 — Antigravity Agent
 Goal: F-42 Admin dashboard KPIs, settings page, specializations, audit/email logs
 Plan:
 - Verify Models (Specialization, Setting, AuditLog, EmailLog).

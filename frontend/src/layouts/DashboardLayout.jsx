@@ -21,8 +21,9 @@ import { NotificationBell } from '@/components/NotificationBell';
 
 const doctorLinks = [
   { name: 'Overview', to: '/doctor/dashboard', icon: LayoutDashboard },
-  { name: 'Appointments', to: '/doctor/appointments', icon: CalendarCheck },
-  { name: 'Normal Queue', to: '/doctor/queue', icon: ListOrdered },
+  { name: 'Normal Walk-ins', to: '/doctor/normal-appointments', icon: ListOrdered },
+  { name: 'Premium Appts', to: '/doctor/premium-appointments', icon: CalendarCheck },
+  { name: 'Home Visits', to: '/doctor/home-appointments', icon: CalendarDays },
   { name: 'Schedule', to: '/doctor/schedule', icon: CalendarDays },
   { name: 'Profile & Gallery', to: '/doctor/profile', icon: UserCircle },
   { name: 'Fees & Services', to: '/doctor/fees', icon: Stethoscope },

@@ -297,7 +297,17 @@ const getDoctorAppointments = async (userId, queryParams) => {
   const filter = { doctor: profile._id };
 
   if (type) filter.type = type;
-  if (status) filter.status = status;
+  if (status) {
+    if (status.includes(',')) {
+      filter.status = { $in: status.split(',') };
+    } else {
+      filter.status = status;
+    }
+  }
+  if (queryParams.excludeStatus) {
+    filter.status = filter.status || {};
+    filter.status.$nin = queryParams.excludeStatus.split(',');
+  }
 
   if (startDate || endDate) {
     filter.dateStr = {};
