@@ -150,9 +150,27 @@ export default function NormalAppointmentsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {app.status === 'CONFIRMED' && (
+                  <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'CHECKED_IN')}>
+                    Mark Checked In
+                  </DropdownMenuItem>
+                )}
+
                 {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
                   <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'COMPLETED')}>
                     Mark Completed
+                  </DropdownMenuItem>
+                )}
+
+                {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
+                  <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'NO_SHOW')}>
+                    Mark No Show
+                  </DropdownMenuItem>
+                )}
+
+                {(app.status === 'CHECKED_IN' || app.status === 'COMPLETED' || app.status === 'NO_SHOW') && (
+                  <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'CONFIRMED')}>
+                    Revert to Confirmed
                   </DropdownMenuItem>
                 )}
 

@@ -13,11 +13,11 @@ const ALLOWED_TRANSITIONS = {
     'CANCELLED_BY_DOCTOR',
     'CANCELLED_BY_ADMIN',
   ],
-  CHECKED_IN: ['IN_PROGRESS', 'COMPLETED', 'NO_SHOW', 'CANCELLED_BY_DOCTOR', 'CANCELLED_BY_ADMIN'],
-  EN_ROUTE: ['IN_PROGRESS', 'COMPLETED', 'NO_SHOW', 'CANCELLED_BY_DOCTOR', 'CANCELLED_BY_ADMIN'],
+  CHECKED_IN: ['IN_PROGRESS', 'COMPLETED', 'NO_SHOW', 'CANCELLED_BY_DOCTOR', 'CANCELLED_BY_ADMIN', 'CONFIRMED'],
+  EN_ROUTE: ['IN_PROGRESS', 'COMPLETED', 'NO_SHOW', 'CANCELLED_BY_DOCTOR', 'CANCELLED_BY_ADMIN', 'CONFIRMED'],
   IN_PROGRESS: ['COMPLETED'],
-  COMPLETED: [], // Terminal
-  NO_SHOW: [], // Terminal
+  COMPLETED: ['CONFIRMED'], // Terminal but can be reverted
+  NO_SHOW: ['CONFIRMED'], // Terminal but can be reverted
   CANCELLED_BY_DOCTOR: [], // Terminal
   CANCELLED_BY_ADMIN: [], // Terminal
   EXPIRED: [], // Terminal (Hold timeout)
@@ -74,6 +74,17 @@ const transition = async (appointmentId, toStatus, user, reason = '') => {
       'FORBIDDEN',
       `Role ${user.role} is not authorized to set status ${toStatus}`,
     );
+  }
+
+  // Time restriction for reverts
+  if (toStatus === 'CONFIRMED' && ['COMPLETED', 'NO_SHOW'].includes(fromStatus)) {
+    const lastHistory = appointment.statusHistory[appointment.statusHistory.length - 1];
+    if (lastHistory) {
+      const hoursSince = (Date.now() - new Date(lastHistory.at).getTime()) / (1000 * 60 * 60);
+      if (hoursSince > 24) {
+        throw new ApiError(400, 'VALIDATION_ERROR', 'Cannot revert status after 24 hours');
+      }
+    }
   }
 
   // Type specific restrictions

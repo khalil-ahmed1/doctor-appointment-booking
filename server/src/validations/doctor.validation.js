@@ -140,6 +140,7 @@ const updateAppointmentStatusSchema = z.object({
   }),
   body: z.object({
     status: z.enum([
+      'CONFIRMED',
       'CHECKED_IN',
       'EN_ROUTE',
       'IN_PROGRESS',

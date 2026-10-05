@@ -225,6 +225,11 @@ export default function HomeVisitAppointmentsPage() {
                     Mark No-show
                   </DropdownMenuItem>
                 )}
+                {(app.status === 'EN_ROUTE' || app.status === 'COMPLETED' || app.status === 'NO_SHOW') && (
+                  <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'CONFIRMED')}>
+                    Revert to Confirmed
+                  </DropdownMenuItem>
+                )}
                 {app.status === 'CONFIRMED' && (
                   <DropdownMenuItem
                     onClick={() =>

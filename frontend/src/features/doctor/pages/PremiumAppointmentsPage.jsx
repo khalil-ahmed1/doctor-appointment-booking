@@ -189,6 +189,11 @@ export default function PremiumAppointmentsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                {app.status === 'CONFIRMED' && (
+                  <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'CHECKED_IN')}>
+                    Mark Checked In
+                  </DropdownMenuItem>
+                )}
                 {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
                   <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'COMPLETED')}>
                     Mark Completed
@@ -197,6 +202,11 @@ export default function PremiumAppointmentsPage() {
                 {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
                   <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'NO_SHOW')}>
                     Mark No-show
+                  </DropdownMenuItem>
+                )}
+                {(app.status === 'CHECKED_IN' || app.status === 'COMPLETED' || app.status === 'NO_SHOW') && (
+                  <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'CONFIRMED')}>
+                    Revert to Confirmed
                   </DropdownMenuItem>
                 )}
                 {app.status === 'CONFIRMED' && (

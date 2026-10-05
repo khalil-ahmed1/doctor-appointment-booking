@@ -125,6 +125,33 @@ Build **in this order**. One feature at a time. "PRD" column = sections to read 
 
 ## 4. Session Log (append newest entry at the TOP of this list)
 
+### Session 44 — 2026-10-06 — Antigravity Agent
+Goal: Add Check-In, No-Show, and Revert actions to Doctor Dashboard
+Plan:
+- Allow CONFIRMED as a valid next state from CHECKED_IN, COMPLETED, and NO_SHOW in `appointment.service.js`.
+- Enforce 24-hour limit on reverting COMPLETED/NO_SHOW back to CONFIRMED.
+- Add "Mark Checked In", "Mark No Show", and "Revert to Confirmed" actions to `NormalAppointmentsPage.jsx`.
+- Update `PremiumAppointmentsPage.jsx` and `HomeVisitAppointmentsPage.jsx` with the same actions for consistency.
+Done:
+- Successfully implemented state transition logic for reverts.
+- All 3 appointment type dashboard pages now include Check-In, No-Show, and Revert actions.
+Files/modules touched: `server/src/services/appointment.service.js`, `frontend/src/features/doctor/pages/*AppointmentsPage.jsx`.
+NEXT STEP (specific): Start Phase 5, F-43.
+
+### Session 43 — 2026-10-06 — Antigravity Agent
+Goal: Remove Auto-Expiry of Normal Bookings
+Plan:
+- Remove `expireNormalTokens` background job.
+- Remove `validUntil` timestamps from `payment.service.js` token generation.
+- Remove `validUntil` from schema, indices, queries, and `PRD.md`.
+- Remove `EXPIRED_TOKEN` from valid states in `appointment.service.js` and frontend filtering.
+- Update Patient `AppointmentsTab.jsx` to show Token label instead of validity date.
+Done:
+- Normal bookings no longer automatically expire. They persist in the queue indefinitely.
+- Cleaned up all code and references tying normal tokens to a validity period.
+Files/modules touched: `server/src/jobs/maintenance.job.js`, `server/src/models/Appointment.js`, `server/src/services/payment.service.js`, `server/src/services/doctor.service.js`, `frontend/src/features/patient/components/AppointmentsTab.jsx`, `PROGRESS.md`, `PRD.md`.
+NEXT STEP (specific): Add Check-In, No-Show, and Revert actions to Doctor Dashboard.
+
 ### Session 42 — 2026-10-05 — Antigravity Agent\nGoal: Simplified Doctor Appointments UI\nPlan:\n- Replace unified DoctorAppointmentsPage with three dedicated pages: NormalAppointmentsPage, PremiumAppointmentsPage, and HomeVisitAppointmentsPage.\n- Update doctor.service.js getDoctorAppointments to support excludeStatus and comma-separated status strings for filtering.\n- Use shadcn Tabs to separate Active vs Cancelled/Refunded records.\n- Add specific columns matching the needs of each type (e.g. Map link and address for Home Visits, tokenLabel for Normal).\n- Update App.jsx and DashboardLayout.jsx sidebars.\nDone:\n- Successfully separated the views.\n- The backend search now accurately maps name/phone along with the active/cancelled tabs.\nFiles/modules touched: server/src/services/doctor.service.js, rontend/src/features/doctor/pages/*, rontend/src/App.jsx, rontend/src/layouts/DashboardLayout.jsx.\nNEXT STEP (specific): Start Phase 5, F-43.\n\n### Session 41 — 2026-10-04 — Antigravity Agent
 Goal: F-42 Admin dashboard KPIs, settings page, specializations, audit/email logs
 Plan:
