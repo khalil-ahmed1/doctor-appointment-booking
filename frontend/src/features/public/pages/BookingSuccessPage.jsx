@@ -1,5 +1,6 @@
 import { useLocation, Link } from 'react-router-dom';
 import { CheckCircle, Calendar, MapPin, Hash } from 'lucide-react';
+import { formatTime12h, formatDateIndian } from '../../../utils/formatters';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 
@@ -65,10 +66,10 @@ const BookingSuccessPage = () => {
                   <Calendar className="w-4 h-4 mr-1" /> Date & Time
                 </p>
                 <p className="font-medium">
-                  {appointment.dateStr}
+                  {formatDateIndian(appointment.dateStr)}
                   {appointment.type === 'NORMAL'
                     ? ' (Anytime during working hours)'
-                    : ` at ${appointment.startTime} - ${appointment.endTime}`}
+                    : ` at ${formatTime12h(appointment.startTime)} - ${formatTime12h(appointment.endTime)}`}
                 </p>
               </div>
 

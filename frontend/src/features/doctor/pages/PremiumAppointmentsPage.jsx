@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
+import { formatTime12h, formatDateIndian } from '../../../utils/formatters';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { doctorApi } from '../api/doctor.api';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -163,8 +164,8 @@ export default function PremiumAppointmentsPage() {
       rows.push(
         <tr key={app._id} className="border-b transition-colors hover:bg-muted/50">
           <td className="p-4 align-middle">
-            <span className="font-medium text-base">{app.dateStr}</span>
-            <div className="font-bold text-primary">{app.startTime}</div>
+            <span className="font-medium text-base">{formatDateIndian(app.dateStr)}</span>
+            <div className="font-bold text-primary">{formatTime12h(app.startTime)}</div>
             <div className="text-xs text-muted-foreground mt-1">Code: {app.bookingCode}</div>
           </td>
           <td className="p-4 align-middle font-medium">

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { formatTime12h, formatDateIndian } from '../../../utils/formatters';
 import { useQuery } from '@tanstack/react-query';
 import { getDoctorBySlug, getDoctorSlots } from '../api/public.api';
 import { holdSlot, createOrder, verifyPayment } from '../api/booking.api';
@@ -283,7 +284,7 @@ const BookingPage = () => {
                   </div>
                   <div>
                     <Label className="mb-2 block">
-                      Available Slots {date && `- ${format(date, 'MMM d, yyyy')}`}
+                      Available Slots {date && `- ${formatDateIndian(date)}`}
                     </Label>
                     {!date ? (
                       <div className="text-sm text-muted-foreground flex items-center h-32 justify-center border border-dashed rounded-md">
@@ -305,7 +306,7 @@ const BookingPage = () => {
                             disabled={s.status !== 'AVAILABLE'}
                             onClick={() => setSelectedSlot(s)}
                           >
-                            {s.startTime}
+                            {formatTime12h(s.startTime)}
                           </Button>
                         ))}
                       </div>
@@ -548,8 +549,8 @@ const BookingPage = () => {
                     <span className="text-muted-foreground">Date & Time</span>
                     <span className="font-medium">
                       {type === 'NORMAL'
-                        ? heldAppointment.dateStr
-                        : `${heldAppointment.dateStr} at ${heldAppointment.startTime}`}
+                        ? formatDateIndian(heldAppointment.dateStr)
+                        : `${formatDateIndian(heldAppointment.dateStr)} at ${formatTime12h(heldAppointment.startTime)}`}
                     </span>
                   </div>
                 </div>

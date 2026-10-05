@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatTime12h, formatDateIndian } from '../../../utils/formatters';
 import { useQuery } from '@tanstack/react-query';
 import { getMyAppointments } from '../api/patient.api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -111,11 +112,11 @@ const AppointmentsTab = () => {
                     <div className="text-sm text-muted-foreground">
                       {appt.type === 'NORMAL' ? (
                         <p>
-                          Valid from: {appt.validFrom ? format(new Date(appt.validFrom), 'PP') : ''}
+                          Valid from: {appt.validFrom ? formatDateIndian(appt.validFrom) : ''}
                         </p>
                       ) : (
                         <p>
-                          {format(new Date(appt.dateStr), 'PP')} at {appt.startTime}
+                          {formatDateIndian(appt.dateStr)} at {formatTime12h(appt.startTime)}
                         </p>
                       )}
                     </div>
