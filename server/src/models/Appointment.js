@@ -18,7 +18,6 @@ const appointmentSchema = new mongoose.Schema(
         'NO_SHOW',
         'CANCELLED_BY_DOCTOR',
         'CANCELLED_BY_ADMIN',
-        'EXPIRED_TOKEN',
         'EXPIRED',
         'PAYMENT_FAILED',
       ],
@@ -46,9 +45,6 @@ const appointmentSchema = new mongoose.Schema(
     // Normal specific
     tokenSeq: { type: Number },
     tokenLabel: { type: String },
-    validFrom: { type: Date },
-    validUntil: { type: Date },
-    extendedByDays: { type: Number, default: 0 },
 
     holdExpiresAt: { type: Date },
 
@@ -133,6 +129,5 @@ appointmentSchema.index({ doctor: 1, type: 1, status: 1, tokenSeq: 1 });
 appointmentSchema.index({ patient: 1, createdAt: -1 });
 appointmentSchema.index({ status: 1, holdExpiresAt: 1 });
 appointmentSchema.index({ startAt: 1 });
-appointmentSchema.index({ validUntil: 1, status: 1 });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

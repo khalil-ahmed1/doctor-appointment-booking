@@ -90,20 +90,7 @@ const startReminderJobs = () => {
           needsSave = true;
         }
 
-        // Last day of validity morning (8 AM)
-        if (apt.validUntil) {
-          const lastDay = dayjs(apt.validUntil).tz('Asia/Kolkata');
-          const isLastDay = now.format('YYYY-MM-DD') === lastDay.format('YYYY-MM-DD');
-          if (!apt.remindersSent.normalLastDay && isLastDay && now.hour() >= 8) {
-            await sendAppointmentReminder(
-              apt,
-              `Reminder: Today is the last day your Normal Queue token (${apt.tokenLabel || ''}) is valid.`,
-            );
-            apt.remindersSent.normalEvening = true;
-            apt.remindersSent.normalLastDay = true;
-            needsSave = true;
-          }
-        }
+
 
         if (needsSave) {
           await apt.save();

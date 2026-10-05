@@ -230,7 +230,6 @@ const getDashboardKPIs = async (userId) => {
     doctor: profile._id,
     type: 'NORMAL',
     status: 'CONFIRMED', // Tokens in queue
-    validUntil: { $gte: new Date() },
   });
 
   // 4. This month's earnings (net to doctor)
@@ -355,7 +354,6 @@ const getNormalQueue = async (userId) => {
     doctor: profile._id,
     type: 'NORMAL',
     status: { $in: ['CONFIRMED', 'CHECKED_IN', 'IN_PROGRESS'] },
-    validUntil: { $gte: new Date() },
   })
     .populate('patient', 'name email avatarUrl')
     .sort({ tokenSeq: 1 });

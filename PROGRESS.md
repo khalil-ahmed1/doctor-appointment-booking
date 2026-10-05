@@ -273,7 +273,6 @@ Goal: F-35 Jobs: expireHolds, reconcilePayments, retryTransfers/Refunds, expireN
 Plan:
 - Create `maintenance.job.js` in `server/src/jobs/`
 - Job 1: `expireHolds` runs every minute to mark `PENDING_PAYMENT` holds as `EXPIRED` and unlock the slot.
-- Job 2: `expireNormalTokens` runs every hour to mark unused confirmed normal tokens past `validUntil` as `EXPIRED_TOKEN`.
 - Job 3: `reconcilePayments` runs every 10 min to check `CREATED` or `ATTEMPTED` payments > 15m old. It will ping Razorpay's API and either finalize payment (calling `finalizePayment`) or fail them.
 - Job 4: `retryTransfersAndRefunds` runs every 15 min to retry refunds and transfers that are marked as `FAILED` or `failed` in the DB.
 - Hook into `server.js` startup via `startMaintenanceJobs()`.
@@ -480,7 +479,7 @@ Done:
 - Updated `payment.service.js` integrating atomic Mongo counter updates generating unique string `tokenLabel`s (e.g. `N-005`) strictly inside the Transaction Session ensuring no duplicate tokens ever persist.
 Files/modules touched: `server/src/services/booking.service.js`, `server/src/models/Counter.js`, `server/src/services/payment.service.js`.
 Tests added/updated: Linter logic normalized.
-How to verify manually: When successfully creating a NORMAL booking through the Razorpay pipeline, observe that the `Appointment` receives `tokenSeq`, `tokenLabel` (string formatted N-XXX), and `validFrom`/`validUntil` tags properly mapping atomic increments.
+How to verify manually: When successfully creating a NORMAL booking through the Razorpay pipeline, observe that the `Appointment` receives `tokenSeq` and `tokenLabel` (string formatted N-XXX) tags properly mapping atomic increments.
 Decisions made: Assigned a static fallback of 2 days for `normalValidityDays` strictly mapping to PRD constraints (configurable later).
 Left undone / known issues: None.
 NEXT STEP (specific): Start F-23 (Premium booking UI flow).

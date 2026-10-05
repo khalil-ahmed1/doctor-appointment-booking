@@ -36,7 +36,6 @@ const AppointmentsTab = () => {
           'NO_SHOW',
           'CANCELLED_BY_DOCTOR',
           'CANCELLED_BY_ADMIN',
-          'EXPIRED_TOKEN',
           'EXPIRED',
           'PAYMENT_FAILED',
         ].includes(a.status)
@@ -112,7 +111,7 @@ const AppointmentsTab = () => {
                     <div className="text-sm text-muted-foreground">
                       {appt.type === 'NORMAL' ? (
                         <p>
-                          Valid from: {appt.validFrom ? formatDateIndian(appt.validFrom) : ''}
+                          Token: {appt.tokenLabel || 'N/A'}
                         </p>
                       ) : (
                         <p>

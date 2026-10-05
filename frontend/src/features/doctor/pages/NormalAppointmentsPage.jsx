@@ -33,9 +33,9 @@ export default function NormalAppointmentsPage() {
   };
 
   if (activeTab === 'ACTIVE') {
-    queryParams.excludeStatus = 'COMPLETED,NO_SHOW,CANCELLED_BY_DOCTOR,CANCELLED_BY_ADMIN,REFUNDED,PAYMENT_FAILED,EXPIRED,EXPIRED_TOKEN';
+    queryParams.excludeStatus = 'COMPLETED,NO_SHOW,CANCELLED_BY_DOCTOR,CANCELLED_BY_ADMIN,REFUNDED,PAYMENT_FAILED,EXPIRED';
   } else {
-    queryParams.status = 'COMPLETED,NO_SHOW,CANCELLED_BY_DOCTOR,CANCELLED_BY_ADMIN,REFUNDED,PAYMENT_FAILED,EXPIRED,EXPIRED_TOKEN';
+    queryParams.status = 'COMPLETED,NO_SHOW,CANCELLED_BY_DOCTOR,CANCELLED_BY_ADMIN,REFUNDED,PAYMENT_FAILED,EXPIRED';
   }
 
   const { data, isLoading, isError } = useQuery({
@@ -91,7 +91,6 @@ export default function NormalAppointmentsPage() {
       case 'CANCELLED_BY_DOCTOR':
       case 'CANCELLED_BY_ADMIN':
         return <Badge variant="destructive">Cancelled</Badge>;
-      case 'EXPIRED_TOKEN':
       case 'EXPIRED':
         return <Badge variant="secondary">Expired</Badge>;
       case 'PAYMENT_FAILED':

@@ -125,12 +125,6 @@ const finalizePayment = async (razorpayOrderId, razorpayPaymentId) => {
         appt.tokenSeq = seq.value;
         appt.tokenLabel = `N-${String(daily.value).padStart(3, '0')}`;
 
-        // Validity is today + 2 days (assuming setting default normalValidityDays = 2)
-        // In Phase 2 this comes from settings
-        const normalValidityDays = 2;
-        const nowMs = Date.now();
-        appt.validFrom = new Date(nowMs);
-        appt.validUntil = new Date(nowMs + normalValidityDays * 24 * 60 * 60 * 1000);
 
         return true;
       };

@@ -558,11 +558,10 @@ PENDING_PAYMENT ──paid──► CONFIRMED ──► CHECKED_IN (optional) �
       │                       ├──► NO_SHOW                (doctor)
       │                       ├──► CANCELLED_BY_DOCTOR    (+auto refund)
       │                       ├──► CANCELLED_BY_ADMIN     (+auto refund)
-      │                       └──► EXPIRED_TOKEN          (Normal validity over)
       ├──hold timeout──► EXPIRED
       └──payment fail/ slot lost──► PAYMENT_FAILED
 ```
-Allowed transitions are enforced in one service function `transition(appointment, to, actor)` that validates the matrix, writes an AuditLog, updates `slotLock`, reschedules reminders and sends notifications. Terminal states: COMPLETED, NO_SHOW, CANCELLED_*, EXPIRED, EXPIRED_TOKEN, PAYMENT_FAILED. A doctor may **revert** COMPLETED/NO_SHOW → CONFIRMED within 24h (correction), audit-logged.
+Allowed transitions are enforced in one service function `transition(appointment, to, actor)` that validates the matrix, writes an AuditLog, updates `slotLock`, reschedules reminders and sends notifications. Terminal states: COMPLETED, NO_SHOW, CANCELLED_*, EXPIRED, PAYMENT_FAILED. A doctor may **revert** COMPLETED/NO_SHOW → CONFIRMED within 24h (correction), audit-logged.
 
 ### 9.2 Payment Status
 `CREATED → ATTEMPTED → CAPTURED → (TRANSFER_PENDING → TRANSFERRED | TRANSFER_FAILED)`; `FAILED`; `AUTO_REFUND_PENDING`; `REFUND_INITIATED → REFUNDED | PARTIALLY_REFUNDED | REFUND_FAILED`.
@@ -653,7 +652,7 @@ All schemas use `{ timestamps: true }`. Only key fields shown; add `isDeleted` w
   // Premium/Home
   dateStr, startTime, endTime, startAt (Date UTC), endAt (Date UTC), slotLock (String|null),
   // Normal
-  tokenSeq, tokenLabel, validFrom, validUntil, extendedByDays,
+  tokenSeq, tokenLabel,
 
   holdExpiresAt,
   patientDetails: { name, age, gender, phone, relation, reason },
@@ -667,7 +666,7 @@ All schemas use `{ timestamps: true }`. Only key fields shown; add `isDeleted` w
   confirmedAt, completedAt, rescheduledFrom: { dateStr, startTime }
 }
 // indexes: bookingCode unique; slotLock unique partial; {doctor, dateStr, status}; {doctor, type, status, tokenSeq};
-// {patient, createdAt:-1}; {status, holdExpiresAt}; {startAt}; {validUntil, status}
+// {patient, createdAt:-1}; {status, holdExpiresAt}; {startAt};
 ```
 
 ### 10.6 Payment
@@ -840,7 +839,7 @@ Common codes: `VALIDATION_ERROR`(422), `UNAUTHENTICATED`(401), `FORBIDDEN`(403),
 | `retryTransfers` | every 15 min | Retry `TRANSFER_FAILED/PENDING` (max 8 attempts) → alert Admin |
 | `retryRefunds` | every 15 min | Retry/monitor `REFUND_INITIATED/FAILED` |
 | `sendReminders` | every 5 min + delayed jobs | Premium/Home/Normal reminders (flags prevent duplicates) |
-| `expireNormalTokens` | hourly (and 00:05 IST) | `CONFIRMED` Normal with `validUntil < now` → `EXPIRED_TOKEN` |
+
 | `subscriptionTransitions` | hourly | Recompute TRIAL/ACTIVE → GRACE → EXPIRED; update denormalized fields |
 | `subscriptionReminders` | daily 09:00 IST | Notifications per 7.4 (deduped) |
 | `doctorDigest` | daily 07:30 IST | Today's schedule email (if enabled) |

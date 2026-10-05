@@ -12,7 +12,6 @@ const ALLOWED_TRANSITIONS = {
     'NO_SHOW',
     'CANCELLED_BY_DOCTOR',
     'CANCELLED_BY_ADMIN',
-    'EXPIRED_TOKEN', // For NORMAL queue
   ],
   CHECKED_IN: ['IN_PROGRESS', 'COMPLETED', 'NO_SHOW', 'CANCELLED_BY_DOCTOR', 'CANCELLED_BY_ADMIN'],
   EN_ROUTE: ['IN_PROGRESS', 'COMPLETED', 'NO_SHOW', 'CANCELLED_BY_DOCTOR', 'CANCELLED_BY_ADMIN'],
@@ -21,7 +20,6 @@ const ALLOWED_TRANSITIONS = {
   NO_SHOW: [], // Terminal
   CANCELLED_BY_DOCTOR: [], // Terminal
   CANCELLED_BY_ADMIN: [], // Terminal
-  EXPIRED_TOKEN: [], // Terminal
   EXPIRED: [], // Terminal (Hold timeout)
   PAYMENT_FAILED: [], // Terminal
 };

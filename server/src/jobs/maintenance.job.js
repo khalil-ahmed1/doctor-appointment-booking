@@ -42,41 +42,6 @@ const expireHolds = async () => {
   }
 };
 
-// Job 2: Expire Normal Tokens
-// Runs every hour
-const expireNormalTokens = async () => {
-  try {
-    const now = new Date();
-
-    // Find NORMAL appointments that are CONFIRMED and validity has passed
-    const expiredTokens = await Appointment.find({
-      type: 'NORMAL',
-      status: 'CONFIRMED',
-      validUntil: { $lt: now },
-    });
-
-    for (const appt of expiredTokens) {
-      await Appointment.updateOne(
-        { _id: appt._id, status: 'CONFIRMED' },
-        {
-          $set: { status: 'EXPIRED_TOKEN' },
-          $push: {
-            statusHistory: {
-              from: 'CONFIRMED',
-              to: 'EXPIRED_TOKEN',
-              byRole: 'SYSTEM',
-              at: now,
-              reason: 'Token validity expired',
-            },
-          },
-        },
-      );
-      logger.info(`Expired normal token for appointment: ${appt._id}`);
-    }
-  } catch (err) {
-    logger.error(`Error in expireNormalTokens job: ${err.message}`);
-  }
-};
 
 // Job 3: Reconcile Payments
 // Runs every 10 minutes
@@ -226,8 +191,7 @@ const startMaintenanceJobs = () => {
   // Every minute
   cron.schedule('* * * * *', expireHolds);
 
-  // Every hour at minute 0
-  cron.schedule('0 * * * *', expireNormalTokens);
+
 
   // Every 10 minutes
   cron.schedule('*/10 * * * *', reconcilePayments);
@@ -241,7 +205,6 @@ const startMaintenanceJobs = () => {
 module.exports = {
   startMaintenanceJobs,
   expireHolds,
-  expireNormalTokens,
   reconcilePayments,
   retryTransfersAndRefunds,
 };
