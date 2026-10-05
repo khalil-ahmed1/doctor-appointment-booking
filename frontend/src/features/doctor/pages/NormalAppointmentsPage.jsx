@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import dayjs from 'dayjs';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { doctorApi } from '../api/doctor.api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +21,7 @@ export default function NormalAppointmentsPage() {
   const [activeTab, setActiveTab] = useState('ACTIVE');
   const [filters, setFilters] = useState({
     page: 1,
-    limit: 10,
+    limit: 20,
     search: '',
   });
 
@@ -54,10 +55,16 @@ export default function NormalAppointmentsPage() {
     },
   });
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setFilters((prev) => ({ ...prev, search: searchInput, page: 1 }));
-  };
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setFilters((prev) => {
+        if (prev.search === searchInput) return prev;
+        return { ...prev, search: searchInput, page: 1 };
+      });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const handleStatusChange = (id, newStatus) => {
     if (newStatus === 'CANCELLED_BY_DOCTOR') {
@@ -93,6 +100,80 @@ export default function NormalAppointmentsPage() {
         return <Badge variant="outline">{status}</Badge>;
     }
   };
+  const formatDateSeparator = (dateStr) => {
+    const today = dayjs().format('YYYY-MM-DD');
+    const tomorrow = dayjs().add(1, 'day').format('YYYY-MM-DD');
+    if (dateStr === today) return 'Today';
+    if (dateStr === tomorrow) return 'Tomorrow';
+    return dayjs(dateStr).format('dddd, DD MMM YYYY');
+  };
+
+  const renderTableBody = () => {
+    let lastDateStr = null;
+    const rows = [];
+
+    data?.appointments?.forEach((app) => {
+      if (app.dateStr !== lastDateStr) {
+        rows.push(
+          <tr key={`header-${app.dateStr}`} className="bg-muted/30">
+            <td colSpan="6" className="py-2 px-4 font-semibold text-primary/80 border-b">
+              {formatDateSeparator(app.dateStr)}
+            </td>
+          </tr>
+        );
+        lastDateStr = app.dateStr;
+      }
+
+      rows.push(
+        <tr key={app._id} className="border-b transition-colors hover:bg-muted/50">
+          <td className="p-4 align-middle">
+            <span className="font-bold text-lg text-primary">{app.tokenLabel}</span>
+            <div className="text-xs text-muted-foreground mt-1">Code: {app.bookingCode}</div>
+          </td>
+          <td className="p-4 align-middle font-medium">
+            {app.patientDetails?.name || app.patient?.name}
+          </td>
+          <td className="p-4 align-middle text-muted-foreground">
+            {app.patientDetails?.age ? `${app.patientDetails.age} Y` : 'N/A'} / {app.patientDetails?.gender || 'N/A'}
+          </td>
+          <td className="p-4 align-middle text-muted-foreground">
+            {app.patientDetails?.phone || 'N/A'}
+          </td>
+          <td className="p-4 align-middle">
+            {getStatusBadge(app.status)}
+          </td>
+          <td className="p-4 align-middle text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
+                  <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'COMPLETED')}>
+                    Mark Completed
+                  </DropdownMenuItem>
+                )}
+
+                {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
+                  <DropdownMenuItem
+                    className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                    onClick={() => handleStatusChange(app._id, 'CANCELLED_BY_DOCTOR')}
+                  >
+                    Cancel & Refund
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </td>
+        </tr>
+      );
+    });
+
+    return <tbody className="[&_tr:last-child]:border-0">{rows}</tbody>;
+  };
 
   return (
     <div className="space-y-6">
@@ -110,16 +191,15 @@ export default function NormalAppointmentsPage() {
           </Tabs>
 
           <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
-            <form onSubmit={handleSearch} className="flex gap-2 w-full md:max-w-sm">
+            <div className="relative w-full md:max-w-sm">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
+                className="pl-8"
                 placeholder="Search by name, phone or code"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />
-              <Button type="submit" size="icon" variant="secondary">
-                <Search className="h-4 w-4" />
-              </Button>
-            </form>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -147,58 +227,7 @@ export default function NormalAppointmentsPage() {
                       <th className="h-12 px-4 text-right align-middle font-medium text-muted-foreground">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="[&_tr:last-child]:border-0">
-                    {data?.appointments?.map((app) => (
-                      <tr key={app._id} className="border-b transition-colors hover:bg-muted/50">
-                        <td className="p-4 align-middle">
-                          <span className="font-bold text-lg text-primary">{app.tokenLabel}</span>
-                          <div className="text-xs text-muted-foreground mt-1">Code: {app.bookingCode}</div>
-                        </td>
-                        <td className="p-4 align-middle font-medium">
-                          {app.patientDetails?.name || app.patient?.name}
-                        </td>
-                        <td className="p-4 align-middle text-muted-foreground">
-                          {app.patientDetails?.age ? `${app.patientDetails.age} Y` : 'N/A'} / {app.patientDetails?.gender || 'N/A'}
-                        </td>
-                        <td className="p-4 align-middle text-muted-foreground">
-                          {app.patientDetails?.phone || 'N/A'}
-                        </td>
-                        <td className="p-4 align-middle">
-                          {getStatusBadge(app.status)}
-                        </td>
-                        <td className="p-4 align-middle text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
-                                <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'COMPLETED')}>
-                                  Mark Completed
-                                </DropdownMenuItem>
-                              )}
-                              {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
-                                <DropdownMenuItem onClick={() => handleStatusChange(app._id, 'NO_SHOW')}>
-                                  Mark No-show
-                                </DropdownMenuItem>
-                              )}
-                              {(app.status === 'CONFIRMED' || app.status === 'CHECKED_IN') && (
-                                <DropdownMenuItem
-                                  className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                                  onClick={() => handleStatusChange(app._id, 'CANCELLED_BY_DOCTOR')}
-                                >
-                                  Cancel & Refund
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
+                  {renderTableBody()}
                 </table>
               </div>
             </div>
